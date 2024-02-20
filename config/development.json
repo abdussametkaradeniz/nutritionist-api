@@ -1,0 +1,4 @@
+{
+  "name": "My app -Development",
+  "jwtPrivateKey": "my_secret_jwt"
+}

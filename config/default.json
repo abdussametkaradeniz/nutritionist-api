@@ -1,0 +1,4 @@
+{
+  "name": "name",
+  "jwtPrivateKey": "my_secret_jwt"
+}
