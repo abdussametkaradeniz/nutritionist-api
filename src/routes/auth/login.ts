@@ -1,7 +1,6 @@
 import express, { Request, Response, NextFunction } from "express";
 import { loginSchema } from "../../validations/auth/loginValidator";
 import { requestValidator } from "../../middleware/requestValidator";
-import { UserFields } from "../../types/user";
 import { LoginManager } from "../../bussiness/auth/loginManager";
 import { UserLoginFields } from "../../types/login";
 

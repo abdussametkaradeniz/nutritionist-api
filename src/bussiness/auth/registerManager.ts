@@ -1,5 +1,6 @@
 import { RegisterDbManager } from "../../database/registerDbManager";
 import { UserFields } from "../../types/user";
+import { hashPassword } from "../../helpers/passwordHash";
 
 export class RegisterManager {
   request: UserFields;
@@ -10,6 +11,8 @@ export class RegisterManager {
   }
 
   create = async () => {
+    const passwordHashed = await hashPassword(this.request.password);
+    this.request.password = passwordHashed;
     //dbde boyle bir kullanici var mi?
     //gelen requestteki passwordu hasleyecez
     if (this.request.secondaryName === undefined) {
