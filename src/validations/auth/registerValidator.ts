@@ -12,4 +12,5 @@ export const registerSchema = joi.object({
   role: joi.array().required(),
   roleId: joi.number().required(),
   recordStatus: joi.string().default("A"),
+  permissions: joi.array().required(),
 });

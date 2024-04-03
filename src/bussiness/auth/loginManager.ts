@@ -1,4 +1,5 @@
 import { LoginDbManager } from "../../database/loginDbManager";
+import { NotFound } from "../../domain/exception";
 import { UserLoginFields } from "../../types/login";
 export class LoginManager {
   request: UserLoginFields;
@@ -9,13 +10,15 @@ export class LoginManager {
   }
 
   findUniqueUser = async () => {
-    //password hashlenecek
-    //kullanici var mi bakilacak
-
-    const result = await this.loginDbManager.findUniqueUser({
+    const user = await this.loginDbManager.findUniqueUser({
       ...this.request,
     });
 
-    return result;
+    const result = await this.loginDbManager.checkUserPassword(
+      this.request.passwordHash,
+      user.passwordHash
+    );
+    if (!result) return new NotFound();
+    return user;
   };
 }

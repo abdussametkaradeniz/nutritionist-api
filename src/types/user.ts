@@ -1,4 +1,7 @@
+import { Permissions, UserRole } from "../domain/user";
+
 export type UserFields = {
+  id?: number;
   email: string;
   userName: string;
   password: string;
@@ -9,5 +12,6 @@ export type UserFields = {
   secondaryName: string;
   recordStatus: string;
   roleId: number;
-  role: [];
+  role: UserRole;
+  permissions: Permissions[];
 };
