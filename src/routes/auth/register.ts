@@ -10,6 +10,7 @@ router.post(
   "/",
   requestValidator(registerSchema),
   async (req: Request, res: Response): Promise<void> => {
+    console.log("body ekrana yazdırıldı ",req.body);
     const request = req.body as UserFields;
     const user = await new RegisterManager(request).create();
     res.send(user);

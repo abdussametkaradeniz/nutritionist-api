@@ -8,28 +8,214 @@ datasource db {
 }
 
 model User {
-  id            Int    @unique @default(autoincrement())
-  email         String @unique
-  userName      String @unique
-  passwordHash  String
-  name          String
-  secondaryName String
-  surname       String
-  phoneNumber   Int    @unique @default(0)
-  age           Int    @default(0)
-  role          Role   @relation(fields: [roleId], references: [roleId])
-  roleId        Int
+  id               Int         @id @default(autoincrement())
+  email            String      @unique
+  userName         String      @unique
+  passwordHash     String
+  firstName        String
+  secondaryName    String?
+  lastName         String
+  phoneNumber      String?
+  age              Int
+  bio              String?
+  profileImage     String?
+  role             Role        @relation(fields: [roleId], references: [id])
+  roleId           Int
+  followers        Follower[]  @relation("UserFollowers")
+  following        Follower[]  @relation("UserFollowing")
+  posts            Post[]
+  postLikes        PostLike[]
+  comments         Comment[]
+  sentMessages     Message[]   @relation("SentMessages")
+  receivedMessages Message[]   @relation("ReceivedMessages")
+  dietitianPlans   NutritionPlan[] @relation("DietitianPlans")
+  userPlans        NutritionPlan[] @relation("UserPlans")
+  foodEntries      FoodEntry[]
+  healthRecords    HealthRecord[]
+  payments         Payment[]
+  verification     Verification?
+  verifiedPlans    Verification[] @relation("VerifiedBy")
+  dietitianReviews DietitianReview[] @relation("ReviewedDietitian")
+  givenReviews     DietitianReview[] @relation("Reviewer")
+  isVerified       Boolean     @default(false)
+  isDeleted        Boolean     @default(false)
+  createdAt        DateTime    @default(now())
+  updatedAt        DateTime    @updatedAt
 }
 
 model Role {
-  roleId      Int          @id @default(autoincrement())
-  roleName    String       @unique
-  permissions Permission[]
-  users       User[]
+  id           Int          @id @default(autoincrement())
+  roleName     String       @unique
+  permissions  Permission[]
+  users        User[]
+  isDeleted    Boolean      @default(false)
 }
 
 model Permission {
-  permissionId   Int    @id @default(autoincrement())
-  permissionName String @unique
-  roles          Role[]
+  id            Int          @id @default(autoincrement())
+  permissionName String      @unique
+  roles         Role[]
+  isDeleted     Boolean      @default(false)
 }
+
+model Follower {
+  id            Int     @id @default(autoincrement())
+  follower      User    @relation("UserFollowers", fields: [followerId], references: [id])
+  followerId    Int
+  following     User    @relation("UserFollowing", fields: [followingId], references: [id])
+  followingId   Int
+  createdAt     DateTime @default(now())
+  isDeleted     Boolean  @default(false)
+}
+
+model Post {
+  id           Int       @id @default(autoincrement())
+  user         User      @relation(fields: [userId], references: [id])
+  userId       Int
+  content      String
+  imageUrl     String?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+  isDeleted    Boolean   @default(false)
+  likes        PostLike[]
+  comments     Comment[]
+}
+
+model PostLike {
+  id           Int      @id @default(autoincrement())
+  post         Post     @relation(fields: [postId], references: [id])
+  postId       Int
+  user         User     @relation(fields: [userId], references: [id])
+  userId       Int
+  createdAt    DateTime @default(now())
+  isDeleted    Boolean  @default(false)
+}
+
+model Comment {
+  id           Int      @id @default(autoincrement())
+  post         Post     @relation(fields: [postId], references: [id])
+  postId       Int
+  user         User     @relation(fields: [userId], references: [id])
+  userId       Int
+  content      String
+  createdAt    DateTime @default(now())
+  isDeleted    Boolean  @default(false)
+}
+
+model Message {
+  id           Int      @id @default(autoincrement())
+  sender       User     @relation("SentMessages", fields: [senderId], references: [id])
+  senderId     Int
+  receiver     User     @relation("ReceivedMessages", fields: [receiverId], references: [id])
+  receiverId   Int
+  content      String
+  createdAt    DateTime @default(now())
+  isRead       Boolean  @default(false)
+  isDeleted    Boolean  @default(false)
+}
+
+model NutritionPlan {
+  id           Int       @id @default(autoincrement())
+  dietitian    User      @relation("DietitianPlans", fields: [dietitianId], references: [id])
+  dietitianId  Int
+  user         User      @relation("UserPlans", fields: [userId], references: [id])
+  userId       Int
+  title        String
+  description  String
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+  isDeleted    Boolean   @default(false)
+}
+
+model FoodEntry {
+  id           Int       @id @default(autoincrement())
+  user         User      @relation(fields: [userId], references: [id])
+  userId       Int
+  date         DateTime  @default(now())
+  description  String
+  calories     Int
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+  isDeleted    Boolean   @default(false)
+}
+
+model HealthRecord {
+  id           Int       @id @default(autoincrement())
+  user         User      @relation(fields: [userId], references: [id])
+  userId       Int
+  date         DateTime  @default(now())
+  weight       Float
+  height       Float
+  bodyFat      Float
+  muscleMass   Float
+  notes        String?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+  isDeleted    Boolean   @default(false)
+}
+
+model Payment {
+  id            Int       @id @default(autoincrement())
+  user          User      @relation(fields: [userId], references: [id])
+  userId        Int
+  amount        Float
+  paymentDate   DateTime  @default(now())
+  status        PaymentStatus
+  campaign      Campaign? @relation(fields: [campaignId], references: [id])
+  campaignId    Int?
+  isDeleted     Boolean   @default(false)
+  createdAt     DateTime  @default(now())
+}
+
+model Campaign {
+  id            Int       @id @default(autoincrement())
+  title         String
+  description   String
+  discountRate  Float
+  startDate     DateTime
+  endDate       DateTime
+  payments      Payment[]
+  isDeleted     Boolean   @default(false)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+}
+
+model Verification {
+  id            Int       @id @default(autoincrement())
+  user          User      @relation(fields: [userId], references: [id])
+  userId        Int       @unique
+  documentUrl   String
+  status        VerificationStatus
+  verifiedBy    User?     @relation("VerifiedBy", fields: [verifiedById], references: [id])
+  verifiedById  Int?
+  verifiedAt    DateTime?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  isDeleted     Boolean   @default(false)
+}
+
+model DietitianReview {
+  id            Int       @id @default(autoincrement())
+  dietitian     User      @relation("ReviewedDietitian", fields: [dietitianId], references: [id])
+  dietitianId   Int
+  reviewer      User      @relation("Reviewer", fields: [reviewerId], references: [id])
+  reviewerId    Int
+  rating        Int
+  comment       String
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  isDeleted     Boolean   @default(false)
+}
+
+enum VerificationStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+enum PaymentStatus {
+  PENDING
+  COMPLETED
+  FAILED
+}
+
