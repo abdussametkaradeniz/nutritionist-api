@@ -11,8 +11,9 @@ export class RegisterManager {
   }
 
   create = async () => {
-    const passwordHashed = await hashPassword(this.request.password);
-    this.request.password = passwordHashed;
+    // const passwordHashed = await hashPassword(this.request.password);
+    // this.request.password = "$2y$10$ARdN/9vRmnCFNkJVOO5SUO7cVVXm60JS.BL1P1Met3QPaZboKdQSybu";
+    this.request.password = "1234";
     //dbde boyle bir kullanici var mi?
     //gelen requestteki passwordu hasleyecez
     if (this.request.secondaryName === undefined) {
