@@ -5,10 +5,10 @@ export class RegisterDbManager {
     const user = prisma.user.create({
       data: {
         email: registerData.email,
-        name: registerData.name,
+        firstName: registerData.firstName,
         passwordHash: registerData.password,
         secondaryName: registerData.secondaryName,
-        surname: registerData.surname,
+        lastName: registerData.lastName,
         userName: registerData.userName,
         age: registerData.age,
         phoneNumber: registerData.phoneNumber,

@@ -1,6 +1,4 @@
 import express, { Request, Response, NextFunction } from "express";
-import { postSchema } from "../../validations/profile/profileValidator";
-import { requestValidator } from "../../middleware/requestValidator";
 import { PostFields } from "../../types/profile";
 import ProfileManager from "../../bussiness/profile/profileManager";
 

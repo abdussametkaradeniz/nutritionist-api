@@ -5,9 +5,9 @@ export type UserFields = {
   email: string;
   userName: string;
   password: string;
-  name: string;
-  surname: string;
-  phoneNumber: number;
+  firstName: string;
+  lastName: string;
+  phoneNumber: string;
   age: number;
   secondaryName: string;
   recordStatus: string;

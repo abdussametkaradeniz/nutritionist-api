@@ -15,7 +15,7 @@ export class LoginDbManager {
         },
       });
     } else if (loginData.phoneNumber) {
-      user = await prisma.user.findUnique({
+      user = await prisma.user.findFirst({
         where: {
           phoneNumber: loginData.phoneNumber,
         },
