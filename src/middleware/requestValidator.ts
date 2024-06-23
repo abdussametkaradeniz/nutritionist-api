@@ -1,8 +1,7 @@
-import Joi, {ValidationError} from "joi";
+import Joi from "joi";
 import { Request, Response, NextFunction } from "express";
 
 import { InvalidParameter } from "../domain/exception";
-
 
 export function requestValidator(
   schema: Joi.ObjectSchema<any>,
@@ -17,15 +16,10 @@ export function requestValidator(
     if (error) {
       return next(new InvalidParameter(error.details[0].message));
     }
-    
+
     next();
   };
 }
-
-
-
-
-
 
 // export function requestValidator(
 //   schema: Joi.ObjectSchema<any>,

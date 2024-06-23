@@ -8,5 +8,5 @@ import joi from "joi";
 //     postDate: joi.string().optional(),
 // });
 export const postSchema = joi.object({
-    userId: joi.number().optional(),
+  userId: joi.number().optional(),
 });

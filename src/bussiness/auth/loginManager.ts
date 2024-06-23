@@ -1,5 +1,5 @@
 import { LoginDbManager } from "../../database/loginDbManager";
-import { InvalidParameter, NotFound } from "../../domain/exception";
+import { NotFound } from "../../domain/exception";
 import { UserLoginFields } from "../../types/login";
 export class LoginManager {
   request: UserLoginFields;
@@ -10,12 +10,11 @@ export class LoginManager {
   }
 
   findUniqueUser = async () => {
-    try{
-
+    try {
       const user = await this.loginDbManager.findUniqueUser({
         ...this.request,
       });
-      
+
       const result = await this.loginDbManager.checkUserPassword(
         this.request.passwordHash,
         user.passwordHash
@@ -25,9 +24,9 @@ export class LoginManager {
       if (!user) return new NotFound();
 
       return user;
-    }catch(error){
+    } catch (error) {
       console.error("findUniqueUser'da hata oluştu:", error);
-      throw error
+      throw error;
     }
   };
 }

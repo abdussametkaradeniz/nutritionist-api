@@ -23,9 +23,6 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 setRoutes(app);
-
-
 app.listen(port, () => console.log(`Listening on port ${port}`));
-
 
 export default app;

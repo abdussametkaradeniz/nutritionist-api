@@ -1,4 +1,4 @@
-import express, { Request, Response, NextFunction } from "express";
+import express, { Request, Response } from "express";
 import { RoleManager } from "../../bussiness/role-process/roleManager";
 
 const router: express.Router = express.Router();

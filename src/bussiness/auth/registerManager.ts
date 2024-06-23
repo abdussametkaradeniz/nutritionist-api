@@ -1,6 +1,5 @@
 import { RegisterDbManager } from "../../database/registerDbManager";
 import { UserFields } from "../../types/user";
-import { hashPassword } from "../../helpers/passwordHash";
 
 export class RegisterManager {
   request: UserFields;

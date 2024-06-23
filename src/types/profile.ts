@@ -1,23 +1,7 @@
 export type PostFields = {
   id?: number;
   userId: number;
-  content: string;
-  imageUrl: string | null;
-  // postDate: Date;
-  createdAt:Date;
-  updatedAt:Date;
-  isDeleted: boolean
-
+  postText: string;
+  postImage: string | null;
+  postDate: Date;
 };
-
-export type ProfileFields = {
-  id: number;
-  email: string;
-  userName: string;
-  firstName: string;
-  lastName: string;
-  profileImage: string | null;
-  bio: string | null;
-  followerCount: number;
-  followingCount: number;
-}

@@ -16,14 +16,14 @@ export async function jwt(req: Request, res: Response, next: NextFunction) {
   const defaultMember: UserFields = {
     age: 0,
     email: "",
-    name: "",
+    firstName: "",
     password: "",
-    phoneNumber: 0,
+    phoneNumber: "",
     recordStatus: "A",
     role: UserRole.User,
     roleId: 0,
     secondaryName: "",
-    surname: "",
+    lastName: "",
     userName: "",
     permissions: [
       Permissions.edit_clients,
