@@ -209,7 +209,7 @@ model DietitianReview {
 
 model Multilanguage {
   id              Int      @id @default(autoincrement())
-  MlCode          String
+  MlCode          String   @unique
   CountryCode     String
   MlValue         String
   ApplicationCode String
