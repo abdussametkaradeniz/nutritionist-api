@@ -9,13 +9,14 @@ import postAdd from "./src/routes/profile/addPost";
 import getPost from "./src/routes/profile/getPost";
 import mainPagePost from "./src/routes/profile/mainPost";
 import profileCover from "./src/routes/profile/profileCover";
+import multilanguage from "./src/routes/multiLanguage/multilanguage";
 
 export const setRoutes = (app: express.Application) => {
   app.use(express.json()); //req.body
   app.use(express.urlencoded({ extended: true })); //key value olarak parse eder
   app.use(log);
   if (app.get("env") === "development") {
-    app.use(morgan()); //console icerisinde nereye istek gittigini soyler
+    app.use(morgan('combined')); //console icerisinde nereye istek gittigini soyler
   }
   app.use(express.static("public")); //public klasoru altindaki her seye erisim saglar link ile ornegin localhost:3000/readme.txt
   app.use(helmet());
@@ -28,4 +29,6 @@ export const setRoutes = (app: express.Application) => {
   app.use("/api/postAdd", postAdd);
   app.use("/api/mainPagePost", mainPagePost);
   app.use("/api/profileCover", profileCover);
+  
+  app.use("/api/multilanguage", multilanguage);
 };

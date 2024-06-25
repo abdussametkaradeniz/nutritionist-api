@@ -10,7 +10,7 @@ export class RoleManager {
 
   getAllRoles = async () => {
     const roles = await this.roleDbManager.getAllRoles();
-    if (!roles) return new BusinessException("Oops");
+    if (!roles) return new BusinessException("Oops",500);
     console.log(roles);
     return roles;
   };

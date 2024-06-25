@@ -2,7 +2,12 @@ import { StatusCodes } from "../../constants/statusCodes";
 import { Exception } from "./exception";
 
 export class BusinessException extends Exception {
-  constructor(message?: string) {
-    super(message || "Bad Request", StatusCodes.Ok);
+  isError: boolean;
+  constructor(message: string, status: number) {
+    super(message);
+    this.name = this.constructor.name;
+    this.status = status;
+    this.isError = true;
+    Error.captureStackTrace(this, this.constructor);
   }
 }

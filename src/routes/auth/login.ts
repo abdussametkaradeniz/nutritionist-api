@@ -10,7 +10,6 @@ router.post(
   "/",
   requestValidator(loginSchema),
   async (req: Request, res: Response): Promise<void> => {
-    console.log("body ekrana yazdırıldı ", req.body);
     const request = req.body as UserLoginFields;
     const user = await new LoginManager(request).findUniqueUser();
     res.send(user);
