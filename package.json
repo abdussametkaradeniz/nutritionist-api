@@ -12,6 +12,7 @@
     "forever-stop": "forever stop index.ts",
     "forever-restart": "forever restart index.ts",
     "forever-list": "forever list"
+    
   },
   "prisma": {
     "seed": "ts-node --compiler-options {\"module\":\"CommonJS\"} prisma/seed.ts"
