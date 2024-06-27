@@ -1,6 +1,9 @@
 import express from "express";
 import cors from "cors";
 import { setRoutes } from "./routes";
+import dotenv from "dotenv"; // dotenv paketini dahil edin
+
+dotenv.config(); // dotenv.config() çağrısını yapın
 
 const port: number = 3000;
 const app: express.Application = express();

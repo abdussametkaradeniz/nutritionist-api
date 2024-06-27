@@ -5,10 +5,7 @@ const helmet = require("helmet");
 import register from "./src/routes/auth/register";
 import login from "./src/routes/auth/login";
 import role from "./src/routes/roles/roles";
-import postAdd from "./src/routes/profile/addPost";
-import getPost from "./src/routes/profile/getPost";
-import mainPagePost from "./src/routes/profile/mainPost";
-import profileCover from "./src/routes/profile/profileCover";
+import profile from "./src/routes/profile/profile";
 import multilanguage from "./src/routes/multiLanguage/multilanguage";
 
 export const setRoutes = (app: express.Application) => {
@@ -24,11 +21,8 @@ export const setRoutes = (app: express.Application) => {
   app.use("/api/register", register);
   app.use("/api/login", login);
   app.use("/api/role", role);
-
-  app.use("/api/getPost", getPost);
-  app.use("/api/postAdd", postAdd);
-  app.use("/api/mainPagePost", mainPagePost);
-  app.use("/api/profileCover", profileCover);
+  
+  app.use("/api/profile", profile);
   
   app.use("/api/multilanguage", multilanguage);
 };
