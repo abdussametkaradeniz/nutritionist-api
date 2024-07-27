@@ -41,6 +41,8 @@ model User {
   isDeleted        Boolean           @default(false)
   createdAt        DateTime          @default(now())
   updatedAt        DateTime          @updatedAt
+  recipes          Recipe[]
+
 }
 
 model Role {
@@ -217,6 +219,58 @@ model Multilanguage {
   updatedAt       DateTime @updatedAt
   isDeleted       Boolean  @default(false)
 }
+
+model Recipe {
+  recipeID   Int       @id @default(autoincrement())
+  recipeName String
+  categoryID Int
+  userID     Int
+  isDeleted   Boolean   @default(false)
+
+  category   Category  @relation(fields: [categoryID], references: [categoryID])
+  steps      Step[]
+  user       User      @relation(fields: [userID], references: [id])
+  recipeIngredients RecipeIngredient[]
+}
+
+model Step {
+  stepID      Int       @id @default(autoincrement())
+  recipeID    Int
+  stepNumber  Int
+  stepContent String
+  stepImage   String?
+  isDeleted   Boolean   @default(false)
+
+  recipe      Recipe    @relation(fields: [recipeID], references: [recipeID])
+}
+
+model Ingredient {
+  ingredientID Int      @id @default(autoincrement())
+  ingredientName String
+  isDeleted   Boolean   @default(false)
+  recipeIngredients RecipeIngredient[]
+}
+
+model Category {
+  categoryID  Int       @id @default(autoincrement())
+  categoryName String
+  recipes     Recipe[]
+  isDeleted   Boolean   @default(false)
+}
+
+model RecipeIngredient {
+  recipeID    Int
+  ingredientID Int
+  quantity    String?
+  isDeleted   Boolean   @default(false)
+
+  @@id([recipeID, ingredientID])
+  recipe      Recipe    @relation(fields: [recipeID], references: [recipeID])
+  ingredient  Ingredient @relation(fields: [ingredientID], references: [ingredientID])
+
+
+}
+
 
 enum VerificationStatus {
   PENDING

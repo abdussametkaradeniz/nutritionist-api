@@ -37,7 +37,7 @@ async function main() {
           permissionName: "Admin",
           roles: {
             connect: {
-              roleId: roleCio.roleId,
+              id: roleCio.id,
             },
           },
         },
@@ -53,7 +53,7 @@ async function main() {
           permissionName: "User",
           roles: {
             connect: {
-              roleId: roleDeveloper.roleId,
+              id: roleDeveloper.id,
             },
           },
         },
@@ -66,11 +66,11 @@ async function main() {
         email: "byrbrs@example.com",
         userName: "bybrs",
         passwordHash: "1234",
-        name: "User",
+        firstName: "User",
         secondaryName: "userseconder",
-        surname: "One",
-        roleId: roleCio.roleId,
-        phoneNumber: 148,
+        lastName: "One",
+        roleId: roleCio.id,
+        phoneNumber: "148",
         age: 30,
       },
     });
@@ -80,11 +80,11 @@ async function main() {
         email: "mrsmile@example.com",
         userName: "mrsmile",
         passwordHash: "1234",
-        name: "User",
+        firstName: "User",
         secondaryName: "userseconder",
-        surname: "Two",
-        roleId: roleDeveloper.roleId,
-        phoneNumber: 551,
+        lastName: "Two",
+        roleId: roleDeveloper.id,
+        phoneNumber: "551",
         age: 25,
       },
     });
@@ -92,12 +92,12 @@ async function main() {
     // Takipçi ve takip edilen kullanıcı ilişkileri oluşturma
     await prisma.follower.create({
       data: {
-        user: {
+        follower: {
           connect: {
             id: user1.id,
           },
         },
-        followingUser: {
+        following: {
           connect: {
             id: user2.id,
           },
@@ -107,12 +107,12 @@ async function main() {
 
     await prisma.follower.create({
       data: {
-        user: {
+        follower: {
           connect: {
             id: user2.id,
           },
         },
-        followingUser: {
+        following: {
           connect: {
             id: user1.id,
           },
@@ -128,8 +128,8 @@ async function main() {
             id: user1.id,
           },
         },
-        postText: "Bu bir gönderidir.",
-        postImage: "https://example.com/image1.jpg",
+        content: "Bu bir gönderidir.",
+        imageUrl: "https://example.com/image1.jpg",
       },
     });
 
@@ -140,8 +140,8 @@ async function main() {
             id: user2.id,
           },
         },
-        postText: "Bu da başka bir gönderidir.",
-        postImage: "https://example.com/image2.jpg",
+        content: "Bu da başka bir gönderidir.",
+        imageUrl: "https://example.com/image2.jpg",
       },
     });
 
@@ -150,7 +150,7 @@ async function main() {
       data: {
         post: {
           connect: {
-            postId: post1.postId,
+            id: post1.id,
           },
         },
         user: {
@@ -165,7 +165,7 @@ async function main() {
       data: {
         post: {
           connect: {
-            postId: post2.postId,
+            id: post2.id,
           },
         },
         user: {
@@ -182,62 +182,12 @@ async function main() {
     await prisma.$disconnect();
   }
 }
-
-// async function main() {
-//   try {
-//         // Rol tanımlamaları
-//         const roleAdmin = await prisma.role.create({
-//             data: {
-//               roleName: "Admin",
-//             },
-//           });
-
-//           const roleUser = await prisma.role.create({
-//             data: {
-//               roleName: "User",
-//             },
-//           });
-
-//           // Kullanıcı oluşturma
-//           const user1 = await prisma.user.create({
-//             data: {
-//               email: "user1@example.com",
-//               userName: "user1",
-//               passwordHash: "password123",
-//               name: "User",
-//               secondaryName: "userseconder",
-//               surname: "One",
-//               roleId: roleUser.roleId, // RoleId belirtiyoruz
-//               phoneNumber: 123456789,
-//               age: 30,
-//             },
-//           });
-//     console.log("Seed işlemi tamamlandı.");
-//   } catch (error) {
-//     console.error("Seed işlemi sırasında hata oluştu:", error);
-//   } finally {
-//     await prisma.$disconnect();
-//   }
-// }
-
 main()
   .catch(async (e) => {
     console.error(e);
     await prisma.$disconnect();
     process.exit(1);
   })
-
   .then(async () => {
     await prisma.$disconnect();
   });
-
-// const user2 = await prisma.user.create({
-//   data: {
-//     email: "tkn.ism2000@gmail.com",
-//     userName: "mrsmilee",
-//     name: "İsmail",
-//     secondaryName: "Abdulkadir",
-//     surname: "Tekin",
-//     passwordHash: "$2y$10$HG6NTHdex9En.BEvX06pvuMD8GScWjmlP8LuPdLM.ScWEKXkQU7nm",
-//   },
-// });
