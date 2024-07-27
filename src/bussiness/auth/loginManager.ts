@@ -1,6 +1,9 @@
 import { LoginDbManager } from "../../database/loginDbManager";
-import { NotFound } from "../../domain/exception";
+import { NotFound, Unauthorized } from "../../domain/exception";
+import { StatusCodes } from "../../constants/statusCodes";
+import { comparePassword } from "../../helpers/passwordHash";
 import { UserLoginFields } from "../../types/login";
+import { UserType } from "../../types/user/User";
 export class LoginManager {
   request: UserLoginFields;
   loginDbManager: LoginDbManager;
@@ -11,22 +14,32 @@ export class LoginManager {
 
   findUniqueUser = async () => {
     try {
-      const user = await this.loginDbManager.findUniqueUser({
+      const user: UserType = await this.loginDbManager.findUniqueUser({
         ...this.request,
       });
 
-      const result = await this.loginDbManager.checkUserPassword(
+      if (!user) return new NotFound();
+
+      const result = await comparePassword(
         this.request.passwordHash,
         user.passwordHash
       );
-      // return new InvalidParameter();
-      // else if(!result) return new InvalidParameter
-      if (!user) return new NotFound();
 
-      return user;
+      if (!result) {
+        return new Unauthorized();
+      }
+      console.log(user);
+      return {
+        isError: false,
+        user,
+        StatusCode: StatusCodes.Ok,
+      };
     } catch (error) {
-      console.error("findUniqueUser'da hata oluştu:", error);
-      throw error;
+      return {
+        isError: true,
+        error: error,
+        statusCode: StatusCodes.BadRequest,
+      };
     }
   };
 }
