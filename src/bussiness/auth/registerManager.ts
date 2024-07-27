@@ -1,23 +1,47 @@
 import { RegisterDbManager } from "../../database/registerDbManager";
-import { UserFields } from "../../types/user";
+import { hashPassword } from "../../helpers/passwordHash";
+import { UserType } from "../../types/user/User";
 
 export class RegisterManager {
-  request: UserFields;
+  request: UserType;
   registerDbManager: RegisterDbManager;
-  constructor(request: UserFields) {
+  constructor(request: UserType) {
     this.request = request;
     this.registerDbManager = new RegisterDbManager();
   }
 
+  checkEmail = async () => {
+    const result = await this.registerDbManager.findEmail(this.request.email);
+    if (result) {
+      return { result: "email already using" };
+    }
+  };
+
+  checkPhoneNumber = async () => {
+    const result = await this.registerDbManager.findPhonenumber(
+      this.request.phoneNumber
+    );
+    if (result) {
+      return { result: "phone number already using" };
+    }
+  };
+
+  checkUsername = async () => {
+    const result = await this.registerDbManager.findUsername(
+      this.request.userName
+    );
+    if (result) {
+      return { result: "username already using" };
+    }
+  };
+
   create = async () => {
-    // const passwordHashed = await hashPassword(this.request.password);
-    // this.request.password = "$2y$10$ARdN/9vRmnCFNkJVOO5SUO7cVVXm60JS.BL1P1Met3QPaZboKdQSybu";
-    this.request.password = "1234";
-    //dbde boyle bir kullanici var mi?
-    //gelen requestteki passwordu hasleyecez
     if (this.request.secondaryName === undefined) {
       this.request.secondaryName = "";
     }
+
+    this.request.passwordHash = await hashPassword(this.request.passwordHash);
+
     const result = await this.registerDbManager.create({
       ...this.request,
     });

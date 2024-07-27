@@ -1,6 +1,5 @@
 import prisma from "../../prisma/client";
 import { UserLoginFields } from "../types/login";
-import * as bcrypt from "bcrypt";
 export class LoginDbManager {
   findUniqueUser = async (loginData: UserLoginFields): Promise<any> => {
     let user;
@@ -22,12 +21,5 @@ export class LoginDbManager {
       });
     }
     return user;
-  };
-
-  checkUserPassword = async (
-    password: string,
-    hashPassword: string
-  ): Promise<any> => {
-    return await bcrypt.compare(password, hashPassword);
   };
 }
