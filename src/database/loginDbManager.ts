@@ -10,11 +10,11 @@ export class LoginDbManager {
     } else if (loginData.userName) {
       user = await prisma.user.findUnique({
         where: {
-          userName: loginData.userName,
+          username: loginData.userName,
         },
       });
     } else if (loginData.phoneNumber) {
-      user = await prisma.user.findUnique({
+      user = await prisma.profile.findUnique({
         where: {
           phoneNumber: loginData.phoneNumber,
         },

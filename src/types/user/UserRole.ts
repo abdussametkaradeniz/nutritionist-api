@@ -1,6 +1,7 @@
 export declare enum UserRole {
-  Admin = "ADMIN",
-  Dietician = "DIETICIAN",
-  UserWithDietician = "USERWITHDIETICIAN",
-  User = "USER",
+  ADMIN = "ADMIN",
+  DIETITIAN = "DIETITIAN",
+  BASICUSER = "BASICUSER",
+  VIPUSER="VIPUSER",
+  USER = "USER",
 }

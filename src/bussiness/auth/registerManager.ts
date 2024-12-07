@@ -1,51 +1,40 @@
 import { RegisterDbManager } from "../../database/registerDbManager";
+import { BusinessException } from "../../domain/exception";
 import { hashPassword } from "../../helpers/passwordHash";
+import { RegisterType } from "../../types/user/Register";
 import { UserType } from "../../types/user/User";
 
 export class RegisterManager {
-  request: UserType;
+  request: RegisterType;
   registerDbManager: RegisterDbManager;
-  constructor(request: UserType) {
+  constructor(request: RegisterType) {
     this.request = request;
     this.registerDbManager = new RegisterDbManager();
   }
 
-  checkEmail = async () => {
-    const result = await this.registerDbManager.findEmail(this.request.email);
-    if (result) {
-      return { result: "email already using" };
+  async create(): Promise<UserType>{
+    const findEmail = await this.registerDbManager.findEmail(this.request.email);
+    if (findEmail) {
+      throw new BusinessException("Email already using", 400);
     }
-  };
 
-  checkPhoneNumber = async () => {
-    const result = await this.registerDbManager.findPhonenumber(
-      this.request.phoneNumber
+    const findPhoneNumber = await this.registerDbManager.findPhonenumber(
+      this.request.phoneNumber!
     );
-    if (result) {
-      return { result: "phone number already using" };
+    if (findPhoneNumber) {
+      throw new BusinessException("phone number already using", 400);
     }
-  };
 
-  checkUsername = async () => {
-    const result = await this.registerDbManager.findUsername(
+    const findUsername = await this.registerDbManager.findUsername(
       this.request.userName
     );
-    if (result) {
-      return { result: "username already using" };
-    }
-  };
-
-  create = async () => {
-    if (this.request.secondaryName === undefined) {
-      this.request.secondaryName = "";
+    if (findUsername) {
+      throw new BusinessException("username already using", 400);
     }
 
-    this.request.passwordHash = await hashPassword(this.request.passwordHash);
+    this.request.password = await hashPassword(this.request.password);
 
-    const result = await this.registerDbManager.create({
-      ...this.request,
-    });
-
+    const result: UserType = await this.registerDbManager.create(this.request);
     return result;
   };
 }

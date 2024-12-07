@@ -1,5 +1,7 @@
 import prisma from "../../prisma/client";
-import { UserType } from "../types/user/User";
+import { RegisterType } from "../types/user/Register";
+import { UserGoals } from "../types/user/UserGoals";
+import { UserRole } from "../types/user/UserRole";
 export class RegisterDbManager {
   findEmail = async (email: string) => {
     const user = prisma.user.findUnique({ where: { email: email } });
@@ -7,29 +9,35 @@ export class RegisterDbManager {
   };
 
   findUsername = async (username: string) => {
-    const user = prisma.user.findUnique({ where: { userName: username } });
+    const user = prisma.user.findUnique({ where: { username: username } });
     return user;
   };
 
-  findPhonenumber = async (phoneNumber: string) => {
-    const user = prisma.user.findUnique({
+  findPhonenumber = async (phoneNumber: number) => {
+    const user = prisma.profile.findUnique({
       where: { phoneNumber: phoneNumber },
     });
     return user;
   };
 
-  create = async (registerData: UserType): Promise<any> => {
+  create = async (registerData: RegisterType): Promise<any> => {
     const user = prisma.user.create({
       data: {
+        username: registerData.userName,
         email: registerData.email,
-        firstName: registerData.firstName,
-        passwordHash: registerData.passwordHash,
-        secondaryName: registerData.secondaryName,
-        lastName: registerData.lastName,
-        userName: registerData.userName,
-        age: registerData.age,
-        phoneNumber: registerData.phoneNumber,
-        roleId: registerData.roleId,
+        password: registerData.password,
+        role: registerData.role ?? UserRole.BASICUSER,
+        profile: {
+          create: {
+            firstName: registerData.firstName,
+            lastName: registerData.lastName,
+            phoneNumber: registerData.phoneNumber ?? 0,
+            age: registerData.age ?? 0,
+            weight: registerData.weight ?? 0,
+            goals: registerData.goals ?? UserGoals.GAINMUSCLES,
+            photoUrl: registerData.photoUrl ?? "",
+          }
+        }
       },
     });
     return user;

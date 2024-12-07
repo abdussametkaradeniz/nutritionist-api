@@ -6,9 +6,7 @@ const helmet = require("helmet");
 
 import register from "./src/routes/auth/register";
 import login from "./src/routes/auth/login";
-import role from "./src/routes/roles/roles";
-import profile from "./src/routes/profile/profile";
-import multilanguage from "./src/routes/multiLanguage/multilanguage";
+
 
 export const setRoutes = (app: express.Application) => {
   app.use(express.json()); //req.body
@@ -22,9 +20,6 @@ export const setRoutes = (app: express.Application) => {
 
   app.use("/api/register", register);
   app.use("/api/login", login);
-  app.use("/api/role", role);
 
-  app.use("/api/profile", profile);
 
-  app.use("/api/multilanguage", multilanguage);
 };

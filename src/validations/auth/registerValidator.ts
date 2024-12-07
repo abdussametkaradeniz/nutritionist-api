@@ -1,18 +1,18 @@
 import joi from "joi";
+import { RegisterType } from "../../types/user/Register";
 
-export const registerSchema = joi.object({
+export const registerSchema = joi.object<RegisterType>({
   userName: joi.string().optional(),
   email: joi.string().optional(),
   phoneNumber: joi.number().optional(),
-  passwordHash: joi.string().required(),
+  password: joi.string().required(),
   age: joi.number().optional().default(0),
   firstName: joi.string().required(),
   lastName: joi.string().required(),
-  secondaryName: joi.string().optional(),
-  role: joi.array().required(),
-  roleId: joi.number().required(),
-  recordStatus: joi.string().default("A"),
-  permissions: joi.array().required(),
-  applicationName: joi.array().required(),
-  bio: joi.string().optional(),
+  secondName: joi.string().optional(),
+  role: joi.string().optional(),
+  weight: joi.number().optional(),
+  height: joi.number().optional(),
+  goals: joi.string().optional(),
+  photoUrl: joi.string().optional().default(" ")
 });
