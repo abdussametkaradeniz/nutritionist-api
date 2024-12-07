@@ -25,7 +25,7 @@ export class RegisterDbManager {
       data: {
         username: registerData.userName,
         email: registerData.email,
-        password: registerData.password,
+        passwordHash: registerData.password,
         role: registerData.role ?? UserRole.BASICUSER,
         profile: {
           create: {

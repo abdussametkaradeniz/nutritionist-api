@@ -18,6 +18,7 @@ export class LoginManager {
     const user: UserType = await this.loginDbManager.findUniqueUser(
       this.request
     );
+
     if (!user) {
       throw new NotFound("User not found");
     }
@@ -26,6 +27,7 @@ export class LoginManager {
       this.request.passwordHash,
       user.passwordHash
     );
+    console.log(isPasswordValid, "password valid");
     if (!isPasswordValid) {
       throw new InvalidParameter("Invalid credentials");
     }

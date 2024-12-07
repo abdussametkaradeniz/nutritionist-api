@@ -11,7 +11,7 @@ model User {
   id                      Int           @id @default(autoincrement())
   username                String        @unique
   email                   String        @unique
-  password                String
+  passwordHash            String
   role                    Role          @default(USER)
   profile                 Profile?
   sessionsAsUser          Session[]     @relation("UserSessions")
@@ -28,19 +28,20 @@ model User {
 }
 
 model Profile {
-  id               Int       @id @default(autoincrement())
-  userId           Int       @unique
-  phoneNumber      Int       @unique
-  user             User      @relation(fields: [userId], references: [id])
-  firstName        String?
-  lastName         String?
-  age              Int?
-  weight           Float?
-  goals            Goal
-  photoUrl         String?
-  lastUpdatingUser String?
-  lastUpdateDate   DateTime? @updatedAt
-  recordStatus     String    @default("A")
+  id                 Int       @id @default(autoincrement())
+  userId             Int       @unique
+  phoneNumber        Int       @unique
+  user               User      @relation(fields: [userId], references: [id])
+  firstName          String?
+  lastName           String?
+  age                Int?
+  weight             Float?
+  isProfileCompleted Boolean   @default(false)
+  goals              Goal
+  photoUrl           String?
+  lastUpdatingUser   String?
+  lastUpdateDate     DateTime? @updatedAt
+  recordStatus       String    @default("A")
 }
 
 model Session {

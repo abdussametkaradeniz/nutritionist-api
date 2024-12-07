@@ -1,7 +1,7 @@
 import { Forbidden } from "../domain/exception/forbidden";
 import { Unauthorized } from "../domain/exception/unauthorized";
-import { UserRole, Permissions } from "../domain/user";
 import { Request, Response } from "express";
+import { UserRole } from "../types/user/UserRole";
 
 export function auth(roles?: UserRole[], userRoles?: Permissions[]) {
   return async (req: Request, res: Response, next: Function) => {
@@ -9,7 +9,7 @@ export function auth(roles?: UserRole[], userRoles?: Permissions[]) {
       throw new Unauthorized("user is not found");
     }
 
-    if (!isAuthorized(req.user.role, req.user.permissions, roles, userRoles)) {
+    if (!isAuthorized(req.user.role, req.user.permissions, roles)) {
       throw new Forbidden(`invalid user/corporate role`);
     }
 
@@ -23,7 +23,7 @@ const isAuthorized = (
   roles?: string[],
   permissions?: string[]
 ) => {
-  if (userRole === UserRole.Admin) return true;
+  if (userRole === UserRole.ADMIN) return true;
   if (!roles && !permissions) return false;
 
   const isUserRoleOk =
