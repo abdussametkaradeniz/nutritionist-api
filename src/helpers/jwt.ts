@@ -1,10 +1,11 @@
 import jwt, { Secret } from "jsonwebtoken";
-import { UserFields } from "../types/user";
 import config from "config";
+import { UserType } from "../types/user/User";
+import { UserFields } from "../types/user";
 
 const secretKey = config.get("jwtPrivateKey");
 
-export function generateToken(user: UserFields): string {
+export function generateToken(user: UserType): string {
   const token = jwt.sign(user, secretKey as Secret, { expiresIn: "1h" });
   return token;
 }

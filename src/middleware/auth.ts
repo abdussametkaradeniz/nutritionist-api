@@ -24,7 +24,7 @@ const isAuthorized = (
   permissions?: string[]
 ) => {
   if (userRole === UserRole.Admin) return true;
-  if (!roles && !permissions) return true;
+  if (!roles && !permissions) return false;
 
   const isUserRoleOk =
     !roles ||
@@ -41,6 +41,5 @@ const isAuthorized = (
   if (!isUserRoleOk || !isPermissionsOk) {
     return false;
   }
-
   return true;
 };

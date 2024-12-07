@@ -2,6 +2,7 @@ import express from "express";
 import cors from "cors";
 import { setRoutes } from "./routes";
 import dotenv from "dotenv"; // dotenv paketini dahil edin
+import errorMiddleware from "./src/middleware/error";
 
 dotenv.config(); // dotenv.config() çağrısını yapın
 
@@ -26,6 +27,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 setRoutes(app);
+app.use(errorMiddleware);
 app.listen(port, () => console.log(`Listening on port ${port}`));
 
 export default app;

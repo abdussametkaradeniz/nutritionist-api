@@ -37,7 +37,7 @@ export async function jwt(req: Request, res: Response, next: NextFunction) {
     if (token && token !== "0" && token !== "null" && token !== "undefined") {
       const verifiedUser = await verifyToken(token);
       if (verifiedUser !== null) {
-        user = verifiedUser;
+        user = verifiedUser as UserFields;
       }
     }
     req.user = user;
