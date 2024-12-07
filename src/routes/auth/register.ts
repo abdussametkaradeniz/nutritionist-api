@@ -16,7 +16,6 @@ router.post(
     try {
       const registerManager = new RegisterManager(request);
       const result = await registerManager.create();
-      console.log(result);
       sendSuccess(res, {user: result}, "Register Successful");
     } catch (error: unknown) {
       if (error instanceof NotFound 
