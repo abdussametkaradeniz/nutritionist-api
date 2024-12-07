@@ -1,4 +1,5 @@
 import { LoginDbManager } from "../../database/loginDbManager";
+import { InvalidParameter, NotFound } from "../../domain/exception";
 import { generateToken } from "../../helpers/jwt";
 import { comparePassword } from "../../helpers/passwordHash";
 import { UserLoginFields } from "../../types/login";
@@ -18,7 +19,7 @@ export class LoginManager {
       this.request
     );
     if (!user) {
-      throw new Error("User not found");
+      throw new NotFound("User not found");
     }
 
     const isPasswordValid = await comparePassword(
@@ -26,7 +27,7 @@ export class LoginManager {
       user.passwordHash
     );
     if (!isPasswordValid) {
-      throw new Error("Invalid credentials");
+      throw new InvalidParameter("Invalid credentials");
     }
 
     const jwt = generateToken(user);

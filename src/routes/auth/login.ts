@@ -4,6 +4,7 @@ import { requestValidator } from "../../middleware/requestValidator";
 import { LoginManager } from "../../bussiness/auth/loginManager";
 import { UserLoginFields } from "../../types/login";
 import { sendSuccess } from "../../helpers/responseHandler";
+import { InvalidParameter, NotFound } from "../../domain/exception";
 
 const router: express.Router = express.Router();
 
@@ -21,8 +22,7 @@ router.post(
         "Login successful"
       );
     } catch (error: unknown) {
-      if (error instanceof Error) {
-        const statusCode = error.message === "User not found" ? 404 : 401;
+      if (error instanceof NotFound || error instanceof InvalidParameter) {
         next(error);
       } else {
         next(new Error("An unexpected error occurred"));
