@@ -7,11 +7,7 @@
     "start": "nodemon --exec ts-node index.ts",
     "migrate": "npx prisma migrate dev",
     "lint": "eslint .",
-    "format": "prettier --write .",
-    "forever-start": "forever start -a -l forever.log -o out.log -e err.log -c ts-node --transpile-only daemon index.ts",
-    "forever-stop": "forever stop index.ts",
-    "forever-restart": "forever restart index.ts",
-    "forever-list": "forever list"
+    "format": "prettier --write ."
   },
   "prisma": {
     "seed": "ts-node --compiler-options {\"module\":\"CommonJS\"} prisma/seed.ts"
@@ -26,11 +22,9 @@
     "cors": "^2.8.5",
     "dotenv": "^16.4.5",
     "express": "^4.19.2",
-    "forever": "^4.0.3",
     "helmet": "^7.1.0",
     "joi": "^17.13.1",
     "jsonwebtoken": "^9.0.2",
-    "lodash": "^4.17.21",
     "morgan": "^1.10.0",
     "nodemon": "^3.1.7",
     "react": "^18.3.1",

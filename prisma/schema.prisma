@@ -1,285 +1,144 @@
-generator client {
-  provider = "prisma-client-js"
-}
-
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
 }
 
+generator client {
+  provider = "prisma-client-js"
+}
+
 model User {
-  id               Int               @id @default(autoincrement())
-  email            String            @unique
-  userName         String            @unique
-  passwordHash     String
-  firstName        String
-  secondaryName    String?
-  lastName         String
-  phoneNumber      String?           @unique
-  age              Int
-  bio              String?
-  profileImage     String?
-  role             Role              @relation(fields: [roleId], references: [id])
-  roleId           Int
-  followers        Follower[]        @relation("UserFollowers")
-  following        Follower[]        @relation("UserFollowing")
-  posts            Post[]
-  postLikes        PostLike[]
-  comments         Comment[]
-  sentMessages     Message[]         @relation("SentMessages")
-  receivedMessages Message[]         @relation("ReceivedMessages")
-  dietitianPlans   NutritionPlan[]   @relation("DietitianPlans")
-  userPlans        NutritionPlan[]   @relation("UserPlans")
-  foodEntries      FoodEntry[]
-  healthRecords    HealthRecord[]
-  payments         Payment[]
-  verification     Verification?
-  verifiedPlans    Verification[]    @relation("VerifiedBy")
-  dietitianReviews DietitianReview[] @relation("ReviewedDietitian")
-  givenReviews     DietitianReview[] @relation("Reviewer")
-  isVerified       Boolean           @default(false)
-  isDeleted        Boolean           @default(false)
-  createdAt        DateTime          @default(now())
-  updatedAt        DateTime          @updatedAt
-  recipes          Recipe[]
-
+  id                      Int           @id @default(autoincrement())
+  username                String        @unique
+  email                   String        @unique
+  password                String
+  role                    Role          @default(USER)
+  profile                 Profile?
+  sessionsAsUser          Session[]     @relation("UserSessions")
+  sessionsAsDietitian     Session[]     @relation("DietitianSessions")
+  messagesSent            Message[]     @relation("MessagesSent")
+  messagesReceived        Message[]     @relation("MessagesReceived")
+  mealPlans               MealPlan[]
+  performances            Performance[]
+  appointmentsAsUser      Appointment[] @relation("UserAppointments")
+  appointmentsAsDietitian Appointment[] @relation("DietitianAppointments")
+  lastUpdatingUser        String?
+  lastUpdateDate          DateTime?     @updatedAt
+  recordStatus            String        @default("A")
 }
 
-model Role {
-  id          Int          @id @default(autoincrement())
-  roleName    String       @unique
-  permissions Permission[]
-  users       User[]
-  isDeleted   Boolean      @default(false)
+model Profile {
+  id               Int       @id @default(autoincrement())
+  userId           Int       @unique
+  user             User      @relation(fields: [userId], references: [id])
+  firstName        String?
+  lastName         String?
+  age              Int?
+  weight           Float?
+  goals            Goal
+  photoUrl         String?
+  lastUpdatingUser String?
+  lastUpdateDate   DateTime? @updatedAt
+  recordStatus     String    @default("A")
 }
 
-model Permission {
-  id             Int     @id @default(autoincrement())
-  permissionName String  @unique
-  roles          Role[]
-  isDeleted      Boolean @default(false)
-}
-
-model Follower {
-  id          Int      @id @default(autoincrement())
-  follower    User     @relation("UserFollowers", fields: [followerId], references: [id])
-  followerId  Int
-  following   User     @relation("UserFollowing", fields: [followingId], references: [id])
-  followingId Int
-  createdAt   DateTime @default(now())
-  isDeleted   Boolean  @default(false)
-}
-
-model Post {
-  id        Int        @id @default(autoincrement())
-  user      User       @relation(fields: [userId], references: [id])
-  userId    Int
-  content   String
-  imageUrl  String?
-  createdAt DateTime   @default(now())
-  updatedAt DateTime   @updatedAt
-  isDeleted Boolean    @default(false)
-  likes     PostLike[]
-  comments  Comment[]
-}
-
-model PostLike {
-  id        Int      @id @default(autoincrement())
-  post      Post     @relation(fields: [postId], references: [id])
-  postId    Int
-  user      User     @relation(fields: [userId], references: [id])
-  userId    Int
-  createdAt DateTime @default(now())
-  isDeleted Boolean  @default(false)
-}
-
-model Comment {
-  id        Int      @id @default(autoincrement())
-  post      Post     @relation(fields: [postId], references: [id])
-  postId    Int
-  user      User     @relation(fields: [userId], references: [id])
-  userId    Int
-  content   String
-  createdAt DateTime @default(now())
-  isDeleted Boolean  @default(false)
+model Session {
+  id               Int           @id @default(autoincrement())
+  userId           Int
+  dietitianId      Int
+  date             DateTime
+  status           SessionStatus @default(PENDING)
+  user             User          @relation(name: "UserSessions", fields: [userId], references: [id])
+  dietitian        User          @relation(name: "DietitianSessions", fields: [dietitianId], references: [id])
+  lastUpdatingUser String?
+  lastUpdateDate   DateTime?     @updatedAt
+  recordStatus     String        @default("A")
 }
 
 model Message {
-  id         Int      @id @default(autoincrement())
-  sender     User     @relation("SentMessages", fields: [senderId], references: [id])
-  senderId   Int
-  receiver   User     @relation("ReceivedMessages", fields: [receiverId], references: [id])
-  receiverId Int
-  content    String
-  createdAt  DateTime @default(now())
-  isRead     Boolean  @default(false)
-  isDeleted  Boolean  @default(false)
+  id               Int       @id @default(autoincrement())
+  content          String
+  sentAt           DateTime  @default(now())
+  userId           Int
+  recipientId      Int
+  sender           User      @relation(name: "MessagesSent", fields: [userId], references: [id])
+  recipient        User      @relation(name: "MessagesReceived", fields: [recipientId], references: [id])
+  lastUpdatingUser String?
+  lastUpdateDate   DateTime? @updatedAt
+  recordStatus     String    @default("A")
 }
 
-model NutritionPlan {
-  id          Int      @id @default(autoincrement())
-  dietitian   User     @relation("DietitianPlans", fields: [dietitianId], references: [id])
-  dietitianId Int
-  user        User     @relation("UserPlans", fields: [userId], references: [id])
-  userId      Int
-  title       String
-  description String
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-  isDeleted   Boolean  @default(false)
+model MealPlan {
+  id               Int       @id @default(autoincrement())
+  userId           Int
+  description      String
+  createdAt        DateTime  @default(now())
+  meals            Meal[]
+  user             User      @relation(fields: [userId], references: [id])
+  lastUpdatingUser String?
+  lastUpdateDate   DateTime? @updatedAt
+  recordStatus     String    @default("A")
 }
 
-model FoodEntry {
-  id          Int      @id @default(autoincrement())
-  user        User     @relation(fields: [userId], references: [id])
-  userId      Int
-  date        DateTime @default(now())
-  description String
-  calories    Int
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-  isDeleted   Boolean  @default(false)
+model Meal {
+  id               Int       @id @default(autoincrement())
+  mealPlanId       Int
+  name             String
+  time             DateTime
+  mealPlan         MealPlan  @relation(fields: [mealPlanId], references: [id])
+  lastUpdatingUser String?
+  lastUpdateDate   DateTime? @updatedAt
+  recordStatus     String    @default("A")
 }
 
-model HealthRecord {
-  id         Int      @id @default(autoincrement())
-  user       User     @relation(fields: [userId], references: [id])
-  userId     Int
-  date       DateTime @default(now())
-  weight     Float
-  height     Float
-  bodyFat    Float
-  muscleMass Float
-  notes      String?
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
-  isDeleted  Boolean  @default(false)
+model Performance {
+  id               Int       @id @default(autoincrement())
+  userId           Int
+  date             DateTime
+  weight           Float?
+  fatPercentage    Float?
+  muscleMass       Float?
+  user             User      @relation(fields: [userId], references: [id])
+  lastUpdatingUser String?
+  lastUpdateDate   DateTime? @updatedAt
+  recordStatus     String    @default("A")
 }
 
-model Payment {
-  id          Int           @id @default(autoincrement())
-  user        User          @relation(fields: [userId], references: [id])
-  userId      Int
-  amount      Float
-  paymentDate DateTime      @default(now())
-  status      PaymentStatus
-  campaign    Campaign?     @relation(fields: [campaignId], references: [id])
-  campaignId  Int?
-  isDeleted   Boolean       @default(false)
-  createdAt   DateTime      @default(now())
+model Appointment {
+  id               Int               @id @default(autoincrement())
+  userId           Int
+  dietitianId      Int?
+  date             DateTime
+  status           AppointmentStatus @default(PENDING)
+  user             User              @relation(name: "UserAppointments", fields: [userId], references: [id])
+  dietitian        User?             @relation(name: "DietitianAppointments", fields: [dietitianId], references: [id])
+  lastUpdatingUser String?
+  lastUpdateDate   DateTime?         @updatedAt
+  recordStatus     String            @default("A")
 }
 
-model Campaign {
-  id           Int       @id @default(autoincrement())
-  title        String
-  description  String
-  discountRate Float
-  startDate    DateTime
-  endDate      DateTime
-  payments     Payment[]
-  isDeleted    Boolean   @default(false)
-  createdAt    DateTime  @default(now())
-  updatedAt    DateTime  @updatedAt
+enum Role {
+  USER
+  DIETITIAN
+  ADMIN
+  BASICUSER
+  VIPUSER
 }
 
-model Verification {
-  id           Int                @id @default(autoincrement())
-  user         User               @relation(fields: [userId], references: [id])
-  userId       Int                @unique
-  documentUrl  String
-  status       VerificationStatus
-  verifiedBy   User?              @relation("VerifiedBy", fields: [verifiedById], references: [id])
-  verifiedById Int?
-  verifiedAt   DateTime?
-  createdAt    DateTime           @default(now())
-  updatedAt    DateTime           @updatedAt
-  isDeleted    Boolean            @default(false)
-}
-
-model DietitianReview {
-  id          Int      @id @default(autoincrement())
-  dietitian   User     @relation("ReviewedDietitian", fields: [dietitianId], references: [id])
-  dietitianId Int
-  reviewer    User     @relation("Reviewer", fields: [reviewerId], references: [id])
-  reviewerId  Int
-  rating      Int
-  comment     String
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-  isDeleted   Boolean  @default(false)
-}
-
-model Multilanguage {
-  id              Int      @id @default(autoincrement())
-  MlCode          String   @unique
-  CountryCode     String
-  MlValue         String
-  ApplicationCode String
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
-  isDeleted       Boolean  @default(false)
-}
-
-model Recipe {
-  recipeID   Int       @id @default(autoincrement())
-  recipeName String
-  categoryID Int
-  userID     Int
-  isDeleted   Boolean   @default(false)
-
-  category   Category  @relation(fields: [categoryID], references: [categoryID])
-  steps      Step[]
-  user       User      @relation(fields: [userID], references: [id])
-  recipeIngredients RecipeIngredient[]
-}
-
-model Step {
-  stepID      Int       @id @default(autoincrement())
-  recipeID    Int
-  stepNumber  Int
-  stepContent String
-  stepImage   String?
-  isDeleted   Boolean   @default(false)
-
-  recipe      Recipe    @relation(fields: [recipeID], references: [recipeID])
-}
-
-model Ingredient {
-  ingredientID Int      @id @default(autoincrement())
-  ingredientName String
-  isDeleted   Boolean   @default(false)
-  recipeIngredients RecipeIngredient[]
-}
-
-model Category {
-  categoryID  Int       @id @default(autoincrement())
-  categoryName String
-  recipes     Recipe[]
-  isDeleted   Boolean   @default(false)
-}
-
-model RecipeIngredient {
-  recipeID    Int
-  ingredientID Int
-  quantity    String?
-  isDeleted   Boolean   @default(false)
-
-  @@id([recipeID, ingredientID])
-  recipe      Recipe    @relation(fields: [recipeID], references: [recipeID])
-  ingredient  Ingredient @relation(fields: [ingredientID], references: [ingredientID])
-
-
-}
-
-
-enum VerificationStatus {
-  PENDING
-  APPROVED
-  REJECTED
-}
-
-enum PaymentStatus {
+enum SessionStatus {
   PENDING
   COMPLETED
-  FAILED
+  CANCELLED
+}
+
+enum AppointmentStatus {
+  PENDING
+  CONFIRMED
+  CANCELLED
+}
+
+enum Goal {
+  GAINMUSCLES
+  GAINWEIGHT
+  WEIGHTLOSS
 }
