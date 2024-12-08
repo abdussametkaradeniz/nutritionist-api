@@ -21,21 +21,24 @@ export class RegisterDbManager {
   };
 
   create = async (registerData: RegisterType): Promise<any> => {
-    const user = prisma.user.create({
+    console.log(registerData, "register data")
+    const user = await prisma.user.create({
       data: {
         username: registerData.userName,
         email: registerData.email,
         passwordHash: registerData.password,
-        role: registerData.role ?? UserRole.BASICUSER,
+        role: registerData.role ?? "BASICUSER",
         phoneNumber: registerData.phoneNumber ?? "",
         profile: {
           create: {
             firstName: registerData.firstName,
-            lastName: registerData.lastName,
+            lastName: registerData.lastName ?? "",
+            secondName: registerData.secondName ?? "",
             age: registerData.age ?? 0,
             weight: registerData.weight ?? 0,
-            goals: registerData.goals ?? UserGoals.GAINMUSCLES,
+            goals: registerData.goals ?? "GAINMUSCLES",
             photoUrl: registerData.photoUrl ?? "",
+            isProfileCompleted: false,
           }
         }
       },

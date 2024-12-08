@@ -5,7 +5,13 @@ import { UserType } from "../types/user/User";
 const secretKey = config.get("jwtPrivateKey");
 
 export function generateToken(user: UserType): string {
-  const token = jwt.sign(user, secretKey as Secret, { expiresIn: "1h" });
+  const payload = {
+    id: user.id,
+    username: user.userName,
+    email: user.email,
+    role: user.role,
+  };
+  const token = jwt.sign(payload, secretKey as Secret, { expiresIn: "1h" });
   return token;
 }
 

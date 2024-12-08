@@ -11,9 +11,9 @@ model User {
   id                      Int           @id @default(autoincrement())
   username                String        @unique
   email                   String        @unique
-  phoneNumber             String        @unique
+  phoneNumber             String?       @unique
   passwordHash            String
-  role                    Role          @default(USER)
+  role                    Role?         @default(USER)
   profile                 Profile?
   sessionsAsUser          Session[]     @relation("UserSessions")
   sessionsAsDietitian     Session[]     @relation("DietitianSessions")
@@ -25,7 +25,7 @@ model User {
   appointmentsAsDietitian Appointment[] @relation("DietitianAppointments")
   lastUpdatingUser        String?
   lastUpdateDate          DateTime?     @updatedAt
-  recordStatus            String        @default("A")
+  recordStatus            String?       @default("A")
 }
 
 model Profile {
@@ -33,15 +33,16 @@ model Profile {
   userId             Int       @unique
   user               User      @relation(fields: [userId], references: [id])
   firstName          String?
+  secondName         String?
   lastName           String?
   age                Int?
   weight             Float?
-  isProfileCompleted Boolean   @default(false)
+  isProfileCompleted Boolean?  @default(false)
   goals              Goal
   photoUrl           String?
   lastUpdatingUser   String?
   lastUpdateDate     DateTime? @updatedAt
-  recordStatus       String    @default("A")
+  recordStatus       String?   @default("A")
 }
 
 model Session {

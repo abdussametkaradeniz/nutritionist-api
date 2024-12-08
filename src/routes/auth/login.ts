@@ -17,9 +17,16 @@ router.post(
       const loginManager = new LoginManager(request);
       const result = await loginManager.findUniqueUser();
 
+      res.cookie("authToken", result.token, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: "strict",
+        maxAge: 3600000,
+      });
+      
       sendSuccess(
         res,
-        { user: result.user, token: result.token },
+        { user: result.user },
         "Login successful"
       );
     } catch (error: unknown) {
