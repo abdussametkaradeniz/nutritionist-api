@@ -13,8 +13,8 @@ export class RegisterDbManager {
     return user;
   };
 
-  findPhonenumber = async (phoneNumber: number) => {
-    const user = prisma.profile.findUnique({
+  findPhonenumber = async (phoneNumber: string) => {
+    const user = prisma.user.findUnique({
       where: { phoneNumber: phoneNumber },
     });
     return user;
@@ -27,11 +27,11 @@ export class RegisterDbManager {
         email: registerData.email,
         passwordHash: registerData.password,
         role: registerData.role ?? UserRole.BASICUSER,
+        phoneNumber: registerData.phoneNumber ?? "",
         profile: {
           create: {
             firstName: registerData.firstName,
             lastName: registerData.lastName,
-            phoneNumber: registerData.phoneNumber ?? 0,
             age: registerData.age ?? 0,
             weight: registerData.weight ?? 0,
             goals: registerData.goals ?? UserGoals.GAINMUSCLES,

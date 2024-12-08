@@ -4,7 +4,7 @@ import { RegisterType } from "../../types/user/Register";
 export const registerSchema = joi.object<RegisterType>({
   userName: joi.string().optional(),
   email: joi.string().optional(),
-  phoneNumber: joi.number().optional(),
+  phoneNumber: joi.string().optional(),
   password: joi.string().required(),
   age: joi.number().optional().default(0),
   firstName: joi.string().required(),

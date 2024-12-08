@@ -2,10 +2,11 @@ import prisma from "../../prisma/client";
 import { UserLoginFields } from "../types/login";
 export class LoginDbManager {
   findUniqueUser = async (loginData: UserLoginFields): Promise<any> => {
+    const { identifier, password } = loginData;
     let user;
-    if (loginData.email) {
+    if (identifier.includes('@')) {
       user = await prisma.user.findUnique({
-        where: { email: loginData.email },
+        where: { email: loginData.identifier },
         include: { profile: true, 
           mealPlans: true, 
           appointmentsAsUser: true, 
@@ -13,15 +14,25 @@ export class LoginDbManager {
           performances: true
         },
       });
-    } else if (loginData.userName) {
+    }  else if (/^\d+$/.test(identifier)) {
       user = await prisma.user.findUnique({
-        where: { username: loginData.userName },
-        include: { profile: true },
+        where: { phoneNumber: loginData.identifier },
+        include: { profile: true, 
+          mealPlans: true, 
+          appointmentsAsUser: true, 
+          appointmentsAsDietitian: true, 
+          performances: true
+        },
       });
-    } else if (loginData.phoneNumber) {
-      user = await prisma.profile.findUnique({
-        where: { phoneNumber: loginData.phoneNumber },
-        include: { user: true },
+    }else {
+      user = await prisma.user.findUnique({
+        where: { username: loginData.identifier },
+        include: { profile: true, 
+          mealPlans: true, 
+          appointmentsAsUser: true, 
+          appointmentsAsDietitian: true, 
+          performances: true
+        },
       });
     }
     return user;

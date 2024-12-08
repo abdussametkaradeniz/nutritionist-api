@@ -8,7 +8,7 @@ export type RegisterType = {
   firstName: string;
   secondName?: string;
   lastName: string;
-  phoneNumber?: number;
+  phoneNumber?: string;
   age?: number;
   role: UserRole;
   weight?: number;

@@ -24,7 +24,7 @@ export class LoginManager {
     }
 
     const isPasswordValid = await comparePassword(
-      this.request.passwordHash,
+      this.request.password,
       user.passwordHash
     );
     console.log(isPasswordValid, "password valid");

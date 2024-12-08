@@ -14,7 +14,6 @@ router.post(
   async (req: Request, res: Response, next: NextFunction) => {
     const request = req.body as UserLoginFields;
     try {
-      console.log(request);
       const loginManager = new LoginManager(request);
       const result = await loginManager.findUniqueUser();
 

@@ -11,6 +11,7 @@ model User {
   id                      Int           @id @default(autoincrement())
   username                String        @unique
   email                   String        @unique
+  phoneNumber             String        @unique
   passwordHash            String
   role                    Role          @default(USER)
   profile                 Profile?
@@ -30,7 +31,6 @@ model User {
 model Profile {
   id                 Int       @id @default(autoincrement())
   userId             Int       @unique
-  phoneNumber        Int       @unique
   user               User      @relation(fields: [userId], references: [id])
   firstName          String?
   lastName           String?
