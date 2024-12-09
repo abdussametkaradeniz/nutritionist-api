@@ -13,7 +13,7 @@ model User {
   email                   String        @unique
   phoneNumber             String?       @unique
   passwordHash            String
-  role                    Role?         @default(USER)
+  roles                   Role[]        @relation("UserRoles")
   profile                 Profile?
   sessionsAsUser          Session[]     @relation("UserSessions")
   sessionsAsDietitian     Session[]     @relation("DietitianSessions")
@@ -29,20 +29,45 @@ model User {
 }
 
 model Profile {
-  id                 Int       @id @default(autoincrement())
-  userId             Int       @unique
-  user               User      @relation(fields: [userId], references: [id])
+  id                 Int      @id @default(autoincrement())
+  userId             Int      @unique
+  user               User     @relation(fields: [userId], references: [id])
   firstName          String?
   secondName         String?
   lastName           String?
   age                Int?
   weight             Float?
-  isProfileCompleted Boolean?  @default(false)
+  isProfileCompleted Boolean  @default(false)
   goals              Goal
   photoUrl           String?
   lastUpdatingUser   String?
-  lastUpdateDate     DateTime? @updatedAt
-  recordStatus       String?   @default("A")
+  lastUpdateDate     DateTime @updatedAt
+  recordStatus       String?  @default("A")
+}
+
+model Role {
+  id              Int               @id @default(autoincrement())
+  name            String            @unique
+  users           User[]            @relation("UserRoles")
+  permissions     Permission[]      @relation("RolePermissions")
+  rolePermissions RolePermissions[] @relation("RolePermissionsRole")
+}
+
+model Permission {
+  id              Int               @id @default(autoincrement())
+  name            String            @unique
+  description     String
+  roles           Role[]            @relation("RolePermissions")
+  rolePermissions RolePermissions[] @relation("RolePermissionsPermission")
+}
+
+model RolePermissions {
+  roleId       Int
+  permissionId Int
+  role         Role       @relation(fields: [roleId], references: [id], name: "RolePermissionsRole")
+  permission   Permission @relation(fields: [permissionId], references: [id], name: "RolePermissionsPermission")
+
+  @@id([roleId, permissionId])
 }
 
 model Session {
@@ -120,7 +145,7 @@ model Appointment {
   recordStatus     String            @default("A")
 }
 
-enum Role {
+enum UserRole {
   USER
   DIETITIAN
   ADMIN

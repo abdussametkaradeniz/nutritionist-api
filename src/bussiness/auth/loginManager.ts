@@ -27,7 +27,7 @@ export class LoginManager {
       this.request.password,
       user.passwordHash
     );
-    console.log(isPasswordValid, "password valid");
+
     if (!isPasswordValid) {
       throw new InvalidParameter("Invalid credentials");
     }

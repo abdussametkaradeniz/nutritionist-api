@@ -23,17 +23,13 @@ router.post(
         sameSite: "strict",
         maxAge: 3600000,
       });
-      
-      sendSuccess(
-        res,
-        { user: result.user },
-        "Login successful"
-      );
+
+      sendSuccess(res, { user: result.user }, "Login successful");
     } catch (error: unknown) {
       if (error instanceof NotFound || error instanceof InvalidParameter) {
         next(error);
       } else {
-        next(new Error("An unexpected error occurred"));
+        next(error);
       }
     }
   }
