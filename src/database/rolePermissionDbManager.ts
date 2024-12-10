@@ -83,4 +83,19 @@ export class RolePermissionDbManager {
 
     return permissions;
   };
+
+  getAllRoles = async () => {
+    const roles = await prisma.role.findMany();
+    return roles;
+  };
+
+  getPermissionsWithConnectedRole = async (role: string) => {
+    const permissions = await prisma.role.findUnique({
+      where: { name: role },
+      include: {
+        permissions: true,
+      },
+    });
+    return permissions;
+  };
 }

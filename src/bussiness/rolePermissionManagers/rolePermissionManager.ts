@@ -1,4 +1,4 @@
-import { RolePermissionDbManager } from "./../../database/roleDbManager";
+import { RolePermissionDbManager } from "../../database/rolePermissionDbManager";
 import { RolePermissionsType } from "../../types/rolePermissions/rolePermissionsType";
 import { BusinessException, NotFound } from "../../domain/exception";
 
@@ -81,5 +81,27 @@ export class RolePermissionManager {
       throw new NotFound("There is no role");
     }
     return allPermissionsWithRoles;
+  }
+
+  async getAllRoles(): Promise<any> {
+    const allRoles = await this.rolePermissionDbManager.getAllRoles();
+
+    if (!allRoles) {
+      throw new BusinessException("Something went wrong!", 401);
+    }
+    return allRoles;
+  }
+
+  async getPermissionsWithConnectedRole(): Promise<any> {
+    const roleName = this.request.roles[0].roleName;
+    const permissions =
+      await this.rolePermissionDbManager.getPermissionsWithConnectedRole(
+        roleName
+      );
+
+    if (!permissions) {
+      throw new BusinessException("Something went wrong", 400);
+    }
+    return permissions;
   }
 }

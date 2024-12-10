@@ -1,3 +1,4 @@
+import { GeneralRoleType } from "./../../types/rolePermissions/generalRoleType";
 import express, { NextFunction, Request, Response } from "express";
 import { requestValidator } from "../../middleware/requestValidator";
 import {
@@ -8,6 +9,7 @@ import { RolePermissionsType } from "../../types/rolePermissions/rolePermissions
 import { RolePermissionManager } from "../../bussiness/rolePermissionManagers/rolePermissionManager";
 import { sendSuccess } from "../../helpers/responseHandler";
 import { BusinessException, NotFound } from "../../domain/exception";
+import { RoleTypes } from "../../types/rolePermissions/roleEnums";
 
 const router: express.Router = express.Router();
 
@@ -71,5 +73,64 @@ router.get("/", async (req: Request, res: Response, next: NextFunction) => {
     }
   }
 });
+
+router.get(
+  "/get-all-roles",
+  async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const requestObj: RolePermissionsType = {
+        permission: {
+          name: "",
+          description: "",
+        },
+        roles: [],
+      };
+
+      const rolePermissionManager = new RolePermissionManager(requestObj);
+      const roles = await rolePermissionManager.getAllRoles();
+      sendSuccess(res, roles, "Roles can be listed");
+    } catch (error: unknown) {
+      if (error instanceof BusinessException) {
+        next(error);
+      } else {
+        next(error);
+      }
+    }
+  }
+);
+
+router.get(
+  "/get-connected-permissions",
+  async (req: Request, res: Response, next: NextFunction) => {
+    const { role } = req.query;
+    const roles = role as unknown as GeneralRoleType;
+    const rolename = roles as unknown as RoleTypes;
+    console.log(rolename);
+    try {
+      const requestObj: RolePermissionsType = {
+        permission: {
+          name: "",
+          description: "",
+        },
+        roles: [
+          {
+            roleId: 0,
+            roleName: rolename,
+          },
+        ],
+      };
+      const rolePermissionManager = new RolePermissionManager(requestObj);
+      const roles =
+        await rolePermissionManager.getPermissionsWithConnectedRole();
+      sendSuccess(res, roles, "Roles can be listed");
+    } catch (error: unknown) {
+      if (error instanceof BusinessException) {
+        next(error);
+      } else {
+        next(error);
+      }
+    }
+  }
+);
 
 export default router;

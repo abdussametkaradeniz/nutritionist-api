@@ -46,19 +46,25 @@ model Profile {
 }
 
 model Role {
-  id              Int               @id @default(autoincrement())
-  name            String            @unique
-  users           User[]            @relation("UserRoles")
-  permissions     Permission[]      @relation("RolePermissions")
-  rolePermissions RolePermissions[] @relation("RolePermissionsRole")
+  id               Int               @id @default(autoincrement())
+  name             String            @unique
+  users            User[]            @relation("UserRoles")
+  permissions      Permission[]      @relation("RolePermissions")
+  rolePermissions  RolePermissions[] @relation("RolePermissionsRole")
+  lastUpdatingUser String?           @default("ADMIN")
+  lastUpdateDate   DateTime          @updatedAt
+  recordStatus     String?           @default("A")
 }
 
 model Permission {
-  id              Int               @id @default(autoincrement())
-  name            String            @unique
-  description     String
-  roles           Role[]            @relation("RolePermissions")
-  rolePermissions RolePermissions[] @relation("RolePermissionsPermission")
+  id               Int               @id @default(autoincrement())
+  name             String            @unique
+  description      String
+  roles            Role[]            @relation("RolePermissions")
+  rolePermissions  RolePermissions[] @relation("RolePermissionsPermission")
+  lastUpdatingUser String?           @default("ADMIN")
+  lastUpdateDate   DateTime          @updatedAt
+  recordStatus     String?           @default("A")
 }
 
 model RolePermissions {
