@@ -2,7 +2,7 @@ import { LoginDbManager } from "../../database/loginDbManager";
 import { InvalidParameter, NotFound } from "../../domain/exception";
 import { generateToken } from "../../helpers/jwt";
 import { comparePassword } from "../../helpers/passwordHash";
-import { UserLoginFields } from "../../types/login";
+import { UserLoginFields } from "../../types/user/login";
 import { UserType } from "../../types/user/User";
 
 export class LoginManager {

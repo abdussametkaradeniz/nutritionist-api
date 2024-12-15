@@ -2,7 +2,7 @@ import express, { NextFunction, Request, Response } from "express";
 import { loginSchema } from "../../validations/auth/loginValidator";
 import { requestValidator } from "../../middleware/requestValidator";
 import { LoginManager } from "../../bussiness/auth/loginManager";
-import { UserLoginFields } from "../../types/login";
+import { UserLoginFields } from "../../types/user/login";
 import { sendSuccess } from "../../helpers/responseHandler";
 import { InvalidParameter, NotFound } from "../../domain/exception";
 
