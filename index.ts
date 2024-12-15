@@ -19,7 +19,7 @@ app.use(
       }
     },
     credentials: true,
-    methods: ["POST", "PUT", "GET", "DELETE", "OPTIONS", "HEAD"],
+    methods: ["POST", "PUT", "GET", "DELETE", "OPTIONS", "HEAD", "PATCH"],
   })
 );
 

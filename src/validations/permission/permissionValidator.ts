@@ -1,22 +1,26 @@
-import Joi from "joi";
+import Joi, { date } from "joi";
 import { RoleTypes } from "../../types/rolePermissions/roleEnums";
 
 export const permissionCreateSchema = Joi.object({
   permission: Joi.object({
     name: Joi.string().required(),
     description: Joi.string().required(),
+    recordStatus: Joi.string().default("A"),
+    lastUpdatingUser: Joi.string().default("admin"),
   }),
   roles: Joi.array()
     .items(
-      Joi.string().valid(
-        "ADMIN",
-        "DIETITIAN",
-        "USER",
-        "PREMIUMUSER",
-        "BASICUSER"
-      )
+      Joi.object({
+        roleId: Joi.number().integer().positive().required(),
+        roleName: Joi.string()
+          .valid("ADMIN", "DIETITIAN", "USER", "PREMIUMUSER", "BASICUSER")
+          .required(),
+        recordStatus: Joi.string().default("A"),
+        lastUpdatingUser: Joi.string().default("admin"),
+      })
     )
-    .min(1),
+    .min(1)
+    .required(),
 });
 
 const roleNames = Object.values(RoleTypes);

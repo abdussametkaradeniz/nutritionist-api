@@ -3,7 +3,7 @@ import { RolePermissionsType } from "../../types/rolePermissions/rolePermissions
 import { BusinessException, NotFound } from "../../domain/exception";
 
 export class RolePermissionManager {
-  request: RolePermissionsType;
+  request?: RolePermissionsType;
   rolePermissionDbManager: RolePermissionDbManager;
 
   constructor(request: RolePermissionsType) {
@@ -16,9 +16,8 @@ export class RolePermissionManager {
     description: string;
     id: number;
   }> {
-    const { permission } = this.request;
+    const { permission } = this.request!;
     const { name } = permission;
-
     const isPermissionUnique =
       await this.rolePermissionDbManager.isPermissionUnique(name);
 
@@ -27,7 +26,7 @@ export class RolePermissionManager {
     }
 
     const createdPermission = await this.rolePermissionDbManager.addPermission(
-      this.request
+      this.request!
     );
 
     if (!createdPermission) {
@@ -41,7 +40,7 @@ export class RolePermissionManager {
     id: number;
     description: string;
   }> {
-    const { permission, roles } = this.request;
+    const { permission, roles } = this.request!;
     const { name, permissionId } = permission;
 
     const roleIds = roles.map((role) => role.roleId);
@@ -60,7 +59,7 @@ export class RolePermissionManager {
 
     const updatedRolePermissions =
       await this.rolePermissionDbManager.updateRolePermission(
-        permission.permissionId!,
+        permission,
         roleIds
       );
 
@@ -71,7 +70,7 @@ export class RolePermissionManager {
 
   //bütün permissionlar dönmeli
   async getAllPermissionsWithRole(): Promise<any> {
-    const { page, pageSize } = this.request;
+    const { page, pageSize } = this.request!;
     const allPermissionsWithRoles =
       await this.rolePermissionDbManager.getAllPermissionsWithRoles(
         page!,
@@ -93,7 +92,7 @@ export class RolePermissionManager {
   }
 
   async getPermissionsWithConnectedRole(): Promise<any> {
-    const roleName = this.request.roles[0].roleName;
+    const roleName = this.request!.roles[0].roleName;
     const permissions =
       await this.rolePermissionDbManager.getPermissionsWithConnectedRole(
         roleName
@@ -103,5 +102,27 @@ export class RolePermissionManager {
       throw new BusinessException("Something went wrong", 400);
     }
     return permissions;
+  }
+
+  async searchWithCriteria(): Promise<any> {
+    const roleName = this.request!.roles[0].roleName;
+    const permissionName = this.request!.permission.name;
+
+    const searchResults = await this.rolePermissionDbManager.searchWithCriteria(
+      roleName,
+      permissionName,
+      this.request!.page!,
+      this.request!.pageSize!
+    );
+    return searchResults;
+  }
+
+  async deletePermission(): Promise<any> {
+    const permissionId = this.request!.permission!.permissionId;
+
+    const result = await this.rolePermissionDbManager.deletePermission(
+      permissionId!
+    );
+    return result;
   }
 }

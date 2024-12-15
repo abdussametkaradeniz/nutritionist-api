@@ -1,4 +1,5 @@
 import prisma from "../../prisma/client";
+import { BusinessException, NotFound } from "../domain/exception";
 import { GeneralRoleType } from "../types/rolePermissions/generalRoleType";
 import { RolePermissionsType } from "../types/rolePermissions/rolePermissionsType";
 
@@ -18,6 +19,9 @@ export class RolePermissionDbManager {
       data: {
         name: request.permission.name,
         description: request.permission.description,
+        recordStatus: "A",
+        lastUpdateDate: new Date(),
+        lastUpdatingUser: "BATCH",
         roles: {
           connect: request.roles.map((role) => ({ name: role.roleName })),
         },
@@ -38,11 +42,11 @@ export class RolePermissionDbManager {
     return existingRelation;
   };
   updateRolePermission = async (
-    permissionId: number,
+    permission: any,
     roleIdList: number[]
   ): Promise<{ name: string; id: number; description: string }> => {
     const currentRoles = await prisma.permission.findUnique({
-      where: { id: permissionId },
+      where: { id: permission?.permissionId },
       include: { roles: true },
     });
 
@@ -58,8 +62,10 @@ export class RolePermissionDbManager {
     );
 
     const updatedPermission = await prisma.permission.update({
-      where: { id: permissionId },
+      where: { id: permission?.permissionId },
       data: {
+        description: permission?.description,
+        name: permission?.name,
         roles: {
           disconnect: rolesToRemove.map((role) => ({ id: role.id })),
           connect: rolesToAdd.map((id: number) => ({ id })),
@@ -97,5 +103,77 @@ export class RolePermissionDbManager {
       },
     });
     return permissions;
+  };
+
+  searchWithCriteria = async (
+    role: string,
+    permission: string,
+    page: number,
+    pageSize: number
+  ) => {
+    let searchResult;
+    const skip = (page - 1) * pageSize;
+    const take = pageSize;
+    console.log(role, permission, page, pageSize);
+    if (role && permission) {
+      searchResult = await prisma.role.findMany({
+        where: {
+          name: role,
+          permissions: {
+            some: {
+              name: permission,
+            },
+          },
+        },
+        include: {
+          permissions: true,
+        },
+      });
+    } else if (role && !permission) {
+      searchResult = await prisma.role.findMany({
+        where: {
+          name: role,
+        },
+        include: {
+          permissions: true,
+        },
+      });
+    } else if (!role && permission) {
+      searchResult = await prisma.permission.findMany({
+        include: {
+          roles: true,
+        },
+        where: {
+          name: permission,
+        },
+      });
+    } else {
+      searchResult = await prisma.role.findMany({
+        skip,
+        take,
+        include: {
+          permissions: true,
+        },
+      });
+    }
+    return searchResult;
+  };
+
+  deletePermission = async (permissionId: number) => {
+    const currentPermission = await prisma.permission.findUnique({
+      where: { id: permissionId },
+    });
+    if (!currentPermission) {
+      throw new NotFound("permission id not found");
+    }
+
+    const deletedPermission = await prisma.permission.update({
+      where: { id: permissionId },
+      data: {
+        recordStatus: "P",
+      },
+    });
+
+    return deletedPermission;
   };
 }

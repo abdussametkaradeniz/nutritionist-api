@@ -133,4 +133,69 @@ router.get(
   }
 );
 
+router.get(
+  "/search-with-criteria",
+  async (req: Request, res: Response, next: NextFunction) => {
+    const { role, selectedPermission, page, pageSize } = req.query;
+    try {
+      const roles = role as unknown as GeneralRoleType;
+      const rolename = roles as unknown as RoleTypes;
+
+      const requestObj: RolePermissionsType = {
+        permission: {
+          name: selectedPermission ? (selectedPermission as string) : "",
+          description: "",
+        },
+        roles: [
+          {
+            roleId: 0,
+            roleName: rolename ?? "",
+          },
+        ],
+        page: parseInt(page as string) || 1,
+        pageSize: parseInt(pageSize as string) || 10,
+      };
+
+      const rolePermissionManager = new RolePermissionManager(requestObj);
+      const results = await rolePermissionManager.searchWithCriteria();
+      sendSuccess(
+        res,
+        results,
+        "All roles and permissions are listed based on criteria."
+      );
+    } catch (error: unknown) {
+      next(error);
+    }
+  }
+);
+
+router.patch(
+  "/delete-permission",
+  async (req: Request, res: Response, next: NextFunction) => {
+    const { permissionId } = req.body;
+
+    try {
+      const requestObj = {
+        permission: {
+          permissionId: permissionId,
+          name: "",
+          description: "",
+        },
+      };
+
+      const rolePermissionManager = new RolePermissionManager(
+        requestObj as RolePermissionsType
+      );
+      const result = await rolePermissionManager.deletePermission();
+      sendSuccess(res, result, "permission deleted successfully");
+    } catch (error) {
+      if (error instanceof NotFound) {
+        next(error);
+      } else {
+        next(error);
+      }
+    }
+  }
+);
+
 export default router;
