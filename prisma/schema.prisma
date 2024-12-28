@@ -160,9 +160,9 @@ enum UserRole {
 }
 
 enum SessionStatus {
+  APPROVED
   PENDING
-  COMPLETED
-  CANCELLED
+  REJECTED
 }
 
 enum AppointmentStatus {

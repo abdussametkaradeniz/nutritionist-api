@@ -1,7 +1,8 @@
-import { Permissions, UserRole } from "../domain/user";
-import { verifyToken } from "../helpers/jwt";
-import { UserFields } from "../types/user";
 import { Request, Response, NextFunction } from "express";
+import { verifyToken } from "../helpers/jwt";
+import { InvalidParameter } from "../domain/exception/invalid-parameter";
+import { UserFields } from "../types/user/UserFields";
+import { UserRole } from "../types/user/UserRole";
 
 declare global {
   namespace Express {
@@ -20,24 +21,24 @@ export async function jwt(req: Request, res: Response, next: NextFunction) {
     password: "",
     phoneNumber: "",
     recordStatus: "A",
-    role: UserRole.User,
+    role: UserRole.USER,
     roleId: 0,
     secondaryName: "",
     lastName: "",
     userName: "",
-    permissions: [
-      Permissions.edit_clients,
-      Permissions.edit_own_profile,
-      Permissions.view_own_profile,
-    ],
+    permissions: [],
   };
+
+  if (token && typeof token !== "string") {
+    return next(new InvalidParameter("Invalid token format"));
+  }
 
   try {
     let user: UserFields = defaultMember;
     if (token && token !== "0" && token !== "null" && token !== "undefined") {
       const verifiedUser = await verifyToken(token);
       if (verifiedUser !== null) {
-        user = verifiedUser as UserFields;
+        user = verifiedUser as unknown as UserFields;
       }
     }
     req.user = user;

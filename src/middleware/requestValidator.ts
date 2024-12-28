@@ -5,19 +5,32 @@ import { InvalidParameter } from "../domain/exception";
 
 export function requestValidator(
   schema: Joi.ObjectSchema<any>,
-  options?: Joi.ValidationOptions
+  options: Joi.ValidationOptions = { abortEarly: false }
 ) {
   return async (req: Request, res: Response, next: NextFunction) => {
-    debugger;
-    const { error } = schema.validate(
-      req.method === "GET" ? req.query : req.body,
-      options
-    );
-    if (error) {
-      return next(new InvalidParameter(error.details[0].message));
-    }
+    try {
+      const value = await schema.validateAsync(
+        req.method === "GET" ? req.query : req.body,
+        options
+      );
 
-    next();
+      // Replace request data with validated data
+      if (req.method === "GET") {
+        req.query = value;
+      } else {
+        req.body = value;
+      }
+
+      next();
+    } catch (error) {
+      if (error instanceof Joi.ValidationError) {
+        next(
+          new InvalidParameter(error.details.map((d) => d.message).join(", "))
+        );
+      } else {
+        next(error);
+      }
+    }
   };
 }
 
