@@ -23,9 +23,13 @@ model User {
   performances            Performance[]
   appointmentsAsUser      Appointment[] @relation("UserAppointments")
   appointmentsAsDietitian Appointment[] @relation("DietitianAppointments")
+  dietitianId             Int?          // Diyetisyenle doğrudan ilişki
   lastUpdatingUser        String?
   lastUpdateDate          DateTime?     @updatedAt
   recordStatus            String?       @default("A")
+
+  dietitian               User?         @relation("UserDietitian", fields: [dietitianId], references: [id])
+  clients                 User[]        @relation("UserDietitian")
 }
 
 model Profile {
