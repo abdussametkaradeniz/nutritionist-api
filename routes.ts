@@ -8,7 +8,8 @@ import register from "./src/routes/auth/register";
 import login from "./src/routes/auth/login";
 import permissions from "./src/routes/rolePermissions/permissions";
 import appointment from "./src/routes/appointments/appointment";
-
+import logout from "./src/routes/auth/logout";
+import userProcess from "./src/routes/users/userProcess";
 export const setRoutes = (app: express.Application) => {
   app.use(express.json()); //req.body
   app.use(express.urlencoded({ extended: true })); //key value olarak parse eder
@@ -23,4 +24,6 @@ export const setRoutes = (app: express.Application) => {
   app.use("/api/login", login);
   app.use("/api/role-permission", permissions);
   app.use("/api/appointments", appointment);
+  app.use("/api/user-process", userProcess);
+  app.use("/api/logout", logout);
 };

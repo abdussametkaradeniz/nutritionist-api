@@ -125,4 +125,15 @@ export class RolePermissionManager {
     );
     return result;
   }
+
+  async updateUserRole(userId: number, newRoleId: number): Promise<any> {
+    const updatedUserRole = await this.rolePermissionDbManager.updateUserRole(
+      userId,
+      newRoleId
+    );
+    if (!updatedUserRole) {
+      throw new BusinessException("Failed to update user role", 400);
+    }
+    return updatedUserRole;
+  }
 }

@@ -23,7 +23,7 @@ export class AppointmentManager {
         this.request?.dietitianId!,
         this.request?.date!
       );
-    if (currentSessions) {
+    if (currentSessions.length > 0) {
       throw new BusinessException("User have appointment", 400);
     }
     //toplantıyı oluştur.
@@ -45,8 +45,6 @@ export class AppointmentManager {
     }
     return updatedSession;
   }
-
-  async getAllAppointment(): Promise<any> {}
 
   async approveAppointment(appointmentId: number): Promise<any> {
     const appointment =

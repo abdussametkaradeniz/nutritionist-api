@@ -198,4 +198,28 @@ router.patch(
   }
 );
 
+router.patch(
+  "/update-user-role",
+  async (req: Request, res: Response, next: NextFunction) => {
+    const { userId, newRoleId } = req.body;
+
+    try {
+      const rolePermissionManager = new RolePermissionManager(
+        {} as RolePermissionsType
+      );
+      const result = await rolePermissionManager.updateUserRole(
+        userId,
+        newRoleId
+      );
+      sendSuccess(res, result, "User role updated successfully");
+    } catch (error) {
+      if (error instanceof BusinessException) {
+        next(error);
+      } else {
+        next(error);
+      }
+    }
+  }
+);
+
 export default router;

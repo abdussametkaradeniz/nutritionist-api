@@ -176,4 +176,16 @@ export class RolePermissionDbManager {
 
     return deletedPermission;
   };
+
+  async updateUserRole(userId: number, newRoleId: number): Promise<any> {
+    const updatedUser = await prisma.user.update({
+      where: { id: userId },
+      data: {
+        roles: {
+          set: [{ id: newRoleId }],
+        },
+      },
+    });
+    return updatedUser;
+  }
 }

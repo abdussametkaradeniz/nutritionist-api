@@ -19,7 +19,7 @@ export class AppointmentDbManager {
         dietitianId: dietitianId,
         date: appointmentDate,
         status: {
-          in: ["CANCELLED", "PENDING"],
+          in: ["PENDING"],
         },
       },
     });
@@ -141,4 +141,27 @@ export class AppointmentDbManager {
       },
     });
   };
+
+  async getAppointmentsByDietitian(dietitianId: number): Promise<any[]> {
+    return await prisma.appointment.findMany({
+      where: {
+        dietitianId: dietitianId,
+        recordStatus: "A",
+      },
+      select: {
+        user: {
+          select: {
+            id: true,
+            username: true,
+            profile: {
+              select: {
+                firstName: true,
+                lastName: true,
+              },
+            },
+          },
+        },
+      },
+    });
+  }
 }
