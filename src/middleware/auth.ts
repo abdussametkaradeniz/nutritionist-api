@@ -3,14 +3,14 @@ import { Unauthorized } from "../domain/exception/unauthorized";
 import { Request, Response } from "express";
 import { UserRole } from "../types/user/UserRole";
 
-export function auth(roles?: UserRole[], userRoles?: Permissions[]) {
-  return async (req: Request, res: Response, next: Function) => {
-    if (!req.user || req.user.id! <= 0) {
-      throw new Unauthorized("user is not found");
+export function auth(roles?: UserRole[]) {
+  return (req: Request, res: Response, next: Function) => {
+    if (!req.user || req.user.roleId <= 0) {
+      throw new Unauthorized("User is not found");
     }
 
     if (!isAuthorized(req.user.role, req.user.permissions, roles)) {
-      throw new Forbidden(`invalid user/corporate role`);
+      throw new Forbidden("Invalid user/corporate role");
     }
 
     next();
@@ -19,27 +19,16 @@ export function auth(roles?: UserRole[], userRoles?: Permissions[]) {
 
 const isAuthorized = (
   userRole: UserRole,
-  permission?: Permissions[],
-  roles?: string[],
-  permissions?: string[]
+  permissions: string[] = [],
+  roles?: UserRole[]
 ) => {
   if (userRole === UserRole.ADMIN) return true;
-  if (!roles && !permissions) return false;
+  if (!roles) return false;
 
-  const isUserRoleOk =
-    !roles ||
-    (roles && roles.length === 0) ||
-    (roles && roles.length > 0 && roles.includes(userRole));
+  const isUserRoleOk = roles.includes(userRole);
 
-  const isPermissionsOk =
-    !permissions ||
-    (permissions && permissions.length === 0) ||
-    (permissions &&
-      permissions.length > 0 &&
-      permissions.includes(permission?.toString() || ""));
+  // Eğer permissions kontrolü gerekiyorsa, burada ekleyebilirsiniz
+  // const isPermissionsOk = permissions.includes(...);
 
-  if (!isUserRoleOk || !isPermissionsOk) {
-    return false;
-  }
-  return true;
+  return isUserRoleOk; // && isPermissionsOk; // Eğer permissions kontrolü eklenirse
 };

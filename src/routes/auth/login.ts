@@ -23,8 +23,12 @@ router.post(
         sameSite: "strict",
         maxAge: 3600000,
       });
-
-      sendSuccess(res, { user: result.user }, "Login successful");
+      console.log(result);
+      sendSuccess(
+        res,
+        { user: result.user, token: result.token },
+        "Login successful"
+      );
     } catch (error: unknown) {
       if (error instanceof NotFound || error instanceof InvalidParameter) {
         next(error);
