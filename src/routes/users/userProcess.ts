@@ -2,6 +2,8 @@ import express, { NextFunction, Request, Response } from "express";
 import { UserProcessManager } from "../../bussiness/users/userProcessManager";
 import { sendSuccess } from "../../helpers/responseHandler";
 import { NotFound, BusinessException } from "../../domain/exception";
+import { auth } from "../../middleware/auth";
+import { UserRole } from "../../types/user/UserRole";
 
 const router: express.Router = express.Router();
 
@@ -26,6 +28,7 @@ router.post(
 
 router.get(
   "/dietitian/:dietitianId/clients",
+  auth([UserRole.DIETITIAN, UserRole.ADMIN]),
   async (req: Request, res: Response, next: NextFunction) => {
     const dietitianId = Number(req.params.dietitianId);
 

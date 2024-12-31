@@ -2,7 +2,7 @@ import express from "express";
 import cors from "cors";
 import { setRoutes } from "./routes";
 import dotenv from "dotenv"; // dotenv paketini dahil edin
-import errorMiddleware from "./src/middleware/error";
+import errorMiddleware from "./src/middleware/errorMiddleware";
 
 dotenv.config(); // dotenv.config() çağrısını yapın
 

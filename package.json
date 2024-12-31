@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "main": "index.ts",
   "scripts": {
-    "build": "ts-node",
+    "build": "tsc",
     "start": "nodemon --exec ts-node index.ts",
     "migrate": "npx prisma migrate dev",
     "lint": "eslint .",

@@ -4,14 +4,6 @@ import { InvalidParameter } from "../domain/exception/invalid-parameter";
 import { UserFields } from "../types/user/UserFields";
 import { UserRole } from "../types/user/UserRole";
 
-declare global {
-  namespace Express {
-    export interface Request {
-      user: UserFields;
-    }
-  }
-}
-
 export async function jwt(req: Request, res: Response, next: NextFunction) {
   const token = req.cookies["token"] || req.header("x-auth-token");
   const defaultMember: UserFields = {
@@ -41,7 +33,10 @@ export async function jwt(req: Request, res: Response, next: NextFunction) {
         user = verifiedUser as unknown as UserFields;
       }
     }
-    req.user = user;
+    req.user = {
+      roles: Array.isArray(user.role) ? user.role : [user.role],
+      permissions: user.permissions.map((permission) => permission.toString()),
+    };
     next();
   } catch (err) {
     next(err);
