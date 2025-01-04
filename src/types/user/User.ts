@@ -3,7 +3,7 @@ import { UserRole } from "./UserRole";
 export type UserType = {
   id?: number;
   email: string;
-  userName: string;
+  username: string;
   passwordHash: string;
   firstName: string;
   lastName: string;
@@ -12,7 +12,40 @@ export type UserType = {
   secondaryName?: string;
   recordStatus?: string;
   roleId?: number;
-  role?: UserRole;
+  roles?: {
+    name: string;
+  }[];
   permissions?: string[];
   applicationName?: string[];
+  dietitianId?: number | null;
+  lastUpdatingUser?: any;
+  lastUpdateDate?: Date;
+  profile?: {
+    id: number;
+    userId: number;
+    firstName: string;
+    secondName: string;
+    lastName: string;
+    age: number;
+    weight: number;
+    isProfileCompleted: boolean;
+    goals: string;
+    photoUrl: string;
+    lastUpdatingUser: any;
+    lastUpdateDate: Date;
+    recordStatus: string;
+  };
+  mealPlans?: any[];
+  appointmentsAsUser?: any[];
+  appointmentsAsDietitian?: {
+    id: number;
+    userId: number;
+    dietitianId: number;
+    date: Date;
+    status: string;
+    lastUpdatingUser: any;
+    lastUpdateDate: Date;
+    recordStatus: string;
+  }[];
+  performances?: any[];
 };

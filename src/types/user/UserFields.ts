@@ -12,5 +12,5 @@ export interface UserFields {
   secondaryName: string;
   lastName: string;
   userName: string;
-  permissions: Permissions[];
+  permissions: [];
 }

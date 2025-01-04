@@ -3,6 +3,18 @@ import { Unauthorized } from "../domain/exception/unauthorized";
 import { Request, Response } from "express";
 import { UserRole } from "../types/user/UserRole";
 
+// Define a custom interface for the user object
+declare global {
+  namespace Express {
+    interface Request {
+      user?: {
+        roles: UserRole;
+        permissions: string[];
+      };
+    }
+  }
+}
+
 export function auth(
   requiredRoles?: UserRole[],
   requiredPermissions?: string[]
@@ -30,7 +42,7 @@ export function auth(
 }
 
 const isAuthorized = (
-  userRoles: UserRole[] = [],
+  userRoles: UserRole,
   requiredRoles?: UserRole[],
   userPermissions: string[] = [],
   requiredPermissions?: string[]
