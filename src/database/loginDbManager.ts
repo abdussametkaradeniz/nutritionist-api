@@ -13,6 +13,11 @@ export class LoginDbManager {
           appointmentsAsUser: true,
           appointmentsAsDietitian: true,
           performances: true,
+          roles: {
+            select: {
+              name: true,
+            },
+          },
         },
       });
     } else if (/^\d+$/.test(identifier)) {
@@ -24,6 +29,11 @@ export class LoginDbManager {
           appointmentsAsUser: true,
           appointmentsAsDietitian: true,
           performances: true,
+          roles: {
+            select: {
+              name: true,
+            },
+          },
         },
       });
     } else {
@@ -35,6 +45,11 @@ export class LoginDbManager {
           appointmentsAsUser: true,
           appointmentsAsDietitian: true,
           performances: true,
+          roles: {
+            select: {
+              name: true,
+            },
+          },
         },
       });
     }

@@ -1,4 +1,4 @@
-import { Permissions, UserRole } from "../../domain/user";
+import { UserRole } from "./UserRole";
 
 export interface UserFields {
   age: number;
@@ -12,5 +12,5 @@ export interface UserFields {
   secondaryName: string;
   lastName: string;
   userName: string;
-  permissions: Permissions[];
+  permissions: [];
 }

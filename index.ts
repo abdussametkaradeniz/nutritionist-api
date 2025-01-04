@@ -3,7 +3,6 @@ import cors from "cors";
 import { setRoutes } from "./routes";
 import dotenv from "dotenv"; // dotenv paketini dahil edin
 import errorMiddleware from "./src/middleware/error";
-
 dotenv.config(); // dotenv.config() çağrısını yapın
 
 const port: number = 3000;

@@ -3,14 +3,38 @@ import { Unauthorized } from "../domain/exception/unauthorized";
 import { Request, Response } from "express";
 import { UserRole } from "../types/user/UserRole";
 
-export function auth(roles?: UserRole[], userRoles?: Permissions[]) {
-  return async (req: Request, res: Response, next: Function) => {
-    if (!req.user || req.user.id! <= 0) {
-      throw new Unauthorized("user is not found");
+// Define a custom interface for the user object
+declare global {
+  namespace Express {
+    interface Request {
+      user?: {
+        roles: UserRole;
+        permissions: string[];
+      };
+    }
+  }
+}
+
+export function auth(
+  requiredRoles?: UserRole[],
+  requiredPermissions?: string[]
+) {
+  return (req: Request, res: Response, next: Function) => {
+    if (!req.user || req.user.roles.length === 0) {
+      throw new Unauthorized("User is not found");
     }
 
-    if (!isAuthorized(req.user.role, req.user.permissions, roles)) {
-      throw new Forbidden(`invalid user/corporate role`);
+    if (
+      !isAuthorized(
+        req.user.roles,
+        requiredRoles,
+        req.user.permissions,
+        requiredPermissions
+      )
+    ) {
+      throw new Forbidden(
+        "Invalid user/corporate role or insufficient permissions"
+      );
     }
 
     next();
@@ -18,28 +42,26 @@ export function auth(roles?: UserRole[], userRoles?: Permissions[]) {
 }
 
 const isAuthorized = (
-  userRole: UserRole,
-  permission?: Permissions[],
-  roles?: string[],
-  permissions?: string[]
+  userRoles: UserRole,
+  requiredRoles?: UserRole[],
+  userPermissions: string[] = [],
+  requiredPermissions?: string[]
 ) => {
-  if (userRole === UserRole.ADMIN) return true;
-  if (!roles && !permissions) return false;
-
-  const isUserRoleOk =
-    !roles ||
-    (roles && roles.length === 0) ||
-    (roles && roles.length > 0 && roles.includes(userRole));
-
-  const isPermissionsOk =
-    !permissions ||
-    (permissions && permissions.length === 0) ||
-    (permissions &&
-      permissions.length > 0 &&
-      permissions.includes(permission?.toString() || ""));
-
-  if (!isUserRoleOk || !isPermissionsOk) {
+  if (
+    requiredRoles &&
+    !requiredRoles.some((role) => userRoles.includes(role))
+  ) {
     return false;
   }
+
+  if (
+    requiredPermissions &&
+    !requiredPermissions.every((permission) =>
+      userPermissions.includes(permission)
+    )
+  ) {
+    return false;
+  }
+
   return true;
 };
