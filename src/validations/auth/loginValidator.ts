@@ -1,6 +1,6 @@
-import joi from "joi";
+import { z } from "zod";
 
-export const loginSchema = joi.object({
-  identifier: joi.string().required(),
-  password: joi.string().required(),
+export const loginSchema = z.object({
+  email: z.string().email("Geçerli bir email adresi giriniz"),
+  password: z.string().min(6, "Şifre en az 6 karakter olmalıdır"),
 });

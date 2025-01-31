@@ -1,51 +1,21 @@
-import { UserRole } from "./UserRole";
+import { Role } from "@prisma/client";
 
-export type UserType = {
+export interface UserType {
   id?: number;
-  email: string;
   username: string;
+  email: string;
+  phoneNumber?: string | null;
   passwordHash: string;
-  firstName: string;
-  lastName: string;
-  phoneNumber?: string;
-  age?: number;
-  secondaryName?: string;
-  recordStatus?: string;
-  roleId?: number;
-  roles?: {
-    name: string;
-  }[];
-  permissions?: string[];
-  applicationName?: string[];
   dietitianId?: number | null;
-  lastUpdatingUser?: any;
-  lastUpdateDate?: Date;
-  profile?: {
-    id: number;
-    userId: number;
-    firstName: string;
-    secondName: string;
-    lastName: string;
-    age: number;
-    weight: number;
-    isProfileCompleted: boolean;
-    goals: string;
-    photoUrl: string;
-    lastUpdatingUser: any;
-    lastUpdateDate: Date;
-    recordStatus: string;
-  };
-  mealPlans?: any[];
-  appointmentsAsUser?: any[];
-  appointmentsAsDietitian?: {
-    id: number;
-    userId: number;
-    dietitianId: number;
-    date: Date;
-    status: string;
-    lastUpdatingUser: any;
-    lastUpdateDate: Date;
-    recordStatus: string;
-  }[];
-  performances?: any[];
-};
+  userRoles?: Role[];
+  permissions?: string[];
+  lastUpdatingUser?: string | null;
+  lastUpdateDate?: Date | null;
+  recordStatus?: string | null;
+}
+
+export interface UserInclude {
+  roles?: boolean;
+  permissions?: boolean;
+  profile?: boolean;
+}

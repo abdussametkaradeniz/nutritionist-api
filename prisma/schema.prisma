@@ -8,28 +8,82 @@ generator client {
 }
 
 model User {
-  id                      Int           @id @default(autoincrement())
-  username                String        @unique
-  email                   String        @unique
-  phoneNumber             String?       @unique
-  passwordHash            String
-  roles                   Role[]        @relation("UserRoles")
-  profile                 Profile?
-  sessionsAsUser          Session[]     @relation("UserSessions")
-  sessionsAsDietitian     Session[]     @relation("DietitianSessions")
-  messagesSent            Message[]     @relation("MessagesSent")
-  messagesReceived        Message[]     @relation("MessagesReceived")
-  mealPlans               MealPlan[]
-  performances            Performance[]
-  appointmentsAsUser      Appointment[] @relation("UserAppointments")
-  appointmentsAsDietitian Appointment[] @relation("DietitianAppointments")
-  dietitianId             Int?          // Diyetisyenle doğrudan ilişki
-  lastUpdatingUser        String?
-  lastUpdateDate          DateTime?     @updatedAt
-  recordStatus            String?       @default("A")
+  id                Int               @id @default(autoincrement())
+  email             String            @unique
+  username          String            @unique
+  passwordHash      String
+  phoneNumber       String?
+  fullName          String?
+  birthDate         DateTime?
+  gender            String?
+  height            Float?
+  weight            Float?
+  address           String?
+  avatarUrl         String?
+  emailVerified     Boolean           @default(false)
+  dietitianId       Int?
+  roles            String[]           @default([])
+  permissions      String[]           @default([])
+  
+  // İlişkiler
+  preferences       UserPreferences?
+  profile          Profile?
+  userRoles        Role[]            @relation("UserRoles")
+  refreshTokens     RefreshToken[]
+  emailVerifications EmailVerification[]
+  passwordResets    PasswordReset[]
+  
+  // Session ilişkileri
+  userSessions      Session[] @relation("UserSessions")
+  dietitianSessions Session[] @relation("DietitianSessions")
+  
+  // Message ilişkileri
+  sentMessages     Message[]         @relation("MessagesSent")
+  receivedMessages Message[]         @relation("MessagesReceived")
+  
+  // MealPlan ilişkisi
+  mealPlans        MealPlan[]
+  
+  // Performance ilişkisi
+  performances     Performance[]
+  
+  // Appointment ilişkileri
+  userAppointments     Appointment[]  @relation("UserAppointments")
+  dietitianAppointments Appointment[] @relation("DietitianAppointments")
+  
+  // Audit fields
+  createdAt         DateTime          @default(now())
+  lastUpdateDate    DateTime          @updatedAt
+  lastUpdatingUser  String?
+  recordStatus      String?           @default("A")
 
-  dietitian               User?         @relation("UserDietitian", fields: [dietitianId], references: [id])
-  clients                 User[]        @relation("UserDietitian")
+  // User modelinde ilişkiyi ekleyelim
+  activities       ActivityLog[]
+  notifications    Notification[]
+
+  // Diyetisyen profil ilişkisi
+  dietitianProfile DietitianProfile?
+
+  @@index([email])
+  @@index([username])
+}
+
+model UserPreferences {
+  id                Int      @id @default(autoincrement())
+  userId            Int      @unique
+  language          String   @default("tr")
+  timezone          String   @default("Europe/Istanbul")
+  theme             String   @default("SYSTEM")
+  emailNotifications Boolean @default(true)
+  pushNotifications Boolean @default(true)
+  smsNotifications  Boolean @default(false)
+  user              User     @relation(fields: [userId], references: [id])
+  createdAt         DateTime @default(now())
+  lastUpdateDate    DateTime @updatedAt
+  lastUpdatingUser  String?
+  recordStatus      String   @default("A")
+
+  @@index([userId])
 }
 
 model Profile {
@@ -81,16 +135,25 @@ model RolePermissions {
 }
 
 model Session {
-  id               Int           @id @default(autoincrement())
-  userId           Int
-  dietitianId      Int
-  date             DateTime
-  status           SessionStatus @default(PENDING)
-  user             User          @relation(name: "UserSessions", fields: [userId], references: [id])
-  dietitian        User          @relation(name: "DietitianSessions", fields: [dietitianId], references: [id])
-  lastUpdatingUser String?
-  lastUpdateDate   DateTime?     @updatedAt
-  recordStatus     String        @default("A")
+  id            String   @id @default(uuid())
+  userId        Int
+  deviceId      String?
+  deviceType    String?
+  ipAddress     String?
+  userAgent     String?
+  lastActivity  DateTime @default(now())
+  isActive      Boolean  @default(true)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  
+  // User ilişkileri
+  user          User     @relation("UserSessions", fields: [userId], references: [id])
+  dietitian     User?    @relation("DietitianSessions", fields: [dietitianId], references: [id])
+  dietitianId   Int?
+
+  @@index([userId])
+  @@index([deviceId])
+  @@index([dietitianId])
 }
 
 model Message {
@@ -155,6 +218,91 @@ model Appointment {
   recordStatus     String            @default("A")
 }
 
+model RefreshToken {
+  id        Int      @id @default(autoincrement())
+  token     String   @unique
+  user      User     @relation(fields: [userId], references: [id])
+  userId    Int
+  expiresAt DateTime
+  isRevoked Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  // Audit fields
+  lastUpdatingUser String?
+  lastUpdateDate   DateTime?
+  recordStatus    String?   @default("A")
+
+  @@index([userId])
+  @@index([token])
+}
+
+model PasswordReset {
+  id        Int      @id @default(autoincrement())
+  userId    Int
+  token     String   @unique
+  expiresAt DateTime
+  used      Boolean  @default(false)
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id])
+
+  @@index([token])
+}
+
+model EmailVerification {
+  id               Int      @id @default(autoincrement())
+  userId           Int
+  token            String   @unique
+  isUsed           Boolean  @default(false)
+  expiresAt        DateTime
+  createdAt        DateTime @default(now())
+  lastUpdateDate   DateTime @updatedAt
+  lastUpdatingUser String
+  recordStatus     String   @default("A")
+  user             User     @relation(fields: [userId], references: [id])
+
+  @@index([token])
+  @@index([userId])
+}
+
+model ActivityLog {
+  id               Int      @id @default(autoincrement())
+  userId           Int
+  action           String
+  details          Json?
+  ipAddress        String?
+  userAgent        String?
+  createdAt        DateTime @default(now())
+  lastUpdateDate   DateTime @updatedAt
+  lastUpdatingUser String?
+  recordStatus     String   @default("A")
+  user             User     @relation(fields: [userId], references: [id])
+
+  @@index([userId])
+  @@index([action])
+  @@index([createdAt])
+}
+
+model Notification {
+  id               Int      @id @default(autoincrement())
+  userId           Int
+  title            String
+  message          String
+  type             String   // SYSTEM, APPOINTMENT, MESSAGE, etc.
+  isRead           Boolean  @default(false)
+  data             Json?    // Additional data specific to notification type
+  readAt           DateTime?
+  createdAt        DateTime @default(now())
+  lastUpdateDate   DateTime @updatedAt
+  lastUpdatingUser String?
+  recordStatus     String   @default("A")
+  user             User     @relation(fields: [userId], references: [id])
+
+  @@index([userId])
+  @@index([type])
+  @@index([createdAt])
+  @@index([isRead])
+}
+
 enum UserRole {
   USER
   DIETITIAN
@@ -179,4 +327,91 @@ enum Goal {
   GAINMUSCLES
   GAINWEIGHT
   WEIGHTLOSS
+}
+
+// Diyetisyen Profili
+model DietitianProfile {
+  id          Int      @id @default(autoincrement())
+  userId      Int      @unique
+  bio         String?  @db.Text
+  education   String?  @db.Text
+  experience  Int?     // Yıl cinsinden deneyim
+  about       String?  @db.Text
+  rating      Float?   @default(0)
+  reviewCount Int      @default(0)
+  isVerified  Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // İlişkiler
+  user        User     @relation(fields: [userId], references: [id])
+  specialties DietitianSpecialty[]
+  schedules   WorkingHours[]
+  pricing     PricingPackage[]
+
+  @@index([userId])
+}
+
+// Uzmanlık Alanları
+model Specialty {
+  id          Int      @id @default(autoincrement())
+  name        String   @unique
+  description String?  @db.Text
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // İlişkiler
+  dietitians  DietitianSpecialty[]
+}
+
+// Diyetisyen-Uzmanlık İlişkisi
+model DietitianSpecialty {
+  id           Int      @id @default(autoincrement())
+  dietitianId  Int
+  specialtyId  Int
+  createdAt    DateTime @default(now())
+
+  // İlişkiler
+  dietitian    DietitianProfile @relation(fields: [dietitianId], references: [id])
+  specialty    Specialty        @relation(fields: [specialtyId], references: [id])
+
+  @@unique([dietitianId, specialtyId])
+  @@index([dietitianId])
+  @@index([specialtyId])
+}
+
+// Çalışma Saatleri
+model WorkingHours {
+  id           Int      @id @default(autoincrement())
+  dietitianId  Int
+  dayOfWeek    Int      // 1-7 (Pazartesi-Pazar)
+  startTime    String   // HH:mm formatında
+  endTime      String   // HH:mm formatında
+  isAvailable  Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  // İlişkiler
+  dietitian    DietitianProfile @relation(fields: [dietitianId], references: [id])
+
+  @@index([dietitianId])
+  @@index([dayOfWeek])
+}
+
+// Fiyatlandırma Paketleri
+model PricingPackage {
+  id           Int      @id @default(autoincrement())
+  dietitianId  Int
+  name         String
+  description  String?  @db.Text
+  duration     Int      // Dakika cinsinden süre
+  price        Decimal  @db.Decimal(10, 2)
+  isActive     Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  // İlişkiler
+  dietitian    DietitianProfile @relation(fields: [dietitianId], references: [id])
+
+  @@index([dietitianId])
 }

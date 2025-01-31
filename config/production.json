@@ -1,4 +1,4 @@
 {
   "name": "My app -Production",
-  "jwtPrivateKey": "my_secret_jwt"
+  "jwtPrivateKey": "production_secret_jwt"
 }

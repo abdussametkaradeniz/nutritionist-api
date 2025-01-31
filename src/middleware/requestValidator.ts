@@ -1,38 +1,22 @@
-import Joi from "joi";
 import { Request, Response, NextFunction } from "express";
+import { AnyZodObject, ZodError } from "zod";
 
 import { InvalidParameter } from "../domain/exception";
 
-export function requestValidator(
-  schema: Joi.ObjectSchema<any>,
-  options: Joi.ValidationOptions = { abortEarly: false }
-) {
+export const requestValidator = (schema: AnyZodObject) => {
   return async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const value = await schema.validateAsync(
-        req.method === "GET" ? req.query : req.body,
-        options
-      );
-
-      // Replace request data with validated data
-      if (req.method === "GET") {
-        req.query = value;
-      } else {
-        req.body = value;
-      }
-
+      await schema.parseAsync(req.body);
       next();
     } catch (error) {
-      if (error instanceof Joi.ValidationError) {
-        next(
-          new InvalidParameter(error.details.map((d) => d.message).join(", "))
-        );
+      if (error instanceof ZodError) {
+        res.status(400).json({ errors: error.errors });
       } else {
         next(error);
       }
     }
   };
-}
+};
 
 // export function requestValidator(
 //   schema: Joi.ObjectSchema<any>,
