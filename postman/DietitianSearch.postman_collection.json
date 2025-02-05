@@ -1,0 +1,72 @@
+{
+  "info": {
+    "name": "Dietitian Search API",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Search Dietitians",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/api/dietitian/search?specialization=WEIGHT_MANAGEMENT&minPrice=100&maxPrice=1000&availableDay=MONDAY&page=1&limit=10",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "dietitian", "search"],
+          "query": [
+            {
+              "key": "specialization",
+              "value": "WEIGHT_MANAGEMENT",
+              "description": "Uzmanlık alanı filtresi"
+            },
+            {
+              "key": "minPrice",
+              "value": "100",
+              "description": "Minimum fiyat"
+            },
+            {
+              "key": "maxPrice",
+              "value": "1000",
+              "description": "Maximum fiyat"
+            },
+            {
+              "key": "availableDay",
+              "value": "MONDAY",
+              "description": "Müsait gün"
+            },
+            {
+              "key": "page",
+              "value": "1",
+              "description": "Sayfa numarası"
+            },
+            {
+              "key": "limit",
+              "value": "10",
+              "description": "Sayfa başına sonuç"
+            }
+          ]
+        },
+        "description": "Diyetisyenleri filtrelere göre ara"
+      }
+    },
+    {
+      "name": "Get Dietitians by Specialization",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/api/dietitian/by-specialization/WEIGHT_MANAGEMENT",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "dietitian", "by-specialization", "WEIGHT_MANAGEMENT"]
+        },
+        "description": "Belirli bir uzmanlık alanındaki diyetisyenleri listele"
+      }
+    }
+  ],
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:3000"
+    }
+  ]
+}

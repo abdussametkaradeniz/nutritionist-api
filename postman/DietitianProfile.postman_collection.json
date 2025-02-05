@@ -1,0 +1,201 @@
+{
+  "info": {
+    "name": "Dietitian Profile API",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Profile Management",
+      "item": [
+        {
+          "name": "Create Profile",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}",
+                "type": "text"
+              }
+            ],
+            "url": "{{baseUrl}}/api/dietitian/profile",
+            "body": {
+              "mode": "raw",
+              "raw": {
+                "bio": "Experienced dietitian specializing in sports nutrition and weight management",
+                "education": [
+                  "BSc in Nutrition, XYZ University",
+                  "MSc in Sports Nutrition, ABC University"
+                ],
+                "experience": 5,
+                "specializations": ["SPORTS_NUTRITION", "WEIGHT_MANAGEMENT"],
+                "certificates": [
+                  "https://example.com/cert1",
+                  "https://example.com/cert2"
+                ]
+              }
+            }
+          }
+        },
+        {
+          "name": "Update Profile",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}",
+                "type": "text"
+              }
+            ],
+            "url": "{{baseUrl}}/api/dietitian/profile",
+            "body": {
+              "mode": "raw",
+              "raw": {
+                "bio": "Updated bio with new specializations",
+                "education": ["Updated education details"],
+                "experience": 6,
+                "specializations": ["SPORTS_NUTRITION", "CLINICAL_NUTRITION"],
+                "certificates": ["https://example.com/new-cert"]
+              }
+            }
+          }
+        },
+        {
+          "name": "Get Profile",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}",
+                "type": "text"
+              }
+            ],
+            "url": "{{baseUrl}}/api/dietitian/profile"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Working Hours",
+      "item": [
+        {
+          "name": "Update Working Hours",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}",
+                "type": "text"
+              }
+            ],
+            "url": "{{baseUrl}}/api/dietitian/profile/working-hours",
+            "body": {
+              "mode": "raw",
+              "raw": [
+                {
+                  "day": "MONDAY",
+                  "startTime": "09:00",
+                  "endTime": "17:00",
+                  "isAvailable": true
+                },
+                {
+                  "day": "TUESDAY",
+                  "startTime": "09:00",
+                  "endTime": "17:00",
+                  "isAvailable": true
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Pricing Packages",
+      "item": [
+        {
+          "name": "Create Package",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}",
+                "type": "text"
+              }
+            ],
+            "url": "{{baseUrl}}/api/dietitian/profile/packages",
+            "body": {
+              "mode": "raw",
+              "raw": {
+                "name": "Basic Package",
+                "description": "3-month nutrition program",
+                "duration": 90,
+                "sessionCount": 12,
+                "price": 1500,
+                "features": [
+                  "Weekly consultations",
+                  "Personalized meal plans",
+                  "24/7 chat support"
+                ]
+              }
+            }
+          }
+        },
+        {
+          "name": "Update Package",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}",
+                "type": "text"
+              }
+            ],
+            "url": "{{baseUrl}}/api/dietitian/profile/packages/{{packageId}}",
+            "body": {
+              "mode": "raw",
+              "raw": {
+                "name": "Updated Package",
+                "description": "Updated description",
+                "price": 1600
+              }
+            }
+          }
+        },
+        {
+          "name": "Delete Package",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}",
+                "type": "text"
+              }
+            ],
+            "url": "{{baseUrl}}/api/dietitian/profile/packages/{{packageId}}"
+          }
+        },
+        {
+          "name": "Get All Packages",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}",
+                "type": "text"
+              }
+            ],
+            "url": "{{baseUrl}}/api/dietitian/profile/packages"
+          }
+        }
+      ]
+    }
+  ]
+}

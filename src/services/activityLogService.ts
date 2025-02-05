@@ -1,9 +1,10 @@
-import { ActivityLogDbManager } from "../database/user/activityLogDbManager";
+import {
+  ActivityLogRepository,
+  ActivityFilters,
+} from "../repositories/activityLogRepository";
 import { BusinessException } from "../domain/exception";
 
 export class ActivityLogService {
-  private static activityLogDb = new ActivityLogDbManager();
-
   static async logActivity(data: {
     userId: number;
     action: string;
@@ -11,39 +12,36 @@ export class ActivityLogService {
     ipAddress?: string;
     userAgent?: string;
   }) {
-    return await this.activityLogDb.logActivity(data);
-  }
-
-  static async getUserActivities(
-    userId: number,
-    page?: number,
-    limit?: number
-  ) {
-    return await this.activityLogDb.getUserActivities(userId, page, limit);
+    return await ActivityLogRepository.create(data);
   }
 
   static async getActivityById(id: number, userId: number) {
-    return await this.activityLogDb.getActivityById(id, userId);
+    return await ActivityLogRepository.findById(id, userId);
   }
 
-  static async filterActivities(
-    userId: number,
-    filters: {
-      action?: string;
-      startDate?: string;
-      endDate?: string;
-      page?: number;
-      limit?: number;
-    }
-  ) {
-    // Tarih dönüşümlerini yap
-    const parsedFilters = {
-      ...filters,
-      startDate: filters.startDate ? new Date(filters.startDate) : undefined,
-      endDate: filters.endDate ? new Date(filters.endDate) : undefined,
-    };
+  static async getUserActivities(userId: number, page = 1, limit = 10) {
+    return await ActivityLogRepository.findByUserId(userId, page, limit);
+  }
 
-    // Tarih validasyonu
+  static async filterActivities(userId: number, filters: ActivityFilters) {
+    const parsedFilters: ActivityFilters = { ...filters };
+
+    if (filters.startDate) {
+      const startDate = new Date(filters.startDate);
+      if (isNaN(startDate.getTime())) {
+        throw new BusinessException("Geçersiz başlangıç tarihi formatı", 400);
+      }
+      parsedFilters.startDate = startDate;
+    }
+
+    if (filters.endDate) {
+      const endDate = new Date(filters.endDate);
+      if (isNaN(endDate.getTime())) {
+        throw new BusinessException("Geçersiz bitiş tarihi formatı", 400);
+      }
+      parsedFilters.endDate = endDate;
+    }
+
     if (
       parsedFilters.startDate &&
       parsedFilters.endDate &&
@@ -55,7 +53,7 @@ export class ActivityLogService {
       );
     }
 
-    return await this.activityLogDb.filterActivities(userId, parsedFilters);
+    return await ActivityLogRepository.findWithFilters(userId, parsedFilters);
   }
 
   // Yardımcı metodlar

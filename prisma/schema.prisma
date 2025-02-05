@@ -8,80 +8,104 @@ generator client {
 }
 
 model User {
-  id                Int               @id @default(autoincrement())
-  email             String            @unique
-  username          String            @unique
-  passwordHash      String
-  phoneNumber       String?
-  fullName          String?
-  birthDate         DateTime?
-  gender            String?
-  height            Float?
-  weight            Float?
-  address           String?
-  avatarUrl         String?
-  emailVerified     Boolean           @default(false)
-  dietitianId       Int?
-  roles            String[]           @default([])
-  permissions      String[]           @default([])
-  
+  id               Int       @id @default(autoincrement())
+  email            String    @unique
+  username         String    @unique
+  passwordHash     String
+  phoneNumber      String?
+  fullName         String?
+  birthDate        DateTime?
+  gender           String?
+  height           Float?
+  weight           Float?
+  address          String?
+  avatarUrl        String?
+  emailVerified    Boolean   @default(false)
+  dietitianId      Int?
+  roles            String[]  @default([])
+  permissions      String[]  @default([])
+  twoFactorSecret  String?
+  twoFactorEnabled Boolean   @default(false)
+  backupCodes      String[]  @default([])
+
   // İlişkiler
-  preferences       UserPreferences?
-  profile          Profile?
-  userRoles        Role[]            @relation("UserRoles")
-  refreshTokens     RefreshToken[]
+  preferences        UserPreferences?
+  profile            Profile?
+  userRoles          Role[]              @relation("UserRoles")
+  refreshTokens      RefreshToken[]
   emailVerifications EmailVerification[]
-  passwordResets    PasswordReset[]
-  
+  passwordResets     PasswordReset[]
+
   // Session ilişkileri
   userSessions      Session[] @relation("UserSessions")
   dietitianSessions Session[] @relation("DietitianSessions")
-  
+
   // Message ilişkileri
-  sentMessages     Message[]         @relation("MessagesSent")
-  receivedMessages Message[]         @relation("MessagesReceived")
-  
-  // MealPlan ilişkisi
-  mealPlans        MealPlan[]
-  
+  sentMessages     Message[] @relation("MessagesSent")
+  receivedMessages Message[] @relation("MessagesReceived")
+
+  // MealPlan ilişkileri
+  mealPlans          MealPlan[]
+  dietitianMealPlans MealPlan[] @relation("DietitianMealPlans")
+
   // Performance ilişkisi
-  performances     Performance[]
-  
+  performances Performance[]
+
   // Appointment ilişkileri
-  userAppointments     Appointment[]  @relation("UserAppointments")
+  userAppointments      Appointment[] @relation("UserAppointments")
   dietitianAppointments Appointment[] @relation("DietitianAppointments")
-  
+
   // Audit fields
-  createdAt         DateTime          @default(now())
-  lastUpdateDate    DateTime          @updatedAt
-  lastUpdatingUser  String?
-  recordStatus      String?           @default("A")
+  createdAt        DateTime @default(now())
+  lastUpdateDate   DateTime @updatedAt
+  lastUpdatingUser String?
+  recordStatus     String?  @default("A")
 
   // User modelinde ilişkiyi ekleyelim
-  activities       ActivityLog[]
-  notifications    Notification[]
+  activities    ActivityLog[]
+  notifications Notification[]
 
   // Diyetisyen profil ilişkisi
   dietitianProfile DietitianProfile?
+
+  // Chat ilişkileri
+  chatParticipations ChatParticipant[]
+  chatMessages       ChatMessage[]
+  messageReads       MessageRead[]
+
+  // E2E şifreleme anahtarları
+  publicKey  String? @db.Text
+  privateKey String? @db.Text
+
+  // İlerleme takibi ilişkisi
+  progress Progress[]
+
+  // Hedef belirleme
+  goals             Goal[]
+  dietitianGoals    Goal[]    @relation("DietitianGoals")
+
+  // Sağlık uygulaması bağlantıları
+  healthConnections HealthAppConnection[]
+  healthData       HealthData[]
 
   @@index([email])
   @@index([username])
 }
 
 model UserPreferences {
-  id                Int      @id @default(autoincrement())
-  userId            Int      @unique
-  language          String   @default("tr")
-  timezone          String   @default("Europe/Istanbul")
-  theme             String   @default("SYSTEM")
-  emailNotifications Boolean @default(true)
-  pushNotifications Boolean @default(true)
-  smsNotifications  Boolean @default(false)
-  user              User     @relation(fields: [userId], references: [id])
-  createdAt         DateTime @default(now())
-  lastUpdateDate    DateTime @updatedAt
-  lastUpdatingUser  String?
-  recordStatus      String   @default("A")
+  id                 Int      @id @default(autoincrement())
+  userId             Int      @unique
+  language           String   @default("tr")
+  timezone           String   @default("Europe/Istanbul")
+  theme              String   @default("SYSTEM")
+  emailNotifications Boolean  @default(true)
+  pushNotifications  Boolean  @default(true)
+  smsNotifications   Boolean  @default(false)
+  user               User     @relation(fields: [userId], references: [id])
+  createdAt          DateTime @default(now())
+  lastUpdateDate     DateTime @updatedAt
+  lastUpdatingUser   String?
+  recordStatus       String   @default("A")
 
   @@index([userId])
 }
@@ -96,7 +120,6 @@ model Profile {
   age                Int?
   weight             Float?
   isProfileCompleted Boolean  @default(false)
-  goals              Goal
   photoUrl           String?
   lastUpdatingUser   String?
   lastUpdateDate     DateTime @updatedAt
@@ -135,21 +158,21 @@ model RolePermissions {
 }
 
 model Session {
-  id            String   @id @default(uuid())
-  userId        Int
-  deviceId      String?
-  deviceType    String?
-  ipAddress     String?
-  userAgent     String?
-  lastActivity  DateTime @default(now())
-  isActive      Boolean  @default(true)
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
-  
+  id           String   @id @default(uuid())
+  userId       Int
+  deviceId     String?
+  deviceType   String?
+  ipAddress    String?
+  userAgent    String?
+  lastActivity DateTime @default(now())
+  isActive     Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
   // User ilişkileri
-  user          User     @relation("UserSessions", fields: [userId], references: [id])
-  dietitian     User?    @relation("DietitianSessions", fields: [dietitianId], references: [id])
-  dietitianId   Int?
+  user        User  @relation("UserSessions", fields: [userId], references: [id])
+  dietitian   User? @relation("DietitianSessions", fields: [dietitianId], references: [id])
+  dietitianId Int?
 
   @@index([userId])
   @@index([deviceId])
@@ -169,29 +192,6 @@ model Message {
   recordStatus     String    @default("A")
 }
 
-model MealPlan {
-  id               Int       @id @default(autoincrement())
-  userId           Int
-  description      String
-  createdAt        DateTime  @default(now())
-  meals            Meal[]
-  user             User      @relation(fields: [userId], references: [id])
-  lastUpdatingUser String?
-  lastUpdateDate   DateTime? @updatedAt
-  recordStatus     String    @default("A")
-}
-
-model Meal {
-  id               Int       @id @default(autoincrement())
-  mealPlanId       Int
-  name             String
-  time             DateTime
-  mealPlan         MealPlan  @relation(fields: [mealPlanId], references: [id])
-  lastUpdatingUser String?
-  lastUpdateDate   DateTime? @updatedAt
-  recordStatus     String    @default("A")
-}
-
 model Performance {
   id               Int       @id @default(autoincrement())
   userId           Int
@@ -206,16 +206,28 @@ model Performance {
 }
 
 model Appointment {
-  id               Int               @id @default(autoincrement())
-  userId           Int
-  dietitianId      Int?
-  date             DateTime
-  status           AppointmentStatus @default(PENDING)
-  user             User              @relation(name: "UserAppointments", fields: [userId], references: [id])
-  dietitian        User?             @relation(name: "DietitianAppointments", fields: [dietitianId], references: [id])
-  lastUpdatingUser String?
-  lastUpdateDate   DateTime?         @updatedAt
-  recordStatus     String            @default("A")
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  startTime DateTime
+  endTime   DateTime
+  status    AppointmentStatus @default(PENDING)
+  type      AppointmentType
+  notes     String?           @db.Text
+
+  dietitian   User @relation("DietitianAppointments", fields: [dietitianId], references: [id])
+  dietitianId Int
+
+  client   User @relation("UserAppointments", fields: [clientId], references: [id])
+  clientId Int
+
+  cancelledBy  String? // User ID of who cancelled
+  cancelReason String? @db.Text
+
+  @@index([dietitianId])
+  @@index([clientId])
+  @@index([status])
 }
 
 model RefreshToken {
@@ -230,7 +242,7 @@ model RefreshToken {
   // Audit fields
   lastUpdatingUser String?
   lastUpdateDate   DateTime?
-  recordStatus    String?   @default("A")
+  recordStatus     String?   @default("A")
 
   @@index([userId])
   @@index([token])
@@ -283,19 +295,19 @@ model ActivityLog {
 }
 
 model Notification {
-  id               Int      @id @default(autoincrement())
+  id               Int       @id @default(autoincrement())
   userId           Int
   title            String
   message          String
-  type             String   // SYSTEM, APPOINTMENT, MESSAGE, etc.
-  isRead           Boolean  @default(false)
-  data             Json?    // Additional data specific to notification type
+  type             String // SYSTEM, APPOINTMENT, MESSAGE, etc.
+  isRead           Boolean   @default(false)
+  data             Json? // Additional data specific to notification type
   readAt           DateTime?
-  createdAt        DateTime @default(now())
-  lastUpdateDate   DateTime @updatedAt
+  createdAt        DateTime  @default(now())
+  lastUpdateDate   DateTime  @updatedAt
   lastUpdatingUser String?
-  recordStatus     String   @default("A")
-  user             User     @relation(fields: [userId], references: [id])
+  recordStatus     String    @default("A")
+  user             User      @relation(fields: [userId], references: [id])
 
   @@index([userId])
   @@index([type])
@@ -321,97 +333,378 @@ enum AppointmentStatus {
   PENDING
   CONFIRMED
   CANCELLED
+  COMPLETED
+  NO_SHOW
 }
 
-enum Goal {
-  GAINMUSCLES
-  GAINWEIGHT
-  WEIGHTLOSS
+enum AppointmentType {
+  INITIAL_CONSULTATION
+  FOLLOW_UP
+  DIET_PLANNING
+  MEASUREMENT
+  GENERAL_CONSULTATION
+}
+
+enum GoalStatus {
+  ACTIVE
+  COMPLETED
+  CANCELLED
+}
+
+// Uzmanlık Alanları için enum
+enum Specialization {
+  WEIGHT_MANAGEMENT
+  SPORTS_NUTRITION
+  DIABETES
+  EATING_DISORDERS
+  PEDIATRIC_NUTRITION
+  PREGNANCY_NUTRITION
+  CLINICAL_NUTRITION
+  VEGAN_VEGETARIAN
+  FOOD_ALLERGIES
+}
+
+// Çalışma günleri için enum
+enum WeekDay {
+  MONDAY
+  TUESDAY
+  WEDNESDAY
+  THURSDAY
+  FRIDAY
+  SATURDAY
+  SUNDAY
 }
 
 // Diyetisyen Profili
 model DietitianProfile {
-  id          Int      @id @default(autoincrement())
-  userId      Int      @unique
-  bio         String?  @db.Text
-  education   String?  @db.Text
-  experience  Int?     // Yıl cinsinden deneyim
-  about       String?  @db.Text
-  rating      Float?   @default(0)
-  reviewCount Int      @default(0)
-  isVerified  Boolean  @default(false)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  id              String           @id @default(uuid())
+  userId          Int              @unique
+  user            User             @relation(fields: [userId], references: [id])
+  bio             String?
+  education       String[]
+  experience      Int // Deneyim yılı
+  specializations Specialization[]
+  certificates    String[] // Sertifika URL'leri
+  rating          Float            @default(0)
+  reviewCount     Int              @default(0)
 
-  // İlişkiler
-  user        User     @relation(fields: [userId], references: [id])
-  specialties DietitianSpecialty[]
-  schedules   WorkingHours[]
-  pricing     PricingPackage[]
+  // Çalışma Saatleri
+  workingHours WorkingHours[]
 
+  // Fiyatlandırma Paketleri
+  pricingPackages PricingPackage[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model WorkingHours {
+  id          String           @id @default(uuid())
+  dietitianId String
+  dietitian   DietitianProfile @relation(fields: [dietitianId], references: [id])
+  day         WeekDay
+  startTime   String // Format: "HH:mm"
+  endTime     String // Format: "HH:mm"
+  isAvailable Boolean          @default(true)
+
+  @@unique([dietitianId, day])
+}
+
+model PricingPackage {
+  id           String           @id @default(uuid())
+  dietitianId  String
+  dietitian    DietitianProfile @relation(fields: [dietitianId], references: [id])
+  name         String
+  description  String
+  duration     Int // Paket süresi (gün)
+  sessionCount Int // Görüşme sayısı
+  price        Float
+  isActive     Boolean          @default(true)
+  features     String[] // Paket özellikleri
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Chat {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  messages     ChatMessage[]
+  participants ChatParticipant[]
+
+  lastMessageAt DateTime @default(now())
+  isActive      Boolean  @default(true)
+}
+
+model ChatParticipant {
+  id       String    @id @default(cuid())
+  chatId   String
+  userId   Int // String -> Int
+  joinedAt DateTime  @default(now())
+  leftAt   DateTime?
+
+  chat Chat @relation(fields: [chatId], references: [id])
+  user User @relation(fields: [userId], references: [id])
+
+  @@unique([chatId, userId])
   @@index([userId])
 }
 
-// Uzmanlık Alanları
-model Specialty {
+model ChatMessage {
+  id       String      @id @default(cuid())
+  chatId   String
+  senderId Int // String -> Int
+  content  String      @db.Text
+  type     MessageType @default(TEXT)
+  mediaUrl String?
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  chat   Chat @relation(fields: [chatId], references: [id])
+  sender User @relation(fields: [senderId], references: [id])
+
+  readBy MessageRead[]
+
+  // E2E şifreleme alanları
+  isEncrypted        Boolean @default(false)
+  encryptedContent   String? @db.Text
+  nonce              String? @db.Text
+  ephemeralPublicKey String? @db.Text
+
+  @@index([chatId])
+  @@index([senderId])
+}
+
+model MessageRead {
+  id        String   @id @default(cuid())
+  messageId String
+  userId    Int
+  readAt    DateTime @default(now())
+
+  message ChatMessage @relation(fields: [messageId], references: [id])
+  user    User        @relation(fields: [userId], references: [id])
+
+  @@unique([messageId, userId])
+  @@index([userId])
+}
+
+enum MessageType {
+  TEXT
+  IMAGE
+  FILE
+  AUDIO
+}
+
+// Besin kategorileri
+model FoodCategory {
   id          Int      @id @default(autoincrement())
-  name        String   @unique
-  description String?  @db.Text
+  name        String
+  description String?
+  foods       Food[]
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
-
-  // İlişkiler
-  dietitians  DietitianSpecialty[]
 }
 
-// Diyetisyen-Uzmanlık İlişkisi
-model DietitianSpecialty {
-  id           Int      @id @default(autoincrement())
-  dietitianId  Int
-  specialtyId  Int
-  createdAt    DateTime @default(now())
+// Besinler
+model Food {
+  id         Int          @id @default(autoincrement())
+  name       String
+  categoryId Int
+  category   FoodCategory @relation(fields: [categoryId], references: [id])
 
-  // İlişkiler
-  dietitian    DietitianProfile @relation(fields: [dietitianId], references: [id])
-  specialty    Specialty        @relation(fields: [specialtyId], references: [id])
+  // Besin değerleri (100g için)
+  calories Float
+  protein  Float
+  carbs    Float
+  fat      Float
+  fiber    Float
 
-  @@unique([dietitianId, specialtyId])
-  @@index([dietitianId])
-  @@index([specialtyId])
+  // Ek besin değerleri
+  sugar       Float?
+  sodium      Float?
+  cholesterol Float?
+
+  // Porsiyon bilgisi
+  servingSize Float // gram
+  servingUnit String // g, ml, adet vb.
+
+  // Kullanım
+  mealFoods MealFood[]
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+
+  @@index([categoryId])
+  @@index([name])
 }
 
-// Çalışma Saatleri
-model WorkingHours {
-  id           Int      @id @default(autoincrement())
-  dietitianId  Int
-  dayOfWeek    Int      // 1-7 (Pazartesi-Pazar)
-  startTime    String   // HH:mm formatında
-  endTime      String   // HH:mm formatında
-  isAvailable  Boolean  @default(true)
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+// Öğün planları
+model MealPlan {
+  id          Int   @id @default(autoincrement())
+  userId      Int
+  user        User  @relation(fields: [userId], references: [id])
+  dietitianId Int?
+  dietitian   User? @relation("DietitianMealPlans", fields: [dietitianId], references: [id])
 
-  // İlişkiler
-  dietitian    DietitianProfile @relation(fields: [dietitianId], references: [id])
+  startDate DateTime
+  endDate   DateTime?
+  isActive  Boolean   @default(true)
 
+  meals     Meal[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId])
   @@index([dietitianId])
-  @@index([dayOfWeek])
 }
 
-// Fiyatlandırma Paketleri
-model PricingPackage {
-  id           Int      @id @default(autoincrement())
-  dietitianId  Int
-  name         String
-  description  String?  @db.Text
-  duration     Int      // Dakika cinsinden süre
-  price        Decimal  @db.Decimal(10, 2)
-  isActive     Boolean  @default(true)
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+// Öğünler
+model Meal {
+  id         Int      @id @default(autoincrement())
+  mealPlanId Int
+  mealPlan   MealPlan @relation(fields: [mealPlanId], references: [id])
 
-  // İlişkiler
-  dietitian    DietitianProfile @relation(fields: [dietitianId], references: [id])
+  name  String // Kahvaltı, Öğle, Akşam vb.
+  time  DateTime
+  notes String?
 
+  foods     MealFood[]
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+
+  @@index([mealPlanId])
+}
+
+// Öğün-Besin ilişkisi
+model MealFood {
+  id     Int  @id @default(autoincrement())
+  mealId Int
+  meal   Meal @relation(fields: [mealId], references: [id])
+  foodId Int
+  food   Food @relation(fields: [foodId], references: [id])
+
+  amount Float // Porsiyon miktarı
+  unit   String // Porsiyon birimi
+  notes  String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([mealId])
+  @@index([foodId])
+}
+
+// İlerleme takibi
+model Progress {
+  id      Int      @id @default(autoincrement())
+  userId  Int
+  user    User     @relation(fields: [userId], references: [id])
+  date    DateTime
+  weight  Float? // kg
+  bodyFat Float? // %
+  muscle  Float? // kg
+  water   Float? // %
+
+  // Vücut ölçüleri (cm)
+  chest Float?
+  waist Float?
+  hip   Float?
+  arm   Float?
+  thigh Float?
+
+  // Fotoğraflar
+  photos ProgressPhoto[]
+
+  notes     String?  @db.Text
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId])
+  @@index([date])
+}
+
+// İlerleme fotoğrafları
+model ProgressPhoto {
+  id         Int      @id @default(autoincrement())
+  progressId Int
+  progress   Progress @relation(fields: [progressId], references: [id])
+  url        String
+  type       String // front, side, back vb.
+  createdAt  DateTime @default(now())
+
+  @@index([progressId])
+}
+
+// Hedef belirleme
+model Goal {
+  id          Int       @id @default(autoincrement())
+  userId      Int
+  user        User      @relation(fields: [userId], references: [id])
+  dietitianId Int?
+  dietitian   User?     @relation("DietitianGoals", fields: [dietitianId], references: [id])
+  
+  startDate   DateTime
+  targetDate  DateTime
+  
+  // Kilo hedefi
+  startWeight Float?
+  targetWeight Float?
+  
+  // Kalori hedefi
+  calorieTarget Int?
+  
+  // Makro besin hedefleri (%)
+  proteinTarget Float?
+  carbTarget    Float?
+  fatTarget     Float?
+  
+  status      GoalStatus @default(ACTIVE)
+  notes       String?    @db.Text
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+
+  @@index([userId])
   @@index([dietitianId])
+}
+
+// Sağlık uygulaması bağlantıları
+model HealthAppConnection {
+  id          Int       @id @default(autoincrement())
+  userId      Int
+  user        User      @relation(fields: [userId], references: [id])
+  provider    HealthAppProvider
+  accessToken String    @db.Text
+  refreshToken String?  @db.Text
+  expiresAt   DateTime?
+  lastSync    DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  @@index([userId])
+  @@unique([userId, provider])
+}
+
+// Sağlık uygulaması veri senkronizasyonu
+model HealthData {
+  id          Int       @id @default(autoincrement())
+  userId      Int
+  user        User      @relation(fields: [userId], references: [id])
+  provider    HealthAppProvider
+  dataType    String    // steps, weight, calories, etc.
+  value       Float
+  unit        String
+  timestamp   DateTime
+  createdAt   DateTime  @default(now())
+
+  @@index([userId])
+  @@index([dataType])
+  @@index([timestamp])
+}
+
+enum HealthAppProvider {
+  APPLE_HEALTH
+  GOOGLE_FIT
 }

@@ -1,5 +1,5 @@
-export declare enum UserGoals {
-    GAINMUSCLES = "GAINMUSCLES",
-    GAINWEIGHT = "GAINWEIGHT",
-    WEIGHTLOSS = "WEIGHTLOSS"
-  }
+export enum UserGoals {
+  GAINMUSCLES = "GAINMUSCLES",
+  GAINWEIGHT = "GAINWEIGHT",
+  WEIGHTLOSS = "WEIGHTLOSS",
+}

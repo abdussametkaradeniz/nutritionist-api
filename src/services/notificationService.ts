@@ -1,13 +1,8 @@
-import { PrismaClient } from "@prisma/client";
-import { NotificationDbManager } from "../database/user/notificationDbManager";
+import { NotificationRepository } from "../repositories/notificationRepository";
 import { sendEmail } from "../helpers/email";
 import { sendPushNotification } from "../helpers/pushNotification";
 
-const prisma = new PrismaClient();
-
 export class NotificationService {
-  private static notificationDb = new NotificationDbManager();
-
   static async createNotification(data: {
     userId: number;
     title: string;
@@ -18,18 +13,14 @@ export class NotificationService {
     sendEmail?: boolean;
   }) {
     const { sendPush, sendEmail: shouldSendEmail, ...notificationData } = data;
-
-    // Bildirimi veritabanına kaydet
     const notification =
-      await this.notificationDb.createNotification(notificationData);
+      await NotificationRepository.createNotification(notificationData);
 
     try {
-      // Kullanıcı tercihlerine göre push notification gönder
       if (sendPush) {
-        const user = await prisma.user.findUnique({
-          where: { id: data.userId },
-          include: { preferences: true },
-        });
+        const user = await NotificationRepository.getUserWithPreferences(
+          data.userId
+        );
 
         if (user?.preferences?.pushNotifications) {
           await sendPushNotification({
@@ -41,12 +32,10 @@ export class NotificationService {
         }
       }
 
-      // Kullanıcı tercihlerine göre email gönder
       if (shouldSendEmail) {
-        const user = await prisma.user.findUnique({
-          where: { id: data.userId },
-          include: { preferences: true },
-        });
+        const user = await NotificationRepository.getUserWithPreferences(
+          data.userId
+        );
 
         if (user?.preferences?.emailNotifications) {
           await sendEmail({
@@ -64,7 +53,6 @@ export class NotificationService {
       }
     } catch (error) {
       console.error("Notification delivery error:", error);
-      // Bildirim gönderme hatası olsa bile işleme devam et
     }
 
     return notification;
@@ -76,7 +64,7 @@ export class NotificationService {
     limit?: number,
     onlyUnread = false
   ) {
-    return await this.notificationDb.getUserNotifications(
+    return await NotificationRepository.getUserNotifications(
       userId,
       page,
       limit,
@@ -85,22 +73,22 @@ export class NotificationService {
   }
 
   static async markAsRead(id: number, userId: number) {
-    return await this.notificationDb.markAsRead(id, userId);
+    return await NotificationRepository.markAsRead(id, userId);
   }
 
   static async markAllAsRead(userId: number) {
-    return await this.notificationDb.markAllAsRead(userId);
+    return await NotificationRepository.markAllAsRead(userId);
   }
 
   static async getUnreadCount(userId: number) {
-    return await this.notificationDb.getUnreadCount(userId);
+    return await NotificationRepository.getUnreadCount(userId);
   }
 
   static async deleteNotification(id: number, userId: number) {
-    return await this.notificationDb.deleteNotification(id, userId);
+    return await NotificationRepository.deleteNotification(id, userId);
   }
 
-  // Yardımcı metodlar
+  // Helper methods
   static async sendAppointmentNotification(
     userId: number,
     appointmentData: any

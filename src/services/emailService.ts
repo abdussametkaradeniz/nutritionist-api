@@ -47,7 +47,7 @@ export class EmailService {
 
   async sendPasswordResetEmail(to: string, resetLink: string): Promise<void> {
     const mailOptions: nodemailer.SendMailOptions = {
-      from: process.env.SMTP_FROM,
+      from: `"${process.env.EMAIL_FROM_NAME}" <${process.env.EMAIL_FROM_ADDRESS}>`,
       to: to,
       subject: "Şifre Sıfırlama Talebi",
       html: `

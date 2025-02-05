@@ -1,18 +1,42 @@
-import { UserGoals } from "./UserGoals";
 import { UserRole } from "./UserRole";
 
+// Ana kayıt tipi
 export type RegisterType = {
+  // Zorunlu alanlar
   email: string;
-  userName: string;
+  username: string;
   password: string;
-  firstName: string;
-  secondName?: string;
-  lastName: string;
+
+  // Opsiyonel kullanıcı bilgileri
   phoneNumber?: string;
-  age?: number;
-  role: UserRole;
-  weight?: number;
+  fullName?: string;
+  birthDate?: Date;
+  gender?: string;
   height?: number;
-  goals?: UserGoals;
-  photoUrl?: string;
+  weight?: number;
+  address?: string;
+  avatarUrl?: string;
+
+  // Rol bilgisi (varsayılan BASICUSER)
+  role?: UserRole;
+
+  // Profil bilgileri (opsiyonel)
+  profile?: {
+    firstName?: string;
+    secondName?: string;
+    lastName?: string;
+    age?: number;
+    weight?: number;
+    photoUrl?: string;
+  };
+
+  // Kullanıcı tercihleri (opsiyonel, varsayılan değerler var)
+  preferences?: {
+    language?: string;
+    timezone?: string;
+    theme?: string;
+    emailNotifications?: boolean;
+    pushNotifications?: boolean;
+    smsNotifications?: boolean;
+  };
 };

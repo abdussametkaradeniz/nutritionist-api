@@ -1,16 +1,29 @@
 import { Request, Response, NextFunction } from "express";
-import { BusinessException } from "../domain/exception";
-
+import prisma from "../../prisma/client";
+import { AppError } from "../utils/appError";
 export const validateDietitian = async (
   req: Request,
   res: Response,
   next: NextFunction
 ) => {
-  if (!req.user?.permissions || !req.user?.permissions.includes("DIETITIAN")) {
-    throw new BusinessException(
-      "Bu işlem için diyetisyen yetkisi gereklidir",
-      403
-    );
+  try {
+    const userId = req.user?.userId;
+
+    if (!userId) {
+      throw new AppError("Unauthorized", 401);
+    }
+
+    // Kullanıcının diyetisyen rolüne sahip olup olmadığını kontrol et
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+    });
+
+    if (!user?.roles.includes("DIETITIAN")) {
+      throw new AppError("Only dietitians can access this resource", 403);
+    }
+
+    next();
+  } catch (error) {
+    next(error);
   }
-  next();
 };

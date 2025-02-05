@@ -1,4 +1,3 @@
-import { ProfileDbManager } from "../database/user/profileDbManager";
 import { BusinessException } from "../domain/exception";
 import {
   UpdateProfileRequest,
@@ -7,28 +6,26 @@ import {
 } from "../types/request/profile";
 import { comparePassword, hashPassword } from "../helpers/password";
 import { uploadToS3, deleteFromS3 } from "../helpers/s3";
-import { Multer } from "multer";
+import { ProfileRepository } from "../repositories/profileRepository";
 
 export class ProfileService {
-  private static profileDb = new ProfileDbManager();
-
   static async getProfile(userId: number) {
-    return await this.profileDb.getProfile(userId);
+    return await ProfileRepository.getProfile(userId);
   }
 
   static async updateProfile(userId: number, data: UpdateProfileRequest) {
-    return await this.profileDb.updateProfile(userId, data);
+    return await ProfileRepository.updateProfile(userId, data);
   }
 
   static async updatePreferences(
     userId: number,
     data: UpdatePreferencesRequest
   ) {
-    return await this.profileDb.updatePreferences(userId, data);
+    return await ProfileRepository.updatePreferences(userId, data);
   }
 
   static async changePassword(userId: number, data: ChangePasswordRequest) {
-    const user = await this.profileDb.getProfile(userId);
+    const user = await ProfileRepository.getProfile(userId);
 
     const isValidPassword = await comparePassword(
       data.currentPassword,
@@ -42,8 +39,15 @@ export class ProfileService {
       throw new BusinessException("Yeni şifreler eşleşmiyor", 400);
     }
 
+    if (data.currentPassword === data.newPassword) {
+      throw new BusinessException(
+        "Yeni şifre mevcut şifre ile aynı olamaz",
+        400
+      );
+    }
+
     const newPasswordHash = await hashPassword(data.newPassword);
-    return await this.profileDb.updateProfile(userId, {
+    return await ProfileRepository.updateProfile(userId, {
       passwordHash: newPasswordHash,
     });
   }
@@ -61,24 +65,29 @@ export class ProfileService {
     }
 
     const avatarUrl = await uploadToS3(file, `avatars/${userId}`);
-    return await this.profileDb.updateAvatar(userId, avatarUrl);
+    return await ProfileRepository.updateAvatar(userId, avatarUrl);
   }
 
   static async deleteAvatar(userId: number) {
-    const user = await this.profileDb.getProfile(userId);
+    const user = await ProfileRepository.getProfile(userId);
     if (user.avatarUrl) {
       await deleteFromS3(user.avatarUrl);
     }
-    return await this.profileDb.deleteAvatar(userId);
+    return await ProfileRepository.deleteAvatar(userId);
   }
 
   static async deleteAccount(userId: number) {
     // Avatar varsa sil
-    const user = await this.profileDb.getProfile(userId);
+    const user = await ProfileRepository.getProfile(userId);
     if (user.avatarUrl) {
       await deleteFromS3(user.avatarUrl);
     }
 
-    return await this.profileDb.deleteAccount(userId);
+    return await ProfileRepository.deleteAccount(userId);
+  }
+
+  static async getPreferences(userId: number) {
+    const preferences = await ProfileRepository.getPreferences(userId);
+    return preferences ?? {};
   }
 }

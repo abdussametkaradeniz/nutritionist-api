@@ -1,0 +1,141 @@
+{
+  "info": {
+    "name": "Appointment API",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Create Appointment",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}",
+            "type": "text"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/api/appointments",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "appointments"]
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n    \"startTime\": \"2024-03-01T10:00:00Z\",\n    \"endTime\": \"2024-03-01T11:00:00Z\",\n    \"type\": \"INITIAL_CONSULTATION\",\n    \"notes\": \"İlk görüşme\",\n    \"dietitianId\": \"1\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "description": "Yeni randevu oluştur"
+      }
+    },
+    {
+      "name": "Update Appointment Status",
+      "request": {
+        "method": "PATCH",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}",
+            "type": "text"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/api/appointments/:id/status",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "appointments", ":id", "status"],
+          "variable": [
+            {
+              "key": "id",
+              "value": "1"
+            }
+          ]
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n    \"status\": \"CONFIRMED\",\n    \"notes\": \"Randevu onaylandı\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "description": "Randevu durumunu güncelle"
+      }
+    },
+    {
+      "name": "Get Appointments",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}",
+            "type": "text"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/api/appointments?status=PENDING&startDate=2024-03-01T00:00:00Z&endDate=2024-03-31T23:59:59Z&page=1&limit=10",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "appointments"],
+          "query": [
+            {
+              "key": "status",
+              "value": "PENDING",
+              "description": "Randevu durumu"
+            },
+            {
+              "key": "startDate",
+              "value": "2024-03-01T00:00:00Z",
+              "description": "Başlangıç tarihi"
+            },
+            {
+              "key": "endDate",
+              "value": "2024-03-31T23:59:59Z",
+              "description": "Bitiş tarihi"
+            },
+            {
+              "key": "page",
+              "value": "1",
+              "description": "Sayfa numarası"
+            },
+            {
+              "key": "limit",
+              "value": "10",
+              "description": "Sayfa başına sonuç"
+            }
+          ]
+        },
+        "description": "Randevuları listele"
+      }
+    },
+    {
+      "name": "Get Appointment Detail",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}",
+            "type": "text"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/api/appointments/:id",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "appointments", ":id"],
+          "variable": [
+            {
+              "key": "id",
+              "value": "1"
+            }
+          ]
+        },
+        "description": "Randevu detayını getir"
+      }
+    }
+  ]
+}

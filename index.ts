@@ -3,30 +3,63 @@ import cors from "cors";
 import { setRoutes } from "./routes";
 import dotenv from "dotenv"; // dotenv paketini dahil edin
 import errorMiddleware from "./src/middleware/error";
+import swaggerUi from "swagger-ui-express";
+import swaggerJsdoc from "swagger-jsdoc";
+import { swaggerConfig } from "./src/config/swagger";
+
 dotenv.config(); // dotenv.config() çağrısını yapın
 
-const port: number = 3000;
-const app: express.Application = express();
+class App {
+  public app: express.Application;
+  private port: number;
 
-app.use(
-  cors({
-    origin: function (origin: any, callback: any) {
-      if (!origin || origin.indexOf("localhost") !== -1) {
-        callback(null, true);
-      } else {
-        callback(new Error("Not allowed by CORS"));
-      }
-    },
-    credentials: true,
-    methods: ["POST", "PUT", "GET", "DELETE", "OPTIONS", "HEAD", "PATCH"],
-  })
-);
+  constructor() {
+    this.app = express();
+    this.port = Number(process.env.PORT) || 3000;
+    this.initializeMiddlewares();
+    this.initializeSwagger();
+    this.initializeRoutes();
+    this.initializeErrorHandling();
+  }
 
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+  private initializeMiddlewares() {
+    this.app.use(
+      cors({
+        origin: (origin, callback) => {
+          if (!origin || origin.indexOf("localhost") !== -1) {
+            callback(null, true);
+          } else {
+            callback(new Error("Not allowed by CORS"));
+          }
+        },
+        credentials: true,
+        methods: ["POST", "PUT", "GET", "DELETE", "OPTIONS", "HEAD", "PATCH"],
+      })
+    );
+    this.app.use(express.json());
+    this.app.use(express.urlencoded({ extended: true }));
+  }
 
-setRoutes(app);
-app.use(errorMiddleware);
-app.listen(port, () => console.log(`Listening on port ${port}`));
+  private initializeSwagger() {
+    this.app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerConfig));
+  }
 
-export default app;
+  private initializeRoutes() {
+    setRoutes(this.app);
+  }
+
+  private initializeErrorHandling() {
+    this.app.use(errorMiddleware);
+  }
+
+  public listen() {
+    this.app.listen(this.port, () => {
+      console.log(`Server running on port ${this.port}`);
+    });
+  }
+}
+
+const app = new App();
+app.listen();
+
+export default app.app;

@@ -1,19 +1,15 @@
+import { z } from "zod";
 import { Request, Response, NextFunction } from "express";
-import { AnyZodObject, ZodError } from "zod";
 
 import { InvalidParameter } from "../domain/exception";
 
-export const requestValidator = (schema: AnyZodObject) => {
+export const requestValidator = (schema: z.ZodType<any>) => {
   return async (req: Request, res: Response, next: NextFunction) => {
     try {
       await schema.parseAsync(req.body);
       next();
     } catch (error) {
-      if (error instanceof ZodError) {
-        res.status(400).json({ errors: error.errors });
-      } else {
-        next(error);
-      }
+      next(error);
     }
   };
 };

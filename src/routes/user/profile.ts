@@ -10,6 +10,71 @@ import {
 import multer from "multer";
 import { BusinessException } from "../../domain/exception";
 
+/**
+ * @swagger
+ * /api/user/profile:
+ *   get:
+ *     tags:
+ *       - User
+ *     summary: Kullanıcı profili görüntüleme
+ *     description: Giriş yapmış kullanıcının profil bilgilerini getirir
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Profil bilgileri başarıyla getirildi
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 id:
+ *                   type: number
+ *                 email:
+ *                   type: string
+ *                 username:
+ *                   type: string
+ *                 firstName:
+ *                   type: string
+ *                 lastName:
+ *                   type: string
+ *                 phoneNumber:
+ *                   type: string
+ *                 avatarUrl:
+ *                   type: string
+ *       401:
+ *         description: Yetkilendirme hatası
+ *
+ *   put:
+ *     tags:
+ *       - User
+ *     summary: Profil güncelleme
+ *     description: Kullanıcı profil bilgilerini günceller
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               firstName:
+ *                 type: string
+ *               lastName:
+ *                 type: string
+ *               phoneNumber:
+ *                 type: string
+ *               username:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: Profil başarıyla güncellendi
+ *       400:
+ *         description: Geçersiz veri
+ *       401:
+ *         description: Yetkilendirme hatası
+ */
 const router = express.Router();
 const upload = multer({ storage: multer.memoryStorage() });
 
@@ -91,8 +156,8 @@ router.put(
 // Kullanıcı tercihlerini getir
 router.get("/preferences", authenticateToken, async (req, res, next) => {
   try {
-    const profile = await ProfileService.getProfile(req.user!.userId);
-    res.json(profile.preferences);
+    const preferences = await ProfileService.getPreferences(req.user!.userId);
+    res.json(preferences);
   } catch (error) {
     next(error);
   }

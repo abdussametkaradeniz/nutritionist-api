@@ -1,8 +1,8 @@
 import { Forbidden } from "../domain/exception/forbidden";
 import { Unauthorized } from "../domain/exception/unauthorized";
-import { Request, Response, NextFunction } from "express";
+import { Request, Response, NextFunction, RequestHandler } from "express";
 import { UserRole } from "../types/user/UserRole";
-import jwt from "jsonwebtoken";
+import jwt, { JwtPayload } from "jsonwebtoken";
 import { BusinessException } from "../domain/exception";
 
 // Kaldır veya yorum satırına al
@@ -68,26 +68,31 @@ const isAuthorized = (
   return true;
 };
 
-export const authenticateToken = (
+export const authenticateToken: RequestHandler = async (
   req: Request,
   res: Response,
   next: NextFunction
 ) => {
-  const authHeader = req.headers["authorization"];
-  const token = authHeader && authHeader.split(" ")[1];
-
-  if (!token) {
-    throw new BusinessException("Token gerekli", 401);
-  }
-
   try {
+    const token = req.headers.authorization?.split(" ")[1];
+    if (!token) {
+      throw new BusinessException("Token gerekli", 401);
+    }
+
     const decoded = jwt.verify(
       token,
-      process.env.JWT_SECRET || "your-secret-key"
-    );
-    req.user = decoded as any;
+      process.env.JWT_SECRET_KEY!
+    ) as JwtPayload & {
+      userId: number;
+      email: string;
+      role: string;
+      roles: UserRole[];
+      permissions: string[];
+    };
+
+    req.user = decoded;
     next();
   } catch (error) {
-    throw new BusinessException("Geçersiz token", 401);
+    next(error);
   }
 };

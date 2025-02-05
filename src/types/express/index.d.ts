@@ -1,20 +1,33 @@
 import { Session } from "../session";
-import { UserRole } from "../user/UserRole";
+import { UserRole } from "@prisma/client";
 import { Multer } from "multer";
+import { JwtPayload } from "jsonwebtoken";
+import { Application } from "express";
 
 declare global {
   namespace Express {
-    interface Request {
+    export interface Request {
       session?: Session;
-      user?: {
+      user?: JwtPayload & {
         userId: number;
         email: string;
-        username: string;
-        dietitianId?: number;
+        role: string;
         roles: UserRole[];
-        permissions?: string[];
+        permissions: string[];
       };
       file?: Multer.File;
+      io?: any;
+    }
+
+    interface User {
+      id: number;
+      email: string;
+      username: string;
+      dietitianId?: number;
+      roles: UserRole[];
+      permissions?: string[];
     }
   }
 }
+
+export {};

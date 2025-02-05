@@ -1,11 +1,9 @@
 import jwt, { Secret } from "jsonwebtoken";
 import { TokenType, RefreshTokenPayload } from "../types/auth/TokenType";
 import { UserType } from "../types/user/User";
-import { TokenDbManager } from "../database/auth/tokenDbManager";
 import prisma from "../../prisma/client";
 import { uuid } from "uuidv4";
 
-const tokenDbManager = new TokenDbManager();
 const ACCESS_TOKEN_EXPIRES_IN = "15m";
 const REFRESH_TOKEN_EXPIRES_IN = "7d";
 
@@ -39,13 +37,14 @@ async function generateRefreshToken(userId: number): Promise<string> {
   const expiresAt = new Date();
   expiresAt.setDate(expiresAt.getDate() + 7); // 7 days from now
 
-  const payload: RefreshTokenPayload = {
-    userId,
-    token: tokenFamily,
-    expiresAt,
-  };
-
-  await tokenDbManager.saveRefreshToken(payload);
+  // Save refresh token to database
+  await prisma.refreshToken.create({
+    data: {
+      userId,
+      token: tokenFamily,
+      expiresAt,
+    },
+  });
 
   return jwt.sign({ tokenFamily }, process.env.JWT_REFRESH_SECRET as Secret, {
     expiresIn: REFRESH_TOKEN_EXPIRES_IN,
@@ -60,13 +59,20 @@ export async function refreshAccessToken(
       refreshToken,
       process.env.JWT_REFRESH_SECRET as Secret
     ) as any;
-    const tokenData = await tokenDbManager.getRefreshToken(decoded.tokenFamily);
+
+    // Find refresh token in database
+    const tokenData = await prisma.refreshToken.findFirst({
+      where: {
+        token: decoded.tokenFamily,
+        isRevoked: false,
+      },
+    });
 
     if (!tokenData) {
       return null;
     }
 
-    // Get user data with proper include
+    // Get user data
     const user = await prisma.user.findUnique({
       where: {
         id: tokenData.userId,
@@ -80,26 +86,33 @@ export async function refreshAccessToken(
       return null;
     }
 
-    // Convert Prisma User to UserType
-    const userType: UserType = {
-      id: user.id,
-      username: user.username,
-      email: user.email,
-      phoneNumber: user.phoneNumber,
-      passwordHash: user.passwordHash,
-      userRoles: user.userRoles,
-      dietitianId: user.dietitianId,
-      lastUpdatingUser: user.lastUpdatingUser,
-      lastUpdateDate: user.lastUpdateDate,
-      recordStatus: user.recordStatus,
-    };
-
     // Revoke old refresh token
-    await tokenDbManager.revokeRefreshToken(decoded.tokenFamily);
+    await prisma.refreshToken.update({
+      where: {
+        id: tokenData.id,
+      },
+      data: {
+        isRevoked: true,
+      },
+    });
 
     // Generate new tokens
-    return await generateTokens(userType);
+    return await generateTokens(user);
   } catch (error) {
     return null;
+  }
+}
+
+export function verifyToken(token: string) {
+  try {
+    return jwt.verify(token, process.env.JWT_SECRET_KEY as Secret) as {
+      id: number;
+      username: string;
+      email: string;
+      roles: string[];
+      permissions: string[];
+    };
+  } catch (error) {
+    throw new Error("Invalid token");
   }
 }

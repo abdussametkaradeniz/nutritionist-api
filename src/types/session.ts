@@ -21,15 +21,19 @@ export interface SessionData {
   createdAt: Date;
 }
 
-export interface CreateSessionRequest {
+export type CreateSessionRequest = {
   userId: number;
   deviceId?: string;
   deviceType?: string;
   ipAddress?: string;
   userAgent?: string;
-}
+  dietitianId?: number;
+};
 
-export interface UpdateSessionRequest {
-  lastActivity?: Date;
+export type UpdateSessionRequest = {
+  deviceId?: string;
+  deviceType?: string;
+  ipAddress?: string;
+  userAgent?: string;
   isActive?: boolean;
-}
+};

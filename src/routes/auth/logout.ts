@@ -1,48 +1,67 @@
-import express, { NextFunction, Request, Response } from "express";
-import { SessionService } from "../../services/sessionService";
-import { TokenService } from "../../services/tokenService";
+import { Router, Request, Response, NextFunction } from "express";
+import { SessionRepository } from "../../repositories/sessionRepository";
 import { authenticateToken } from "../../middleware/auth";
+import { BusinessException } from "../../domain/exception";
 
-const router = express.Router();
+const router = Router();
 
+/**
+ * @swagger
+ * /api/auth/logout:
+ *   post:
+ *     tags:
+ *       - Auth
+ *     summary: Kullanıcı çıkışı
+ *     description: Kullanıcı oturumunu sonlandırır ve refresh token'ı geçersiz kılar
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - refreshToken
+ *             properties:
+ *               refreshToken:
+ *                 type: string
+ *                 description: Geçersiz kılınacak refresh token
+ *     responses:
+ *       200:
+ *         description: Başarıyla çıkış yapıldı
+ *       401:
+ *         description: Geçersiz token
+ */
+// Tek oturumu sonlandır
 router.post(
   "/",
   authenticateToken,
   async (req: Request, res: Response, next: NextFunction) => {
     try {
       const sessionId = req.headers["x-session-id"] as string;
-      const refreshToken = req.body.refreshToken;
-
-      if (sessionId) {
-        await SessionService.deactivateSession(sessionId);
+      if (!sessionId) {
+        throw new BusinessException("Session ID gerekli", 400);
       }
-
-      if (refreshToken) {
-        await TokenService.revokeRefreshToken(refreshToken);
-      }
-
-      res.json({ message: "Başarıyla çıkış yapıldı" });
+      await SessionRepository.deactivateSession(sessionId);
+      res.json({ success: true, message: "Başarıyla çıkış yapıldı" });
     } catch (error) {
       next(error);
     }
   }
 );
 
-// Tüm oturumlardan çıkış yap
+// Tüm oturumları sonlandır
 router.post(
   "/all",
   authenticateToken,
   async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const userId = req.user?.userId;
-      if (!userId) {
-        throw new Error("Kullanıcı bulunamadı");
+      if (!req.user?.userId) {
+        throw new BusinessException("Kullanıcı bulunamadı", 401);
       }
-
-      await SessionService.deactivateUserSessions(userId);
-      await TokenService.revokeAllUserRefreshTokens(userId);
-
-      res.json({ message: "Tüm oturumlardan çıkış yapıldı" });
+      await SessionRepository.deactivateAllSessions(req.user.userId);
+      res.json({ success: true, message: "Tüm oturumlardan çıkış yapıldı" });
     } catch (error) {
       next(error);
     }

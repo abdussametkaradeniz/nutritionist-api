@@ -1,134 +1,358 @@
-import { DietitianDbManager } from "../database/dietitian/dietitianDbManager";
-import {
-  CreateDietitianProfileRequest,
-  CreateWorkingHoursRequest,
-  CreatePricingPackageRequest,
-} from "../types/dietitian";
 import { BusinessException } from "../domain/exception";
-
+import prisma from "../../prisma/client";
+import { Prisma, Specialization, WeekDay } from "@prisma/client";
+import { AppError } from "../utils/appError";
 export class DietitianService {
-  private static dietitianDb = new DietitianDbManager();
-
   // Profil işlemleri
   static async createProfile(
     userId: number,
-    data: CreateDietitianProfileRequest
+    data: Prisma.DietitianProfileCreateInput
   ) {
-    const existingProfile = await this.dietitianDb.getProfile(userId);
+    // Kullanıcının zaten profili var mı kontrol et
+    const existingProfile = await prisma.dietitianProfile.findUnique({
+      where: { userId },
+    });
+
     if (existingProfile) {
-      throw new BusinessException(
-        "Bu kullanıcı için zaten bir diyetisyen profili mevcut",
-        400
-      );
+      throw new AppError("Profile already exists", 400);
     }
 
-    return await this.dietitianDb.createProfile(userId, data);
+    return await prisma.dietitianProfile.create({
+      data: {
+        ...data,
+        user: { connect: { id: userId } },
+      },
+    });
   }
 
   static async getProfile(userId: number) {
-    const profile = await this.dietitianDb.getProfile(userId);
+    const profile = await prisma.dietitianProfile.findUnique({
+      where: { userId },
+      include: {
+        workingHours: true,
+        pricingPackages: true,
+      },
+    });
+
     if (!profile) {
-      throw new BusinessException("Diyetisyen profili bulunamadı", 404);
+      throw new AppError("Profile not found", 404);
     }
+
     return profile;
   }
 
   static async updateProfile(
     userId: number,
-    data: Partial<CreateDietitianProfileRequest>
+    data: Prisma.DietitianProfileUpdateInput
   ) {
-    const profile = await this.getProfile(userId);
-    return await this.dietitianDb.updateProfile(userId, data);
+    const profile = await prisma.dietitianProfile.findUnique({
+      where: { userId },
+    });
+
+    if (!profile) {
+      throw new AppError("Profile not found", 404);
+    }
+
+    return await prisma.dietitianProfile.update({
+      where: { userId },
+      data,
+    });
   }
 
   // Uzmanlık alanları işlemleri
-  static async addSpecialty(userId: number, specialtyId: number) {
+  static async addSpecialty(userId: number, specialtyId: Specialization) {
     const profile = await this.getProfile(userId);
 
-    const existingSpecialty = profile.specialties.find(
-      (s) => s.specialtyId === specialtyId
+    const existingSpecialty = profile.specializations.some(
+      (specialty) => specialty === specialtyId
     );
     if (existingSpecialty) {
-      throw new BusinessException("Bu uzmanlık alanı zaten ekli", 400);
+      throw new AppError("This specialization already exists", 400);
     }
 
-    return await this.dietitianDb.addSpecialty(profile.id, specialtyId);
+    return await prisma.dietitianProfile.update({
+      where: { id: profile.id },
+      data: {
+        specializations: {
+          push: specialtyId,
+        },
+      },
+    });
   }
 
-  static async removeSpecialty(userId: number, specialtyId: number) {
+  static async removeSpecialty(userId: number, specialtyId: Specialization) {
     const profile = await this.getProfile(userId);
-    return await this.dietitianDb.removeSpecialty(profile.id, specialtyId);
+
+    return await prisma.dietitianProfile.update({
+      where: { id: profile.id },
+      data: {
+        specializations: {
+          set: profile.specializations.filter((s) => s !== specialtyId),
+        },
+      },
+    });
   }
 
   // Çalışma saatleri işlemleri
   static async addWorkingHours(
     userId: number,
-    data: CreateWorkingHoursRequest
+    data: Prisma.WorkingHoursCreateInput
   ) {
     const profile = await this.getProfile(userId);
 
     // Çakışma kontrolü
     if (await this.hasTimeConflict(profile.id, data)) {
-      throw new BusinessException(
+      throw new AppError(
         "Bu zaman diliminde başka bir çalışma saati mevcut",
         400
       );
     }
 
-    return await this.dietitianDb.addWorkingHours(profile.id, data);
+    return await prisma.workingHours.create({
+      data: {
+        ...data,
+        dietitian: { connect: { id: profile.id } },
+      },
+    });
   }
 
   static async updateWorkingHours(
     userId: number,
-    hourId: number,
-    data: Partial<CreateWorkingHoursRequest>
+    workingHours: Prisma.WorkingHoursCreateInput[]
   ) {
     const profile = await this.getProfile(userId);
-    return await this.dietitianDb.updateWorkingHours(hourId, data);
+
+    // Önce mevcut çalışma saatlerini sil
+    await prisma.workingHours.deleteMany({
+      where: { dietitianId: profile.id },
+    });
+
+    // Yeni çalışma saatlerini ekle
+    return await prisma.workingHours.createMany({
+      data: workingHours.map((hour) => ({
+        ...hour,
+        dietitianId: profile.id,
+      })),
+    });
   }
 
   static async deleteWorkingHours(userId: number, hourId: number) {
     const profile = await this.getProfile(userId);
-    return await this.dietitianDb.deleteWorkingHours(hourId);
+    return await prisma.workingHours.delete({
+      where: { id: String(hourId), dietitianId: profile.id },
+    });
   }
 
   // Fiyatlandırma işlemleri
   static async addPricingPackage(
     userId: number,
-    data: CreatePricingPackageRequest
+    data: Prisma.PricingPackageCreateInput
   ) {
     const profile = await this.getProfile(userId);
-    return await this.dietitianDb.addPricingPackage(profile.id, data);
+
+    return await prisma.pricingPackage.create({
+      data: {
+        ...data,
+        dietitian: { connect: { id: profile.id } },
+      },
+    });
+  }
+
+  static async createPricingPackage(
+    userId: number,
+    data: Prisma.PricingPackageCreateInput
+  ) {
+    const profile = await this.getProfile(userId);
+
+    return await prisma.pricingPackage.create({
+      data: {
+        ...data,
+        dietitian: { connect: { id: profile.id } },
+      },
+    });
   }
 
   static async updatePricingPackage(
     userId: number,
-    packageId: number,
-    data: Partial<CreatePricingPackageRequest>
+    packageId: string,
+    data: Prisma.PricingPackageUpdateInput
   ) {
     const profile = await this.getProfile(userId);
-    return await this.dietitianDb.updatePricingPackage(packageId, data);
+    const pricingPackage = await prisma.pricingPackage.findFirst({
+      where: {
+        id: packageId,
+        dietitianId: profile.id,
+      },
+    });
+
+    if (!pricingPackage) {
+      throw new AppError("Pricing package not found", 404);
+    }
+
+    return await prisma.pricingPackage.update({
+      where: { id: packageId },
+      data,
+    });
   }
 
-  static async deletePricingPackage(userId: number, packageId: number) {
+  static async deletePricingPackage(userId: number, packageId: string) {
     const profile = await this.getProfile(userId);
-    return await this.dietitianDb.deletePricingPackage(packageId);
+    const pricingPackage = await prisma.pricingPackage.findFirst({
+      where: {
+        id: packageId,
+        dietitianId: profile.id,
+      },
+    });
+
+    if (!pricingPackage) {
+      throw new AppError("Pricing package not found", 404);
+    }
+
+    return await prisma.pricingPackage.delete({
+      where: { id: packageId },
+    });
+  }
+
+  static async getPricingPackages(userId: number) {
+    const profile = await this.getProfile(userId);
+
+    return await prisma.pricingPackage.findMany({
+      where: { dietitianId: profile.id },
+    });
   }
 
   // Yardımcı metodlar
   private static async hasTimeConflict(
-    profileId: number,
-    newSchedule: CreateWorkingHoursRequest
+    profileId: string,
+    newSchedule: Prisma.WorkingHoursCreateInput & { day: WeekDay }
   ): Promise<boolean> {
-    const profile = (await this.dietitianDb.getProfile(profileId))!;
+    const existingHours = await prisma.workingHours.findMany({
+      where: { dietitianId: profileId },
+    });
 
-    return profile.schedules.some(
+    return existingHours.some(
       (schedule) =>
-        schedule.dayOfWeek === newSchedule.dayOfWeek &&
+        schedule.day === newSchedule.day &&
         ((schedule.startTime <= newSchedule.startTime &&
           schedule.endTime > newSchedule.startTime) ||
           (schedule.startTime < newSchedule.endTime &&
             schedule.endTime >= newSchedule.endTime))
     );
+  }
+
+  static async searchDietitians(params: {
+    specialization?: Specialization;
+    minPrice?: number;
+    maxPrice?: number;
+    availableDay?: string;
+    availableTime?: string;
+    page?: number;
+    limit?: number;
+  }) {
+    const {
+      specialization,
+      minPrice,
+      maxPrice,
+      availableDay,
+      availableTime,
+      page = 1,
+      limit = 10,
+    } = params;
+
+    const where: Prisma.DietitianProfileWhereInput = {
+      AND: [
+        specialization
+          ? {
+              specializations: {
+                has: specialization,
+              },
+            }
+          : {},
+        minPrice || maxPrice
+          ? {
+              pricingPackages: {
+                some: {
+                  AND: [
+                    minPrice ? { price: { gte: minPrice } } : {},
+                    maxPrice ? { price: { lte: maxPrice } } : {},
+                  ],
+                },
+              },
+            }
+          : {},
+        availableDay
+          ? {
+              workingHours: {
+                some: {
+                  AND: [{ day: availableDay as any }, { isAvailable: true }],
+                },
+              },
+            }
+          : {},
+      ],
+    };
+
+    const [dietitians, total] = await Promise.all([
+      prisma.dietitianProfile.findMany({
+        where,
+        include: {
+          user: {
+            select: {
+              fullName: true,
+              avatarUrl: true,
+            },
+          },
+          workingHours: true,
+          pricingPackages: {
+            where: { isActive: true },
+          },
+        },
+        skip: (page - 1) * limit,
+        take: limit,
+        orderBy: {
+          rating: "desc",
+        },
+      }),
+      prisma.dietitianProfile.count({ where }),
+    ]);
+
+    return {
+      data: dietitians,
+      pagination: {
+        total,
+        page,
+        limit,
+        totalPages: Math.ceil(total / limit),
+      },
+    };
+  }
+
+  static async getDietitiansBySpecialization(specialization: Specialization) {
+    return await prisma.dietitianProfile.findMany({
+      where: {
+        specializations: {
+          has: specialization,
+        },
+      },
+      include: {
+        user: {
+          select: {
+            fullName: true,
+            avatarUrl: true,
+          },
+        },
+      },
+    });
+  }
+
+  static async getWorkingHours(dietitianId: string) {
+    return await prisma.workingHours.findMany({
+      where: {
+        dietitianId,
+      },
+      orderBy: {
+        day: "asc",
+      },
+    });
   }
 }

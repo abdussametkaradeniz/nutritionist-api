@@ -1,14 +1,19 @@
-import Joi from "joi";
-import { AppointmentStatus } from "../../types/appointments/generalAppointmentType";
-export const AppointmentValidateSchema = Joi.object({
-  id: Joi.number().integer().positive(), // Otomatik artan bir sayı
-  userId: Joi.number().integer().positive().required(), // Zorunlu kullanıcı ID
-  dietitianId: Joi.number().integer().positive().required(), // İsteğe bağlı diyetisyen ID
-  date: Joi.date().iso().required(), // ISO formatında zorunlu tarih
-  status: Joi.string()
-    .valid(...Object.values(AppointmentStatus))
-    .default(AppointmentStatus.PENDING), // Varsayılan değer PENDING
-  lastUpdatingUser: Joi.string().optional(), // İsteğe bağlı son güncelleyen kullanıcı
-  lastUpdateDate: Joi.date().iso().optional(), // ISO formatında son güncelleme tarihi
-  recordStatus: Joi.string().default("A"), // Varsayılan değer 'A'
+import { z } from "zod";
+
+export enum AppointmentStatus {
+  PENDING = "PENDING",
+  APPROVED = "APPROVED",
+  CANCELLED = "CANCELLED",
+}
+
+export const AppointmentValidateSchema = z.object({
+  userId: z.number().int().positive(),
+  dietitianId: z.number().int().positive(),
+  date: z.string().datetime(),
+  time: z.string(),
+  status: z.nativeEnum(AppointmentStatus).default(AppointmentStatus.PENDING),
+  notes: z.string().optional(),
+  lastUpdatingUser: z.string().optional(),
+  lastUpdateDate: z.string().datetime().optional(),
+  recordStatus: z.string().default("A"),
 });

@@ -6,6 +6,109 @@ import { requestValidator } from "../../middleware/requestValidator";
 import { z } from "zod";
 import { updatePreferencesSchema } from "../../validations/user/notificationValidator";
 
+/**
+ * @swagger
+ * /api/user/notifications:
+ *   get:
+ *     tags:
+ *       - User
+ *     summary: Bildirimleri listele
+ *     description: Kullanıcının bildirimlerini getirir
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: page
+ *         schema:
+ *           type: integer
+ *           default: 1
+ *         description: Sayfa numarası
+ *       - in: query
+ *         name: limit
+ *         schema:
+ *           type: integer
+ *           default: 20
+ *         description: Sayfa başına bildirim sayısı
+ *       - in: query
+ *         name: read
+ *         schema:
+ *           type: boolean
+ *         description: Okunma durumuna göre filtrele
+ *     responses:
+ *       200:
+ *         description: Bildirimler başarıyla getirildi
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 notifications:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       id:
+ *                         type: number
+ *                       type:
+ *                         type: string
+ *                       title:
+ *                         type: string
+ *                       message:
+ *                         type: string
+ *                       read:
+ *                         type: boolean
+ *                       createdAt:
+ *                         type: string
+ *                         format: date-time
+ *                 totalCount:
+ *                   type: number
+ *                 unreadCount:
+ *                   type: number
+ *
+ *   put:
+ *     tags:
+ *       - User
+ *     summary: Bildirimleri okundu işaretle
+ *     description: Seçili bildirimleri okundu olarak işaretler
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               notificationIds:
+ *                 type: array
+ *                 items:
+ *                   type: number
+ *     responses:
+ *       200:
+ *         description: Bildirimler başarıyla güncellendi
+ *
+ *   delete:
+ *     tags:
+ *       - User
+ *     summary: Bildirimleri sil
+ *     description: Seçili bildirimleri siler
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               notificationIds:
+ *                 type: array
+ *                 items:
+ *                   type: number
+ *     responses:
+ *       200:
+ *         description: Bildirimler başarıyla silindi
+ */
 const router = express.Router();
 const prisma = new PrismaClient();
 

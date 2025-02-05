@@ -1,42 +1,72 @@
 import express from "express";
-import { v4 as uuidv4 } from "uuid";
-import bcrypt from "bcrypt";
-import { PasswordResetDbManager } from "../../database/auth/passwordResetDbManager";
-import { EmailService } from "../../services/emailService";
+import { PasswordResetService } from "../../services/passwordResetService";
 import { sendSuccess } from "../../helpers/responseHandler";
-import { InvalidParameter, NotFound } from "../../domain/exception";
-import prisma from "../../../prisma/client";
 
+/**
+ * @swagger
+ * /api/auth/password-reset:
+ *   post:
+ *     tags:
+ *       - Auth
+ *     summary: Şifre sıfırlama isteği
+ *     description: Kullanıcının email adresine şifre sıfırlama bağlantısı gönderir
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - email
+ *             properties:
+ *               email:
+ *                 type: string
+ *                 format: email
+ *                 description: Kullanıcının kayıtlı email adresi
+ *     responses:
+ *       200:
+ *         description: Sıfırlama bağlantısı gönderildi
+ *       429:
+ *         description: Çok fazla deneme
+ *
+ *   put:
+ *     tags:
+ *       - Auth
+ *     summary: Yeni şifre belirleme
+ *     description: Şifre sıfırlama token'ı ile yeni şifre belirleme
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - token
+ *               - newPassword
+ *             properties:
+ *               token:
+ *                 type: string
+ *                 description: Şifre sıfırlama token'ı
+ *               newPassword:
+ *                 type: string
+ *                 format: password
+ *                 description: Yeni şifre (min 8 karakter)
+ *     responses:
+ *       200:
+ *         description: Şifre başarıyla güncellendi
+ *       400:
+ *         description: Geçersiz token veya şifre
+ *       429:
+ *         description: Çok fazla deneme
+ */
 const router = express.Router();
-const passwordResetDbManager = new PasswordResetDbManager();
-const emailService = new EmailService();
+const passwordResetService = new PasswordResetService();
 
 // Şifre sıfırlama talebi
 router.post("/request", async (req, res, next) => {
   try {
     const { email } = req.body;
-
-    const user = await prisma.user.findUnique({
-      where: { email },
-    });
-
-    if (!user) {
-      throw new NotFound("User not found");
-    }
-
-    const token = uuidv4();
-    const expiresAt = new Date();
-    expiresAt.setHours(expiresAt.getHours() + 1); // 1 saat geçerli
-
-    await passwordResetDbManager.createResetToken({
-      userId: user.id,
-      token,
-      expiresAt,
-    });
-
-    const resetLink = `${process.env.FRONTEND_URL}/reset-password?token=${token}`;
-    await emailService.sendPasswordResetEmail(email, resetLink);
-
+    await passwordResetService.requestPasswordReset(email);
     sendSuccess(res, null, "Password reset email sent successfully");
   } catch (error) {
     next(error);
@@ -47,21 +77,7 @@ router.post("/request", async (req, res, next) => {
 router.post("/confirm", async (req, res, next) => {
   try {
     const { token, newPassword } = req.body;
-
-    const resetToken = await passwordResetDbManager.getResetToken(token);
-    if (!resetToken) {
-      throw new InvalidParameter("Invalid or expired reset token");
-    }
-
-    const hashedPassword = await bcrypt.hash(newPassword, 10);
-
-    await prisma.user.update({
-      where: { id: resetToken.userId },
-      data: { passwordHash: hashedPassword },
-    });
-
-    await passwordResetDbManager.markTokenAsUsed(token);
-
+    await passwordResetService.resetPassword(token, newPassword);
     sendSuccess(res, null, "Password reset successfully");
   } catch (error) {
     next(error);
