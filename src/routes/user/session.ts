@@ -6,9 +6,8 @@ import { authenticateToken } from "../../middleware/auth";
  * @swagger
  * /api/user/sessions:
  *   get:
- *     tags:
- *       - User
- *     summary: Aktif oturumları listele
+ *     tags: [User]
+ *     summary: Get user sessions
  *     description: Kullanıcının tüm aktif oturumlarını getirir
  *     security:
  *       - bearerAuth: []
@@ -42,10 +41,10 @@ import { authenticateToken } from "../../middleware/auth";
  *                       isCurrentSession:
  *                         type: boolean
  *
+ * /api/user/sessions/{sessionId}:
  *   delete:
- *     tags:
- *       - User
- *     summary: Oturumu sonlandır
+ *     tags: [User]
+ *     summary: Delete specific session
  *     description: Belirtilen oturumu sonlandırır
  *     security:
  *       - bearerAuth: []
@@ -69,10 +68,10 @@ import { authenticateToken } from "../../middleware/auth";
  *       404:
  *         description: Oturum bulunamadı
  *
+ * /api/user/sessions/all:
  *   delete:
- *     tags:
- *       - User
- *     summary: Tüm oturumları sonlandır
+ *     tags: [User]
+ *     summary: Delete all sessions
  *     description: Mevcut oturum hariç tüm oturumları sonlandırır
  *     security:
  *       - bearerAuth: []

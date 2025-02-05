@@ -219,7 +219,7 @@
 
 ### Eksikler ❌
 
-- [ ] Role-based access control (RBAC)
+- [x] Role-based access control (RBAC)
 - [ ] Detaylı işlem logları
 - [ ] IP bazlı kısıtlamalar
 - [ ] GDPR uyumluluğu
@@ -312,9 +312,13 @@
   - [ ] Response caching
   - [ ] Cache invalidation
 - [ ] Error Tracking
-  - [ ] Sentry entegrasyonu
-  - [ ] Error grouping
-  - [ ] Error notifications
+  - [x] Sentry kurulumu yapıldı
+  - [ ] Sentry.io hesabı açılacak
+  - [ ] DSN alınıp .env'ye eklenecek
+  - [ ] Dashboard ayarları yapılacak
+  - [ ] Alert kuralları belirlenecek
+  - [ ] Error grouping ayarları
+  - [ ] Error notifications ayarları
 - [ ] API Versiyonlama
   - [ ] Version routing
   - [ ] Backwards compatibility

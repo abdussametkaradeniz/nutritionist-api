@@ -3,6 +3,9 @@ import bcrypt from "bcrypt";
 import { BusinessException } from "../domain/exception";
 import { UserRole } from "../constants/userRoles";
 import { RegisterType } from "../types/user/Register";
+import jwt from "jsonwebtoken";
+import { Role, Permission } from "../models/role.model";
+import { rolePermissions } from "../config/permissions";
 
 export class AuthService {
   async register(registerData: RegisterType) {
@@ -78,5 +81,56 @@ export class AuthService {
     });
 
     return user;
+  }
+
+  private static generateTokens(user: {
+    userId: number;
+    email: string;
+    role: Role;
+  }) {
+    const payload = {
+      userId: user.userId,
+      email: user.email,
+      role: user.role,
+      permissions: rolePermissions[user.role],
+    };
+
+    const accessToken = jwt.sign(payload, process.env.JWT_SECRET!, {
+      expiresIn: process.env.JWT_EXPIRES_IN || "15m",
+    });
+
+    const refreshToken = jwt.sign(
+      { userId: user.userId },
+      process.env.JWT_REFRESH_SECRET!,
+      { expiresIn: process.env.JWT_REFRESH_EXPIRES_IN || "7d" }
+    );
+
+    return { accessToken, refreshToken };
+  }
+
+  public static async login(email: string, password: string) {
+    const user = await prisma.user.findUnique({
+      where: { email },
+    });
+
+    if (!user) {
+      throw new BusinessException("Invalid credentials", 401);
+    }
+
+    const tokens = this.generateTokens({
+      userId: user.id,
+      email: user.email,
+      role: user.roles[0] as Role,
+    });
+
+    return {
+      ...tokens,
+      user: {
+        id: user.id,
+        email: user.email,
+        role: user.roles[0] as Role,
+        permissions: rolePermissions[user.roles[0] as Role],
+      },
+    };
   }
 }

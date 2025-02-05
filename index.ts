@@ -6,6 +6,8 @@ import errorMiddleware from "./src/middleware/error";
 import swaggerUi from "swagger-ui-express";
 import swaggerJsdoc from "swagger-jsdoc";
 import { swaggerConfig } from "./src/config/swagger";
+import { setupSecurityMiddleware } from "./src/middleware/security";
+import { initializeSentry } from "./src/config/sentry";
 
 dotenv.config(); // dotenv.config() çağrısını yapın
 
@@ -14,6 +16,7 @@ class App {
   private port: number;
 
   constructor() {
+    initializeSentry(); // En başta initialize ediyoruz
     this.app = express();
     this.port = Number(process.env.PORT) || 3000;
     this.initializeMiddlewares();
@@ -23,6 +26,7 @@ class App {
   }
 
   private initializeMiddlewares() {
+    setupSecurityMiddleware(this.app);
     this.app.use(
       cors({
         origin: (origin, callback) => {

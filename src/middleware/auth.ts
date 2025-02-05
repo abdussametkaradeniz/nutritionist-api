@@ -4,6 +4,9 @@ import { Request, Response, NextFunction, RequestHandler } from "express";
 import { UserRole } from "../types/user/UserRole";
 import jwt, { JwtPayload } from "jsonwebtoken";
 import { BusinessException } from "../domain/exception";
+import { AppError } from "../utils/appError";
+import { Role } from "../models/role.model";
+import { rolePermissions } from "../config/permissions";
 
 // Kaldır veya yorum satırına al
 // declare global {
@@ -68,31 +71,39 @@ const isAuthorized = (
   return true;
 };
 
-export const authenticateToken: RequestHandler = async (
+export const authenticateToken = async (
   req: Request,
   res: Response,
   next: NextFunction
 ) => {
   try {
-    const token = req.headers.authorization?.split(" ")[1];
+    const authHeader = req.headers["authorization"];
+    const token = authHeader && authHeader.split(" ")[1];
+
     if (!token) {
-      throw new BusinessException("Token gerekli", 401);
+      throw new AppError("No token provided", 401);
     }
 
     const decoded = jwt.verify(
       token,
-      process.env.JWT_SECRET_KEY!
-    ) as JwtPayload & {
+      process.env.JWT_SECRET!
+    ) as jwt.JwtPayload & {
       userId: number;
       email: string;
-      role: string;
-      roles: UserRole[];
-      permissions: string[];
+      role: Role;
     };
 
-    req.user = decoded;
+    req.user = {
+      ...decoded,
+      permissions: rolePermissions[decoded.role],
+    };
+
     next();
   } catch (error) {
-    next(error);
+    if (error instanceof jwt.JsonWebTokenError) {
+      next(new AppError("Invalid token", 401));
+    } else {
+      next(error);
+    }
   }
 };

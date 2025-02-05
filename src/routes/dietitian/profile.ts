@@ -17,6 +17,9 @@ import {
 import { z } from "zod";
 import { AppError } from "../../utils/appError";
 import { Specialization } from "@prisma/client";
+import { Role, Permission } from "../../models/role.model";
+import { hasRole, hasPermission } from "../../middleware/rbac";
+import { captureException } from "../../config/sentry";
 
 const router = express.Router();
 
@@ -29,7 +32,8 @@ const isValidSpecialization = (value: string): value is Specialization => {
 router.post(
   "/",
   authenticateToken,
-  validateDietitian,
+  hasRole([Role.DIETITIAN]),
+  hasPermission([Permission.UPDATE_PROFILE]),
   dietitianProfileLimiter,
   requestValidator(dietitianProfileSchema),
   async (req, res, next) => {
@@ -40,6 +44,11 @@ router.post(
       );
       res.status(201).json({ success: true, data: profile });
     } catch (error) {
+      captureException(error as Error, {
+        userId: req.user?.userId,
+        path: req.path,
+        method: req.method,
+      });
       next(error);
     }
   }
@@ -48,7 +57,8 @@ router.post(
 router.get(
   "/",
   authenticateToken,
-  validateDietitian,
+  hasRole([Role.DIETITIAN]),
+  hasPermission([Permission.READ_PROFILE]),
   async (req, res, next) => {
     try {
       const profile = await DietitianService.getProfile(req.user!.userId);
@@ -62,7 +72,8 @@ router.get(
 router.put(
   "/",
   authenticateToken,
-  validateDietitian,
+  hasRole([Role.DIETITIAN]),
+  hasPermission([Permission.UPDATE_PROFILE]),
   requestValidator(dietitianProfileSchema),
   async (req, res, next) => {
     try {
@@ -81,7 +92,8 @@ router.put(
 router.post(
   "/specialties/:specialtyId",
   authenticateToken,
-  validateDietitian,
+  hasRole([Role.DIETITIAN]),
+  hasPermission([Permission.UPDATE_PROFILE]),
   async (req, res, next) => {
     try {
       const specialtyId = req.params.specialtyId;
@@ -104,7 +116,8 @@ router.post(
 router.delete(
   "/specialties/:specialtyId",
   authenticateToken,
-  validateDietitian,
+  hasRole([Role.DIETITIAN]),
+  hasPermission([Permission.UPDATE_PROFILE]),
   async (req, res, next) => {
     try {
       const specialtyId = req.params.specialtyId;
