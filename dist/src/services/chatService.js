@@ -17,7 +17,6 @@ const client_1 = require("@prisma/client");
 const client_2 = __importDefault(require("../../prisma/client"));
 const appError_1 = require("../utils/appError");
 const encryption_1 = require("../utils/encryption");
-const chatRepository_1 = require("../repositories/chatRepository");
 const exception_1 = require("../domain/exception");
 class ChatService {
     static createChat(participantIds) {
@@ -25,12 +24,30 @@ class ChatService {
             if (participantIds.length < 2) {
                 throw new exception_1.BusinessException("En az 2 katılımcı gerekli", 400);
             }
-            return yield chatRepository_1.ChatRepository.createChat(participantIds);
+            const chat = yield client_2.default.chat.create({
+                data: {
+                    participants: {
+                        create: participantIds.map((id) => ({
+                            userId: id,
+                        })),
+                    },
+                },
+            });
+            return chat;
         });
     }
     static sendMessage(chatId, userId, data, io) {
         return __awaiter(this, void 0, void 0, function* () {
-            const message = yield chatRepository_1.ChatRepository.sendMessage(chatId, userId, data.content, data.attachments);
+            var _a;
+            const message = yield client_2.default.chatMessage.create({
+                data: {
+                    chatId,
+                    senderId: userId,
+                    content: data.content,
+                    mediaUrl: (_a = data.attachments) === null || _a === void 0 ? void 0 : _a.join(", "), // Assuming attachments are URLs stored as comma-separated values
+                    type: client_1.MessageType.TEXT, // Default type, adjust as necessary
+                },
+            });
             if (io) {
                 io.to(chatId).emit("newMessage", message);
             }
@@ -39,12 +56,37 @@ class ChatService {
     }
     static getMessages(chatId, userId, query) {
         return __awaiter(this, void 0, void 0, function* () {
-            return yield chatRepository_1.ChatRepository.getMessages(chatId, userId, query);
+            const messages = yield client_2.default.chatMessage.findMany({
+                where: {
+                    chatId,
+                    createdAt: query.before ? { lt: query.before } : undefined,
+                },
+                take: query.limit,
+                orderBy: {
+                    createdAt: "desc",
+                },
+            });
+            return messages;
         });
     }
     static markMessageAsRead(messageId, userId, io) {
         return __awaiter(this, void 0, void 0, function* () {
-            const messageRead = yield chatRepository_1.ChatRepository.markMessageAsRead(messageId, userId);
+            const messageRead = yield client_2.default.messageRead.upsert({
+                where: {
+                    messageId_userId: {
+                        messageId,
+                        userId,
+                    },
+                },
+                update: {
+                    readAt: new Date(),
+                },
+                create: {
+                    messageId,
+                    userId,
+                    readAt: new Date(),
+                },
+            });
             if (io) {
                 io.to(messageId).emit("messageRead", { messageId, userId });
             }
@@ -53,12 +95,44 @@ class ChatService {
     }
     static getUserChats(userId) {
         return __awaiter(this, void 0, void 0, function* () {
-            return yield chatRepository_1.ChatRepository.getUserChats(userId);
+            const chats = yield client_2.default.chat.findMany({
+                where: {
+                    participants: {
+                        some: {
+                            userId,
+                        },
+                    },
+                },
+                include: {
+                    participants: true,
+                    messages: true,
+                },
+            });
+            return chats;
         });
     }
     static searchMessages(userId, params) {
         return __awaiter(this, void 0, void 0, function* () {
-            return yield chatRepository_1.ChatRepository.searchMessages(userId, params);
+            const messages = yield client_2.default.chatMessage.findMany({
+                where: {
+                    AND: [
+                        { content: { contains: params.searchTerm } },
+                        { chatId: params.chatId ? params.chatId : undefined },
+                        {
+                            createdAt: {
+                                gte: params.startDate ? params.startDate : undefined,
+                                lte: params.endDate ? params.endDate : undefined,
+                            },
+                        },
+                    ],
+                },
+                skip: (params.page - 1) * params.limit,
+                take: params.limit,
+                orderBy: {
+                    createdAt: "desc",
+                },
+            });
+            return messages;
         });
     }
     static sendEncryptedMessage(chatId, senderId, data, io) {

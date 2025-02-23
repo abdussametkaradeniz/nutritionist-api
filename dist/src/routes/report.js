@@ -16,15 +16,11 @@ const express_1 = __importDefault(require("express"));
 const reportService_1 = require("../services/reportService");
 const auth_1 = require("../middleware/auth");
 const requestValidator_1 = require("../middleware/requestValidator");
-const zod_1 = require("zod");
+const reportValidation_1 = require("src/validations/reportValidation");
 const router = express_1.default.Router();
 // Validasyon şemaları
-const dateRangeSchema = zod_1.z.object({
-    startDate: zod_1.z.string().datetime(),
-    endDate: zod_1.z.string().datetime(),
-});
 // Özet raporu
-router.get("/summary", auth_1.authenticateToken, (0, requestValidator_1.requestValidator)(dateRangeSchema), (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
+router.get("/summary", auth_1.authenticateToken, (0, requestValidator_1.requestValidator)(reportValidation_1.dateRangeSchema), (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const report = yield reportService_1.ReportService.generateSummaryReport({
             userId: req.user.userId,
@@ -38,7 +34,7 @@ router.get("/summary", auth_1.authenticateToken, (0, requestValidator_1.requestV
     }
 }));
 // Besin tüketim analizi
-router.get("/nutrition", auth_1.authenticateToken, (0, requestValidator_1.requestValidator)(dateRangeSchema), (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
+router.get("/nutrition", auth_1.authenticateToken, (0, requestValidator_1.requestValidator)(reportValidation_1.dateRangeSchema), (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const report = yield reportService_1.ReportService.generateNutritionReport({
             userId: req.user.userId,

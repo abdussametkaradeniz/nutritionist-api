@@ -1,7 +1,0 @@
-export enum RoleTypes {
-  ADMIN = "ADMIN",
-  DIETITIAN = "DIETITIAN",
-  BASICUSER = "BASICUSER",
-  PREMIUMUSER = "PREMIUMUSER",
-  USER = "USER",
-}

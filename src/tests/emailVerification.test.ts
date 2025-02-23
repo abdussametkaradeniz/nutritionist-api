@@ -4,7 +4,7 @@ import { PrismaClient } from "@prisma/client";
 import { EmailService } from "../services/emailService";
 import { hashPassword } from "../helpers/password";
 import emailVerification from "../routes/auth/emailVerification";
-import { generateAccessToken } from "src/helpers/jwt";
+import { generateAccessToken } from "../helpers/jwt";
 // Test için minimal bir Express uygulaması oluştur
 const app = express();
 app.use(express.json());

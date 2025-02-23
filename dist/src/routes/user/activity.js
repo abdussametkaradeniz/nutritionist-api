@@ -16,7 +16,7 @@ const express_1 = __importDefault(require("express"));
 const auth_1 = require("../../middleware/auth");
 const activityLogService_1 = require("../../services/activityLogService");
 const requestValidator_1 = require("../../middleware/requestValidator");
-const zod_1 = require("zod");
+const filterActivityValidation_1 = require("src/validations/filterActivityValidation");
 /**
  * @swagger
  * /api/user/activity:
@@ -113,20 +113,6 @@ const zod_1 = require("zod");
  *         description: Yetkilendirme hatası
  */
 const router = express_1.default.Router();
-// Validasyon şemaları
-const filterSchema = zod_1.z.object({
-    action: zod_1.z.string().optional(),
-    startDate: zod_1.z
-        .string()
-        .regex(/^\d{4}-\d{2}-\d{2}$/)
-        .optional(),
-    endDate: zod_1.z
-        .string()
-        .regex(/^\d{4}-\d{2}-\d{2}$/)
-        .optional(),
-    page: zod_1.z.number().min(1).optional(),
-    limit: zod_1.z.number().min(1).max(100).optional(),
-});
 // Aktivite loglarını getir
 router.get("/", auth_1.authenticateToken, (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
@@ -155,7 +141,7 @@ router.get("/:id", auth_1.authenticateToken, (req, res, next) => __awaiter(void 
     }
 }));
 // Aktivite loglarını filtrele
-router.post("/filter", auth_1.authenticateToken, (0, requestValidator_1.requestValidator)(filterSchema), (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
+router.post("/filter", auth_1.authenticateToken, (0, requestValidator_1.requestValidator)(filterActivityValidation_1.filterSchema), (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const filters = Object.assign(Object.assign({}, req.body), { page: req.body.page ? parseInt(req.body.page) : undefined, limit: req.body.limit ? parseInt(req.body.limit) : undefined });
         const activities = yield activityLogService_1.ActivityLogService.filterActivities(req.user.userId, filters);

@@ -16,9 +16,10 @@ const express_1 = __importDefault(require("express"));
 const auth_1 = require("../../middleware/auth");
 const profileService_1 = require("../../services/profileService");
 const requestValidator_1 = require("../../middleware/requestValidator");
-const profileValidator_1 = require("../../validations/user/profileValidator");
+const profileValidator_1 = require("../../validations/profileValidator");
 const multer_1 = __importDefault(require("multer"));
 const exception_1 = require("../../domain/exception");
+const s3_1 = require("src/helpers/s3");
 /**
  * @swagger
  * /api/user/profile:
@@ -112,7 +113,8 @@ router.post("/avatar", auth_1.authenticateToken, upload.single("avatar"), (req, 
         if (!req.file) {
             throw new exception_1.BusinessException("Dosya yüklenmedi", 400);
         }
-        const updatedProfile = yield profileService_1.ProfileService.updateAvatar(req.user.userId, req.file);
+        const avatarUrl = yield (0, s3_1.uploadToS3)(req.file, req.user.userId.toString());
+        const updatedProfile = yield profileService_1.ProfileService.updateAvatar(req.user.userId, avatarUrl);
         res.json(updatedProfile);
     }
     catch (error) {

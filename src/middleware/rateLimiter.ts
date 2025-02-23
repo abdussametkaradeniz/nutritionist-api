@@ -1,21 +1,19 @@
 import rateLimit from "express-rate-limit";
-import { BusinessException } from "../domain/exception";
 import RedisStore from "rate-limit-redis";
 import { redis } from "../lib/redis";
-import { RedisReply } from "rate-limit-redis";
 
 // Redis store'u oluştur
 const getStore = () => {
   return new RedisStore({
-    sendCommand: async (...args: string[]): Promise<RedisReply> =>
-      redis.sendCommand(args) as Promise<RedisReply>,
+    sendCommand: async (...args: string[]): Promise<any> =>
+      redis.sendCommand(args),
   });
 };
 
 // Genel API rate limiter
 export const apiLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 dakika
-  max: 100,
+  max: 10000000,
   store: getStore(),
   message: "Çok fazla istek gönderildi, lütfen daha sonra tekrar deneyin.",
   standardHeaders: true,
@@ -46,10 +44,7 @@ export const emailLimiter = rateLimit({
 
 // Diyetisyen profil işlemleri için rate limiter
 export const dietitianProfileLimiter = rateLimit({
-  store: new RedisStore({
-    sendCommand: async (...args: string[]): Promise<RedisReply> =>
-      redis.sendCommand(args) as Promise<RedisReply>,
-  }),
+  store: getStore(),
   windowMs: 15 * 60 * 1000, // 15 dakika
   max: 100, // IP başına maksimum istek
   message: {
@@ -61,10 +56,7 @@ export const dietitianProfileLimiter = rateLimit({
 
 // Çalışma saatleri güncellemeleri için rate limiter
 export const workingHoursLimiter = rateLimit({
-  store: new RedisStore({
-    sendCommand: async (...args: string[]): Promise<RedisReply> =>
-      redis.sendCommand(args) as Promise<RedisReply>,
-  }),
+  store: getStore(),
   windowMs: 60 * 60 * 1000, // 1 saat
   max: 30, // IP başına maksimum istek
   message: {
@@ -75,10 +67,7 @@ export const workingHoursLimiter = rateLimit({
 
 // Fiyatlandırma güncellemeleri için rate limiter
 export const pricingLimiter = rateLimit({
-  store: new RedisStore({
-    sendCommand: async (...args: string[]): Promise<RedisReply> =>
-      redis.sendCommand(args) as Promise<RedisReply>,
-  }),
+  store: getStore(),
   windowMs: 60 * 60 * 1000, // 1 saat
   max: 20, // IP başına maksimum istek
   message: {

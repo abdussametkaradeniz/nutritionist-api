@@ -31,7 +31,9 @@ function jwt(req, res, next) {
                 return next(new invalid_parameter_1.InvalidParameter("Invalid token"));
             }
             req.user = {
-                roles: verifiedUser.roles,
+                userId: verifiedUser.userId,
+                email: verifiedUser.email,
+                role: verifiedUser.role,
                 permissions: verifiedUser.permissions ? verifiedUser.permissions : [],
             };
             console.log("req.user", req.user);

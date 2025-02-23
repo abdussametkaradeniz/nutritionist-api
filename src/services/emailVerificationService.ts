@@ -2,7 +2,7 @@ import { EmailService } from "./emailService";
 import { BusinessException } from "../domain/exception";
 import { User } from "@prisma/client";
 import crypto from "crypto";
-import prisma from "prisma/client";
+import prisma from "../../prisma/client";
 
 export class EmailVerificationService {
   static async sendVerificationEmail(user: User): Promise<void> {

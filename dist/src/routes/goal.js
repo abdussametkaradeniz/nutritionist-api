@@ -18,22 +18,10 @@ const auth_1 = require("../middleware/auth");
 const requestValidator_1 = require("../middleware/requestValidator");
 const zod_1 = require("zod");
 const client_1 = require("@prisma/client");
+const goalValidation_1 = require("src/validations/goalValidation");
 const router = express_1.default.Router();
-// Validasyon şemaları
-const createGoalSchema = zod_1.z.object({
-    dietitianId: zod_1.z.number().optional(),
-    startDate: zod_1.z.string().datetime(),
-    targetDate: zod_1.z.string().datetime(),
-    startWeight: zod_1.z.number().positive().optional(),
-    targetWeight: zod_1.z.number().positive().optional(),
-    calorieTarget: zod_1.z.number().positive().optional(),
-    proteinTarget: zod_1.z.number().min(0).max(100).optional(),
-    carbTarget: zod_1.z.number().min(0).max(100).optional(),
-    fatTarget: zod_1.z.number().min(0).max(100).optional(),
-    notes: zod_1.z.string().optional(),
-});
 // Hedef oluştur
-router.post("/", auth_1.authenticateToken, (0, requestValidator_1.requestValidator)(createGoalSchema), (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
+router.post("/", auth_1.authenticateToken, (0, requestValidator_1.requestValidator)(goalValidation_1.createGoalSchema), (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const goal = yield goalService_1.GoalService.createGoal(Object.assign(Object.assign({ userId: req.user.userId }, req.body), { startDate: new Date(req.body.startDate), targetDate: new Date(req.body.targetDate) }));
         res.status(201).json({ success: true, data: goal });

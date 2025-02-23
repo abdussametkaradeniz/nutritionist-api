@@ -16,21 +16,10 @@ const express_1 = __importDefault(require("express"));
 const analyticsService_1 = require("../services/analyticsService");
 const auth_1 = require("../middleware/auth");
 const requestValidator_1 = require("../middleware/requestValidator");
-const zod_1 = require("zod");
+const analyticValidation_1 = require("src/validations/analyticValidation");
 const router = express_1.default.Router();
-// Validasyon şemaları
-const trendAnalysisSchema = zod_1.z.object({
-    startDate: zod_1.z.string().datetime(),
-    endDate: zod_1.z.string().datetime(),
-});
-const predictionSchema = zod_1.z.object({
-    goalId: zod_1.z.number(),
-});
-const recommendationSchema = zod_1.z.object({
-    period: zod_1.z.number().min(1).max(365).optional(),
-});
 // Trend analizi
-router.get("/trends", auth_1.authenticateToken, (0, requestValidator_1.requestValidator)(trendAnalysisSchema), (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
+router.get("/trends", auth_1.authenticateToken, (0, requestValidator_1.requestValidator)(analyticValidation_1.trendAnalysisSchema), (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const trends = yield analyticsService_1.AnalyticsService.analyzeTrends({
             userId: req.user.userId,
@@ -44,7 +33,7 @@ router.get("/trends", auth_1.authenticateToken, (0, requestValidator_1.requestVa
     }
 }));
 // Tahminleme
-router.get("/predictions/:goalId", auth_1.authenticateToken, (0, requestValidator_1.requestValidator)(predictionSchema), (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
+router.get("/predictions/:goalId", auth_1.authenticateToken, (0, requestValidator_1.requestValidator)(analyticValidation_1.predictionSchema), (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const predictions = yield analyticsService_1.AnalyticsService.generatePredictions({
             userId: req.user.userId,
@@ -57,7 +46,7 @@ router.get("/predictions/:goalId", auth_1.authenticateToken, (0, requestValidato
     }
 }));
 // Öneriler
-router.get("/recommendations", auth_1.authenticateToken, (0, requestValidator_1.requestValidator)(recommendationSchema), (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
+router.get("/recommendations", auth_1.authenticateToken, (0, requestValidator_1.requestValidator)(analyticValidation_1.recommendationSchema), (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const recommendations = yield analyticsService_1.AnalyticsService.generateRecommendations({
             userId: req.user.userId,

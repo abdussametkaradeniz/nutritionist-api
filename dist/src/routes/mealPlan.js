@@ -16,27 +16,10 @@ const express_1 = __importDefault(require("express"));
 const mealPlanService_1 = require("../services/mealPlanService");
 const auth_1 = require("../middleware/auth");
 const requestValidator_1 = require("../middleware/requestValidator");
-const zod_1 = require("zod");
+const mealValidation_1 = require("src/validations/mealValidation");
 const router = express_1.default.Router();
-// Validasyon şemaları
-const createMealPlanSchema = zod_1.z.object({
-    dietitianId: zod_1.z.number().optional(),
-    startDate: zod_1.z.string().datetime(),
-    endDate: zod_1.z.string().datetime().optional(),
-    meals: zod_1.z.array(zod_1.z.object({
-        name: zod_1.z.string().min(1),
-        time: zod_1.z.string().datetime(),
-        notes: zod_1.z.string().optional(),
-        foods: zod_1.z.array(zod_1.z.object({
-            foodId: zod_1.z.number(),
-            amount: zod_1.z.number().positive(),
-            unit: zod_1.z.string(),
-            notes: zod_1.z.string().optional(),
-        })),
-    })),
-});
 // Öğün planı oluştur
-router.post("/", auth_1.authenticateToken, (0, requestValidator_1.requestValidator)(createMealPlanSchema), (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
+router.post("/", auth_1.authenticateToken, (0, requestValidator_1.requestValidator)(mealValidation_1.createMealPlanSchema), (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const mealPlan = yield mealPlanService_1.MealPlanService.createMealPlan(Object.assign(Object.assign({ userId: req.user.userId }, req.body), { startDate: new Date(req.body.startDate), endDate: req.body.endDate ? new Date(req.body.endDate) : undefined, meals: req.body.meals.map((meal) => (Object.assign(Object.assign({}, meal), { time: new Date(meal.time) }))) }));
         res.status(201).json({ success: true, data: mealPlan });
@@ -46,7 +29,7 @@ router.post("/", auth_1.authenticateToken, (0, requestValidator_1.requestValidat
     }
 }));
 // Öğün planı güncelle
-router.patch("/:id", auth_1.authenticateToken, (0, requestValidator_1.requestValidator)(createMealPlanSchema.partial()), (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
+router.patch("/:id", auth_1.authenticateToken, (0, requestValidator_1.requestValidator)(mealValidation_1.createMealPlanSchema.partial()), (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     var _a;
     try {
         const mealPlan = yield mealPlanService_1.MealPlanService.updateMealPlan(Number(req.params.id), req.user.userId, Object.assign(Object.assign({}, req.body), { endDate: req.body.endDate ? new Date(req.body.endDate) : undefined, meals: (_a = req.body.meals) === null || _a === void 0 ? void 0 : _a.map((meal) => (Object.assign(Object.assign({}, meal), { time: new Date(meal.time) }))) }));

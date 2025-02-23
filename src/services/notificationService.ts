@@ -1,6 +1,6 @@
 import { sendEmail } from "../helpers/email";
 import { sendPushNotification } from "../helpers/pushNotification";
-import prisma from "prisma/client";
+import prisma from "../../prisma/client";
 export class NotificationService {
   static async createNotification(data: {
     userId: number;

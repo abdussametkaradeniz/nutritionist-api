@@ -16,26 +16,12 @@ const express_1 = __importDefault(require("express"));
 const progressService_1 = require("../services/progressService");
 const auth_1 = require("../middleware/auth");
 const requestValidator_1 = require("../middleware/requestValidator");
-const zod_1 = require("zod");
 const multer_1 = __importDefault(require("multer"));
+const progressValidation_1 = require("src/validations/progressValidation");
 const router = express_1.default.Router();
 const upload = (0, multer_1.default)();
-// Validasyon şemaları
-const createProgressSchema = zod_1.z.object({
-    date: zod_1.z.string().datetime(),
-    weight: zod_1.z.number().positive().optional(),
-    bodyFat: zod_1.z.number().min(0).max(100).optional(),
-    muscle: zod_1.z.number().positive().optional(),
-    water: zod_1.z.number().min(0).max(100).optional(),
-    chest: zod_1.z.number().positive().optional(),
-    waist: zod_1.z.number().positive().optional(),
-    hip: zod_1.z.number().positive().optional(),
-    arm: zod_1.z.number().positive().optional(),
-    thigh: zod_1.z.number().positive().optional(),
-    notes: zod_1.z.string().optional(),
-});
 // İlerleme kaydı oluştur
-router.post("/", auth_1.authenticateToken, upload.array("photos"), (0, requestValidator_1.requestValidator)(createProgressSchema), (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
+router.post("/", auth_1.authenticateToken, upload.array("photos"), (0, requestValidator_1.requestValidator)(progressValidation_1.createProgressSchema), (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     var _a;
     try {
         const photos = (_a = req.files) === null || _a === void 0 ? void 0 : _a.map((file) => ({

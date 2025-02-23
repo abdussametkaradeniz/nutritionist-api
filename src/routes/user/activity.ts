@@ -3,7 +3,7 @@ import { authenticateToken } from "../../middleware/auth";
 import { ActivityLogService } from "../../services/activityLogService";
 import { requestValidator } from "../../middleware/requestValidator";
 import { z } from "zod";
-import { filterSchema } from "src/validations/filterActivityValidation";
+import { filterSchema } from "../../validations/filterActivityValidation";
 
 /**
  * @swagger

@@ -1,16 +1,22 @@
 {
   "compilerOptions": {
     /* Base Options */
+
+    "rootDir": "./",
     "target": "es2016",
     "module": "commonjs",
-    "rootDir": "./",
-    "outDir": "./dist",
     "baseUrl": "./",
+    "outDir": "./dist",
 
-    /* Type Checking */
     "strict": true,
     "noImplicitAny": true,
     "strictNullChecks": true,
+    "moduleResolution": "node",
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    /* Type Checking */
+
     "strictFunctionTypes": true,
     "strictBindCallApply": true,
     "strictPropertyInitialization": true,
@@ -18,16 +24,13 @@
     "alwaysStrict": true,
 
     /* Module Resolution */
-    "moduleResolution": "node",
+
     "typeRoots": ["./src/types", "./node_modules/@types"],
     "types": ["node", "express", "jest"],
-    "resolveJsonModule": true,
+    "resolveJsonModule": true
 
     /* Advanced */
-    "esModuleInterop": true,
-    "skipLibCheck": true,
-    "forceConsistentCasingInFileNames": true
   },
-  "include": ["src/**/*"],
+  "include": ["**/*.ts"],
   "exclude": ["node_modules", "dist"]
 }

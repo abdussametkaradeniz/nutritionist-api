@@ -16,9 +16,7 @@ exports.AuthService = void 0;
 const client_1 = __importDefault(require("../../prisma/client"));
 const bcrypt_1 = __importDefault(require("bcrypt"));
 const exception_1 = require("../domain/exception");
-const userRoles_1 = require("../constants/userRoles");
 const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
-const permissions_1 = require("../config/permissions");
 class AuthService {
     register(registerData) {
         return __awaiter(this, void 0, void 0, function* () {
@@ -58,7 +56,9 @@ class AuthService {
                     address: (_f = registerData.address) !== null && _f !== void 0 ? _f : null,
                     avatarUrl: (_g = registerData.avatarUrl) !== null && _g !== void 0 ? _g : null,
                     emailVerified: false,
-                    roles: [userRoles_1.UserRole.BASICUSER],
+                    role: {
+                        connect: { name: "USER" },
+                    },
                     permissions: [],
                     twoFactorEnabled: false,
                     backupCodes: [],
@@ -96,7 +96,6 @@ class AuthService {
             userId: user.userId,
             email: user.email,
             role: user.role,
-            permissions: permissions_1.rolePermissions[user.role],
         };
         const accessToken = jsonwebtoken_1.default.sign(payload, process.env.JWT_SECRET, {
             expiresIn: process.env.JWT_EXPIRES_IN || "15m",
@@ -108,6 +107,9 @@ class AuthService {
         return __awaiter(this, void 0, void 0, function* () {
             const user = yield client_1.default.user.findUnique({
                 where: { email },
+                include: {
+                    role: true,
+                },
             });
             if (!user) {
                 throw new exception_1.BusinessException("Invalid credentials", 401);
@@ -115,13 +117,12 @@ class AuthService {
             const tokens = this.generateTokens({
                 userId: user.id,
                 email: user.email,
-                role: user.roles[0],
+                role: user.role.name,
             });
             return Object.assign(Object.assign({}, tokens), { user: {
                     id: user.id,
                     email: user.email,
-                    role: user.roles[0],
-                    permissions: permissions_1.rolePermissions[user.roles[0]],
+                    role: user.role.name,
                 } });
         });
     }

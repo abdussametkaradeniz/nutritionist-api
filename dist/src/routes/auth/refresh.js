@@ -13,8 +13,8 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = __importDefault(require("express"));
-const tokenService_1 = require("../../services/tokenService");
 const exception_1 = require("../../domain/exception");
+const jwt_1 = require("src/helpers/jwt");
 /**
  * @swagger
  * /api/auth/refresh:
@@ -61,7 +61,7 @@ router.post("/", (req, res, next) => __awaiter(void 0, void 0, void 0, function*
         if (!refreshToken) {
             throw new exception_1.BusinessException("Refresh token is required", 400);
         }
-        const newAccessToken = yield tokenService_1.TokenService.refreshAccessToken(refreshToken);
+        const newAccessToken = yield (0, jwt_1.refreshAccessToken)(refreshToken);
         res.json({
             accessToken: newAccessToken,
         });

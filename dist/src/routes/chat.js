@@ -17,7 +17,7 @@ const chatService_1 = require("../services/chatService");
 const auth_1 = require("../middleware/auth");
 const requestValidator_1 = require("../middleware/requestValidator");
 const rateLimiter_1 = require("../middleware/rateLimiter");
-const chat_1 = require("../schemas/chat");
+const chat_1 = require("../validations/chat");
 const mediaService_1 = require("../services/mediaService");
 const zod_1 = require("zod");
 /**

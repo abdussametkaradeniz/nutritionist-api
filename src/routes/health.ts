@@ -8,7 +8,7 @@ import {
   connectSchema,
   syncDataSchema,
   getDataSchema,
-} from "src/validations/healthValidation";
+} from "../validations/healthValidation";
 
 const router = express.Router();
 

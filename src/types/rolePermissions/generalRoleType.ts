@@ -1,6 +1,6 @@
-import { RoleTypes } from "./roleEnums";
+import { Role } from "@prisma/client";
 
 export type GeneralRoleType = {
   roleId: number;
-  roleName: RoleTypes;
+  roleName: Role;
 };

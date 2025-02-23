@@ -5,6 +5,7 @@ import { UserRole } from "../constants/userRoles";
 import { RegisterType } from "../types/user/Register";
 import jwt from "jsonwebtoken";
 import { Role } from "../models/role.model";
+import { generateTokens } from "../../src/helpers/jwt";
 
 export class AuthService {
   async register(registerData: RegisterType) {
@@ -65,47 +66,21 @@ export class AuthService {
             smsNotifications: false,
           },
         },
-        profile: registerData.profile
-          ? {
-              create: {
-                firstName: registerData.profile.firstName ?? null,
-                lastName: registerData.profile.lastName ?? null,
-                secondName: registerData.profile.secondName ?? null,
-                age: registerData.profile.age ?? null,
-                weight: registerData.profile.weight ?? null,
-                isProfileCompleted: false,
-                photoUrl: registerData.profile.photoUrl ?? null,
-              },
-            }
-          : undefined,
+        profile: {
+          create: {
+            firstName: registerData.profile?.firstName ?? null,
+            lastName: registerData.profile?.lastName ?? null,
+            secondName: registerData.profile?.secondName ?? null,
+            age: registerData.profile?.age ?? null,
+            weight: registerData.profile?.weight ?? null,
+            isProfileCompleted: false,
+            photoUrl: registerData.profile?.photoUrl ?? null,
+          },
+        },
       },
     });
 
     return user;
-  }
-
-  private static generateTokens(user: {
-    userId: number;
-    email: string;
-    role: string;
-  }) {
-    const payload = {
-      userId: user.userId,
-      email: user.email,
-      role: user.role,
-    };
-
-    const accessToken = jwt.sign(payload, process.env.JWT_SECRET!, {
-      expiresIn: process.env.JWT_EXPIRES_IN || "15m",
-    });
-
-    const refreshToken = jwt.sign(
-      { userId: user.userId },
-      process.env.JWT_REFRESH_SECRET!,
-      { expiresIn: process.env.JWT_REFRESH_EXPIRES_IN || "7d" }
-    );
-
-    return { accessToken, refreshToken };
   }
 
   public static async login(email: string, password: string) {
@@ -120,10 +95,12 @@ export class AuthService {
       throw new BusinessException("Invalid credentials", 401);
     }
 
-    const tokens = this.generateTokens({
-      userId: user.id,
+    const tokens = generateTokens({
+      id: user.id,
       email: user.email,
-      role: user.role.name,
+      username: user.username,
+      passwordHash: user.passwordHash,
+      role: user.role.name as UserRole,
     });
 
     return {

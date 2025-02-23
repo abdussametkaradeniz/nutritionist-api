@@ -7,7 +7,7 @@ import {
   predictionSchema,
   recommendationSchema,
   trendAnalysisSchema,
-} from "src/validations/analyticValidation";
+} from "../validations/analyticValidation";
 
 const router = express.Router();
 

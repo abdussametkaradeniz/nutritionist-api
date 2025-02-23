@@ -3,7 +3,7 @@ import { ReportService } from "../services/reportService";
 import { authenticateToken } from "../middleware/auth";
 import { requestValidator } from "../middleware/requestValidator";
 import { z } from "zod";
-import { dateRangeSchema } from "src/validations/reportValidation";
+import { dateRangeSchema } from "../validations/reportValidation";
 
 const router = express.Router();
 

@@ -6,7 +6,7 @@ import {
 } from "../types/request/profile";
 import { comparePassword, hashPassword } from "../helpers/password";
 import { uploadToS3, deleteFromS3 } from "../helpers/s3";
-import prisma from "prisma/client";
+import prisma from "../../prisma/client";
 export class ProfileService {
   static async getProfile(userId: number) {
     return await prisma.user.findUnique({

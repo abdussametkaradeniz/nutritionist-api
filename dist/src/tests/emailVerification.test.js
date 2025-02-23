@@ -17,8 +17,8 @@ const express_1 = __importDefault(require("express"));
 const client_1 = require("@prisma/client");
 const emailService_1 = require("../services/emailService");
 const password_1 = require("../helpers/password");
-const tokenService_1 = require("../services/tokenService");
 const emailVerification_1 = __importDefault(require("../routes/auth/emailVerification"));
+const jwt_1 = require("src/helpers/jwt");
 // Test için minimal bir Express uygulaması oluştur
 const app = (0, express_1.default)();
 app.use(express_1.default.json());
@@ -45,7 +45,7 @@ describe("Email Verification Tests", () => {
             },
         });
         // Access token oluştur
-        authToken = tokenService_1.TokenService.generateAccessToken(testUser);
+        authToken = (0, jwt_1.generateAccessToken)(testUser);
     }));
     afterEach(() => __awaiter(void 0, void 0, void 0, function* () {
         // Test verilerini temizle

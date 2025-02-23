@@ -1,4 +1,4 @@
-import { Role } from "@prisma/client";
+import { UserRole } from "src/constants/userRoles";
 
 export interface UserType {
   id?: number;
@@ -7,7 +7,7 @@ export interface UserType {
   phoneNumber?: string | null;
   passwordHash: string;
   dietitianId?: number | null;
-  userRoles?: Role[];
+  role?: UserRole;
   permissions?: string[];
   lastUpdatingUser?: string | null;
   lastUpdateDate?: Date | null;

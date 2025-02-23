@@ -1,11 +1,11 @@
 import { Forbidden } from "../domain/exception/forbidden";
 import { Unauthorized } from "../domain/exception/unauthorized";
 import { Request, Response, NextFunction, RequestHandler } from "express";
-import { UserRole } from "../types/user/UserRole";
 import jwt, { JwtPayload } from "jsonwebtoken";
 import { AppError } from "../utils/appError";
 import prisma from "../../prisma/client";
-import { verifyToken } from "src/helpers/jwt";
+import { verifyToken } from "../helpers/jwt";
+import { UserRole } from "src/constants/userRoles";
 // Kaldır veya yorum satırına al
 // declare global {
 //   namespace Express {
@@ -76,8 +76,7 @@ export const authenticateToken = async (
 ) => {
   try {
     const authHeader = req.headers["authorization"];
-    const token = authHeader && authHeader.split(" ")[1];
-
+    const token = authHeader?.split(" ")[1];
     if (!token) {
       throw new Unauthorized("No token provided");
     }

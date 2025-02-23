@@ -18,30 +18,10 @@ const auth_1 = require("../middleware/auth");
 const requestValidator_1 = require("../middleware/requestValidator");
 const zod_1 = require("zod");
 const client_1 = require("@prisma/client");
+const healthValidation_1 = require("src/validations/healthValidation");
 const router = express_1.default.Router();
-// Validasyon şemaları
-const connectSchema = zod_1.z.object({
-    provider: zod_1.z.nativeEnum(client_1.HealthAppProvider),
-    accessToken: zod_1.z.string(),
-    refreshToken: zod_1.z.string().optional(),
-    expiresAt: zod_1.z.string().datetime().optional(),
-});
-const syncDataSchema = zod_1.z.object({
-    provider: zod_1.z.nativeEnum(client_1.HealthAppProvider),
-    data: zod_1.z.array(zod_1.z.object({
-        dataType: zod_1.z.string(),
-        value: zod_1.z.number(),
-        unit: zod_1.z.string(),
-        timestamp: zod_1.z.string().datetime(),
-    })),
-});
-const getDataSchema = zod_1.z.object({
-    dataType: zod_1.z.string().optional(),
-    startDate: zod_1.z.string().datetime().optional(),
-    endDate: zod_1.z.string().datetime().optional(),
-});
 // Sağlık uygulaması bağlantısı
-router.post("/connect", auth_1.authenticateToken, (0, requestValidator_1.requestValidator)(connectSchema), (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
+router.post("/connect", auth_1.authenticateToken, (0, requestValidator_1.requestValidator)(healthValidation_1.connectSchema), (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const connection = yield healthService_1.HealthService.connectHealthApp(Object.assign(Object.assign({ userId: req.user.userId }, req.body), (req.body.expiresAt && { expiresAt: new Date(req.body.expiresAt) })));
         res.status(201).json({ success: true, data: connection });
@@ -51,7 +31,7 @@ router.post("/connect", auth_1.authenticateToken, (0, requestValidator_1.request
     }
 }));
 // Sağlık verisi senkronizasyonu
-router.post("/sync", auth_1.authenticateToken, (0, requestValidator_1.requestValidator)(syncDataSchema), (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
+router.post("/sync", auth_1.authenticateToken, (0, requestValidator_1.requestValidator)(healthValidation_1.syncDataSchema), (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const healthData = yield healthService_1.HealthService.syncHealthData({
             userId: req.user.userId,
@@ -65,7 +45,7 @@ router.post("/sync", auth_1.authenticateToken, (0, requestValidator_1.requestVal
     }
 }));
 // Sağlık verilerini getir
-router.get("/data", auth_1.authenticateToken, (0, requestValidator_1.requestValidator)(getDataSchema), (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
+router.get("/data", auth_1.authenticateToken, (0, requestValidator_1.requestValidator)(healthValidation_1.getDataSchema), (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const healthData = yield healthService_1.HealthService.getHealthData({
             userId: req.user.userId,

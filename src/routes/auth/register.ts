@@ -101,7 +101,7 @@ router.post(
       ) {
         next(error);
       } else {
-        next(new Error("An unexpected error occurred"));
+        next(new Error(error as string));
       }
     }
   }

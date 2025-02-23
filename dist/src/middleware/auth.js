@@ -18,7 +18,7 @@ const forbidden_1 = require("../domain/exception/forbidden");
 const unauthorized_1 = require("../domain/exception/unauthorized");
 const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
 const appError_1 = require("../utils/appError");
-const permissions_1 = require("../config/permissions");
+const jwt_1 = require("src/helpers/jwt");
 // Kaldır veya yorum satırına al
 // declare global {
 //   namespace Express {
@@ -57,10 +57,15 @@ const authenticateToken = (req, res, next) => __awaiter(void 0, void 0, void 0, 
         const authHeader = req.headers["authorization"];
         const token = authHeader && authHeader.split(" ")[1];
         if (!token) {
-            throw new appError_1.AppError("No token provided", 401);
+            throw new unauthorized_1.Unauthorized("No token provided");
         }
-        const decoded = jsonwebtoken_1.default.verify(token, process.env.JWT_SECRET);
-        req.user = Object.assign(Object.assign({}, decoded), { permissions: permissions_1.rolePermissions[decoded.role] });
+        const decoded = (0, jwt_1.verifyToken)(token);
+        req.user = {
+            userId: decoded.userId,
+            email: decoded.email,
+            role: decoded.role,
+            permissions: decoded.permissions,
+        };
         next();
     }
     catch (error) {

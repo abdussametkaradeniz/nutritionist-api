@@ -33,7 +33,7 @@ function initializeWebSocket(httpServer) {
         try {
             const decoded = (0, jwt_1.verifyToken)(token);
             const user = yield client_1.default.user.findUnique({
-                where: { id: decoded.id },
+                where: { id: decoded.userId },
             });
             if (!user) {
                 return next(new Error("User not found"));

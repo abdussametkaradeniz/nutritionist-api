@@ -9,6 +9,7 @@ import {
 } from "../../validations/profileValidator";
 import multer from "multer";
 import { BusinessException } from "../../domain/exception";
+import { uploadToS3 } from "../../helpers/s3";
 
 /**
  * @swagger
@@ -117,9 +118,10 @@ router.post(
         throw new BusinessException("Dosya yüklenmedi", 400);
       }
 
+      const avatarUrl = await uploadToS3(req.file, req.user!.userId.toString());
       const updatedProfile = await ProfileService.updateAvatar(
         req.user!.userId,
-        req.file
+        avatarUrl
       );
       res.json(updatedProfile);
     } catch (error) {

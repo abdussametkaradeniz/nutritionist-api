@@ -8,85 +8,78 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.ProfileService = void 0;
-const exception_1 = require("../domain/exception");
 const password_1 = require("../helpers/password");
-const s3_1 = require("../helpers/s3");
-const profileRepository_1 = require("../repositories/profileRepository");
+const client_1 = __importDefault(require("prisma/client"));
 class ProfileService {
     static getProfile(userId) {
         return __awaiter(this, void 0, void 0, function* () {
-            return yield profileRepository_1.ProfileRepository.getProfile(userId);
+            return yield client_1.default.user.findUnique({
+                where: { id: userId },
+                include: {
+                    profile: true, // Profil bilgilerini de getir
+                    preferences: true, // Kullanıcı tercihlerini de getir
+                },
+            });
         });
     }
     static updateProfile(userId, data) {
         return __awaiter(this, void 0, void 0, function* () {
-            return yield profileRepository_1.ProfileRepository.updateProfile(userId, data);
-        });
-    }
-    static updatePreferences(userId, data) {
-        return __awaiter(this, void 0, void 0, function* () {
-            return yield profileRepository_1.ProfileRepository.updatePreferences(userId, data);
-        });
-    }
-    static changePassword(userId, data) {
-        return __awaiter(this, void 0, void 0, function* () {
-            const user = yield profileRepository_1.ProfileRepository.getProfile(userId);
-            const isValidPassword = yield (0, password_1.comparePassword)(data.currentPassword, user.passwordHash);
-            if (!isValidPassword) {
-                throw new exception_1.BusinessException("Mevcut şifre yanlış", 400);
-            }
-            if (data.newPassword !== data.confirmPassword) {
-                throw new exception_1.BusinessException("Yeni şifreler eşleşmiyor", 400);
-            }
-            if (data.currentPassword === data.newPassword) {
-                throw new exception_1.BusinessException("Yeni şifre mevcut şifre ile aynı olamaz", 400);
-            }
-            const newPasswordHash = yield (0, password_1.hashPassword)(data.newPassword);
-            return yield profileRepository_1.ProfileRepository.updateProfile(userId, {
-                passwordHash: newPasswordHash,
+            return yield client_1.default.profile.update({
+                where: { userId: userId },
+                data: data,
             });
         });
     }
-    static updateAvatar(userId, file) {
+    static updatePreferences(userId, preferencesData) {
         return __awaiter(this, void 0, void 0, function* () {
-            // Avatar boyut kontrolü
-            if (file.size > 5 * 1024 * 1024) {
-                // 5MB
-                throw new exception_1.BusinessException("Avatar boyutu 5MB'dan büyük olamaz", 400);
-            }
-            // Dosya tipi kontrolü
-            if (!file.mimetype.startsWith("image/")) {
-                throw new exception_1.BusinessException("Geçersiz dosya tipi", 400);
-            }
-            const avatarUrl = yield (0, s3_1.uploadToS3)(file, `avatars/${userId}`);
-            return yield profileRepository_1.ProfileRepository.updateAvatar(userId, avatarUrl);
+            return yield client_1.default.userPreferences.update({
+                where: { userId: userId },
+                data: preferencesData,
+            });
+        });
+    }
+    static changePassword(userId, newPassword) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const newPasswordHash = yield (0, password_1.hashPassword)(newPassword); // Yeni şifreyi hashle
+            return yield client_1.default.user.update({
+                where: { id: userId },
+                data: { passwordHash: newPasswordHash },
+            });
+        });
+    }
+    static updateAvatar(userId, avatarUrl) {
+        return __awaiter(this, void 0, void 0, function* () {
+            return yield client_1.default.profile.update({
+                where: { userId: userId },
+                data: { photoUrl: avatarUrl },
+            });
         });
     }
     static deleteAvatar(userId) {
         return __awaiter(this, void 0, void 0, function* () {
-            const user = yield profileRepository_1.ProfileRepository.getProfile(userId);
-            if (user.avatarUrl) {
-                yield (0, s3_1.deleteFromS3)(user.avatarUrl);
-            }
-            return yield profileRepository_1.ProfileRepository.deleteAvatar(userId);
+            return yield client_1.default.profile.update({
+                where: { userId: userId },
+                data: { photoUrl: null },
+            });
         });
     }
     static deleteAccount(userId) {
         return __awaiter(this, void 0, void 0, function* () {
-            // Avatar varsa sil
-            const user = yield profileRepository_1.ProfileRepository.getProfile(userId);
-            if (user.avatarUrl) {
-                yield (0, s3_1.deleteFromS3)(user.avatarUrl);
-            }
-            return yield profileRepository_1.ProfileRepository.deleteAccount(userId);
+            return yield client_1.default.user.delete({
+                where: { id: userId },
+            });
         });
     }
     static getPreferences(userId) {
         return __awaiter(this, void 0, void 0, function* () {
-            const preferences = yield profileRepository_1.ProfileRepository.getPreferences(userId);
-            return preferences !== null && preferences !== void 0 ? preferences : {};
+            return yield client_1.default.userPreferences.findUnique({
+                where: { userId: userId },
+            });
         });
     }
 }

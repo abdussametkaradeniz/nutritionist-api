@@ -13,6 +13,8 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.generateTokens = generateTokens;
+exports.generateAccessToken = generateAccessToken;
+exports.generateRefreshToken = generateRefreshToken;
 exports.refreshAccessToken = refreshAccessToken;
 exports.verifyToken = verifyToken;
 const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
@@ -32,16 +34,13 @@ function generateTokens(user) {
     });
 }
 function generateAccessToken(user) {
-    var _a;
     const payload = {
         id: user.id,
         username: user.username,
         email: user.email,
-        roles: ((_a = user.userRoles) === null || _a === void 0 ? void 0 : _a.map((role) => role.name)) || [],
-        permissions: user.permissions || [],
     };
     return jsonwebtoken_1.default.sign(payload, process.env.JWT_SECRET_KEY, {
-        expiresIn: ACCESS_TOKEN_EXPIRES_IN,
+        expiresIn: ACCESS_TOKEN_EXPIRES_IN, // Örneğin 1 saat geçerlilik süresi
     });
 }
 function generateRefreshToken(userId) {
@@ -82,7 +81,7 @@ function refreshAccessToken(refreshToken) {
                     id: tokenData.userId,
                 },
                 include: {
-                    userRoles: true,
+                    role: true,
                 },
             });
             if (!user) {

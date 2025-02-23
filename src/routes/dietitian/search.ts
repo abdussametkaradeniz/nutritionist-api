@@ -3,7 +3,7 @@ import { DietitianService } from "../../services/dietitianService";
 import { requestValidator } from "../../middleware/requestValidator";
 import { z } from "zod";
 import { Specialization } from "@prisma/client";
-import { searchParamsSchema } from "src/validations/searchValidation";
+import { searchParamsSchema } from "../../validations/searchValidation";
 
 const router = express.Router();
 

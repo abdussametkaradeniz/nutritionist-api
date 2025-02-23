@@ -1,6 +1,6 @@
 import express from "express";
 import { BusinessException } from "../../domain/exception";
-import { refreshAccessToken } from "src/helpers/jwt";
+import { refreshAccessToken } from "../../helpers/jwt";
 
 /**
  * @swagger

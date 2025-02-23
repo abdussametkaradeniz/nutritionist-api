@@ -16,9 +16,8 @@ const express_1 = __importDefault(require("express"));
 const appointmentService_1 = require("../services/appointmentService");
 const auth_1 = require("../middleware/auth");
 const requestValidator_1 = require("../middleware/requestValidator");
-const appointment_1 = require("../schemas/appointment");
+const appointment_1 = require("../validations/appointment");
 const rateLimiter_1 = require("../middleware/rateLimiter");
-const role_model_1 = require("../models/role.model");
 const rbac_1 = require("../middleware/rbac");
 const router = express_1.default.Router();
 /**
@@ -163,7 +162,7 @@ const router = express_1.default.Router();
  *         description: Randevu bulunamadı
  */
 // Randevu oluşturma
-router.post("/", auth_1.authenticateToken, (0, rbac_1.hasPermission)([role_model_1.Permission.CREATE_APPOINTMENT]), rateLimiter_1.appointmentLimiter, (0, requestValidator_1.requestValidator)(appointment_1.createAppointmentSchema), (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
+router.post("/", auth_1.authenticateToken, (0, rbac_1.hasPermission)(["create:appointment"]), rateLimiter_1.appointmentLimiter, (0, requestValidator_1.requestValidator)(appointment_1.createAppointmentSchema), (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const appointment = yield appointmentService_1.AppointmentService.createAppointment(req.user.userId, req.body);
         res.status(201).json({ success: true, data: appointment });
@@ -173,7 +172,7 @@ router.post("/", auth_1.authenticateToken, (0, rbac_1.hasPermission)([role_model
     }
 }));
 // Randevu güncelleme (durum değişikliği)
-router.patch("/:id/status", auth_1.authenticateToken, (0, rbac_1.hasPermission)([role_model_1.Permission.UPDATE_APPOINTMENT]), (0, requestValidator_1.requestValidator)(appointment_1.updateAppointmentSchema), (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
+router.patch("/:id/status", auth_1.authenticateToken, (0, rbac_1.hasPermission)(["update:appointment"]), (0, requestValidator_1.requestValidator)(appointment_1.updateAppointmentSchema), (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const appointment = yield appointmentService_1.AppointmentService.updateAppointmentStatus(req.params.id, req.user.userId, req.body);
         res.json({ success: true, data: appointment });

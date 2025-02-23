@@ -1,7 +1,7 @@
 import { Router, Request, Response, NextFunction } from "express";
 import { authenticateToken } from "../../middleware/auth";
 import { BusinessException } from "../../domain/exception";
-import { SessionService } from "src/services/sessionService";
+import { SessionService } from "../../services/sessionService";
 
 const router = Router();
 

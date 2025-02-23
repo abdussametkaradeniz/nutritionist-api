@@ -3,7 +3,7 @@ import { MealPlanService } from "../services/mealPlanService";
 import { authenticateToken } from "../middleware/auth";
 import { requestValidator } from "../middleware/requestValidator";
 import { z } from "zod";
-import { createMealPlanSchema } from "src/validations/mealValidation";
+import { createMealPlanSchema } from "../validations/mealValidation";
 
 const router = express.Router();
 

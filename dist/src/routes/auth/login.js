@@ -13,14 +13,14 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = __importDefault(require("express"));
-const loginValidator_1 = require("../../validations/auth/loginValidator");
+const loginValidator_1 = require("../../validations/loginValidator");
 const requestValidator_1 = require("../../middleware/requestValidator");
 const client_1 = require("@prisma/client");
-const tokenService_1 = require("../../services/tokenService");
 const sessionService_1 = require("../../services/sessionService");
 const exception_1 = require("../../domain/exception");
 const password_1 = require("../../helpers/password");
 const speakeasy_1 = __importDefault(require("speakeasy"));
+const jwt_1 = require("src/helpers/jwt");
 /**
  * @swagger
  * /api/auth/login:
@@ -118,10 +118,10 @@ router.post("/", (0, requestValidator_1.requestValidator)(loginValidator_1.login
             }
         }
         // Access ve Refresh token oluştur
-        const accessToken = tokenService_1.TokenService.generateAccessToken(user);
-        const refreshToken = yield tokenService_1.TokenService.generateRefreshToken(user);
+        const accessToken = (0, jwt_1.generateAccessToken)(user);
+        const refreshToken = yield (0, jwt_1.generateRefreshToken)(user.id);
         // Session oluştur
-        const sessionId = yield sessionService.createSession({
+        const sessionId = yield sessionService_1.SessionService.createSession({
             userId: user.id,
             deviceId: req.headers["x-device-id"],
             deviceType: req.headers["x-device-type"],

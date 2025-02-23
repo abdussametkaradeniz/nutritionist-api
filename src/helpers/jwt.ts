@@ -3,18 +3,20 @@ import { TokenType, RefreshTokenPayload } from "../types/auth/TokenType";
 import { UserType } from "../types/user/User";
 import prisma from "../../prisma/client";
 import { uuid } from "uuidv4";
+import { UserRole } from "src/constants/userRoles";
 
-const ACCESS_TOKEN_EXPIRES_IN = "15m";
-const REFRESH_TOKEN_EXPIRES_IN = "7d";
+const ACCESS_TOKEN_EXPIRES_IN = 1 * 60 * 60;
+const REFRESH_TOKEN_EXPIRES_IN = 7 * 24 * 60 * 60;
 
 export async function generateTokens(user: UserType): Promise<TokenType> {
   const accessToken = generateAccessToken(user);
   const refreshToken = await generateRefreshToken(user.id!);
+  const expDate = new Date(Date.now() + ACCESS_TOKEN_EXPIRES_IN);
 
   return {
     accessToken,
     refreshToken,
-    expiresIn: 15 * 60, // 15 minutes in seconds
+    expiresIn: expDate,
   };
 }
 
@@ -26,21 +28,21 @@ export function generateAccessToken(user: UserType): string {
   };
 
   return jwt.sign(payload, process.env.JWT_SECRET_KEY as Secret, {
-    expiresIn: ACCESS_TOKEN_EXPIRES_IN, // Örneğin 1 saat geçerlilik süresi
+    expiresIn: "2 days",
   });
 }
 
 export async function generateRefreshToken(userId: number): Promise<string> {
   const tokenFamily = uuid();
-  const expiresAt = new Date();
-  expiresAt.setDate(expiresAt.getDate() + 7); // 7 days from now
+
+  const expirationDate = new Date(Date.now() + REFRESH_TOKEN_EXPIRES_IN);
 
   // Save refresh token to database
   await prisma.refreshToken.create({
     data: {
       userId,
       token: tokenFamily,
-      expiresAt,
+      expiresAt: expirationDate,
     },
   });
 
@@ -93,9 +95,12 @@ export async function refreshAccessToken(
         isRevoked: true,
       },
     });
-
+    const userWithCorrectRole: UserType = {
+      ...user,
+      role: user.role.name as UserRole,
+    };
     // Generate new tokens
-    return await generateTokens(user);
+    return await generateTokens(userWithCorrectRole);
   } catch (error) {
     return null;
   }

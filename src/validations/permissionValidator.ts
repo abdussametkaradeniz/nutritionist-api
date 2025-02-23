@@ -1,5 +1,5 @@
 import Joi, { date } from "joi";
-import { RoleTypes } from "../../types/rolePermissions/roleEnums";
+import { Role } from "../models/role.model";
 
 export const permissionCreateSchema = Joi.object({
   permission: Joi.object({
@@ -23,7 +23,7 @@ export const permissionCreateSchema = Joi.object({
     .required(),
 });
 
-const roleNames = Object.values(RoleTypes);
+const roleNames = Object.values(Role);
 
 export const permissionUpdateSchema = Joi.object({
   permission: Joi.object({

@@ -40,9 +40,6 @@ export const setRoutes = async (app: express.Application) => {
   app.use(express.static("public"));
   app.use(helmet());
 
-  // Global rate limiter - tüm API rotalarına uygula
-  app.use("/api", apiLimiter);
-
   // Auth routes with specific limiters
   app.use("/api/login", authLimiter, login);
   app.use("/api/register", authLimiter, register);

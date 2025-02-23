@@ -10,9 +10,9 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = require("express");
-const sessionRepository_1 = require("../../repositories/sessionRepository");
 const auth_1 = require("../../middleware/auth");
 const exception_1 = require("../../domain/exception");
+const sessionService_1 = require("src/services/sessionService");
 const router = (0, express_1.Router)();
 /**
  * @swagger
@@ -49,7 +49,7 @@ router.post("/", auth_1.authenticateToken, (req, res, next) => __awaiter(void 0,
         if (!sessionId) {
             throw new exception_1.BusinessException("Session ID gerekli", 400);
         }
-        yield sessionRepository_1.SessionRepository.deactivateSession(sessionId);
+        yield sessionService_1.SessionService.deactivateSession(sessionId);
         res.json({ success: true, message: "Başarıyla çıkış yapıldı" });
     }
     catch (error) {
@@ -63,7 +63,7 @@ router.post("/all", auth_1.authenticateToken, (req, res, next) => __awaiter(void
         if (!((_a = req.user) === null || _a === void 0 ? void 0 : _a.userId)) {
             throw new exception_1.BusinessException("Kullanıcı bulunamadı", 401);
         }
-        yield sessionRepository_1.SessionRepository.deactivateAllSessions(req.user.userId);
+        yield sessionService_1.SessionService.deactivateAllSessions(req.user.userId);
         res.json({ success: true, message: "Tüm oturumlardan çıkış yapıldı" });
     }
     catch (error) {

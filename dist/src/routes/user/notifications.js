@@ -17,8 +17,7 @@ const client_1 = require("@prisma/client");
 const auth_1 = require("../../middleware/auth");
 const notificationService_1 = require("../../services/notificationService");
 const requestValidator_1 = require("../../middleware/requestValidator");
-const zod_1 = require("zod");
-const notificationValidator_1 = require("../../validations/user/notificationValidator");
+const notificationValidator_1 = require("../../validations/notificationValidator");
 /**
  * @swagger
  * /api/user/notifications:
@@ -124,12 +123,6 @@ const notificationValidator_1 = require("../../validations/user/notificationVali
  */
 const router = express_1.default.Router();
 const prisma = new client_1.PrismaClient();
-// Validasyon şemaları
-const getNotificationsSchema = zod_1.z.object({
-    page: zod_1.z.number().min(1).optional(),
-    limit: zod_1.z.number().min(1).max(100).optional(),
-    onlyUnread: zod_1.z.boolean().optional(),
-});
 // Bildirim listesini getir
 router.get("/", auth_1.authenticateToken, (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {

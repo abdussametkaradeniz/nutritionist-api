@@ -16,7 +16,7 @@ exports.SessionService = void 0;
 const client_1 = __importDefault(require("../../prisma/client"));
 const exception_1 = require("../domain/exception");
 class SessionService {
-    createSession(data) {
+    static createSession(data) {
         return __awaiter(this, void 0, void 0, function* () {
             return yield client_1.default.session.create({
                 data: {
@@ -59,10 +59,15 @@ class SessionService {
             });
         });
     }
-    updateSession(sessionId, data) {
+    static updateSession(sessionId, data) {
         return __awaiter(this, void 0, void 0, function* () {
             // Session'ın varlığını kontrol et
-            yield this.getSession(sessionId);
+            const session = yield client_1.default.session.findUnique({
+                where: { id: sessionId },
+            });
+            if (!session) {
+                throw new exception_1.BusinessException("Session not found", 404);
+            }
             return yield client_1.default.session.update({
                 where: { id: sessionId },
                 data: {

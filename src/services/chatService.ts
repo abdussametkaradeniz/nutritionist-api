@@ -10,7 +10,16 @@ export class ChatService {
     if (participantIds.length < 2) {
       throw new BusinessException("En az 2 katılımcı gerekli", 400);
     }
-    return await ChatRepository.createChat(participantIds);
+    const chat = await prisma.chat.create({
+      data: {
+        participants: {
+          create: participantIds.map((id) => ({
+            userId: id,
+          })),
+        },
+      },
+    });
+    return chat;
   }
 
   static async sendMessage(
@@ -19,12 +28,15 @@ export class ChatService {
     data: { content: string; attachments?: string[] },
     io?: Server
   ) {
-    const message = await ChatRepository.sendMessage(
-      chatId,
-      userId,
-      data.content,
-      data.attachments
-    );
+    const message = await prisma.chatMessage.create({
+      data: {
+        chatId,
+        senderId: userId,
+        content: data.content,
+        mediaUrl: data.attachments?.join(", "), // Assuming attachments are URLs stored as comma-separated values
+        type: MessageType.TEXT, // Default type, adjust as necessary
+      },
+    });
 
     if (io) {
       io.to(chatId).emit("newMessage", message);
@@ -38,7 +50,17 @@ export class ChatService {
     userId: number,
     query: { before?: Date; limit?: number }
   ) {
-    return await ChatRepository.getMessages(chatId, userId, query);
+    const messages = await prisma.chatMessage.findMany({
+      where: {
+        chatId,
+        createdAt: query.before ? { lt: query.before } : undefined,
+      },
+      take: query.limit,
+      orderBy: {
+        createdAt: "desc",
+      },
+    });
+    return messages;
   }
 
   static async markMessageAsRead(
@@ -46,10 +68,22 @@ export class ChatService {
     userId: number,
     io?: Server
   ) {
-    const messageRead = await ChatRepository.markMessageAsRead(
-      messageId,
-      userId
-    );
+    const messageRead = await prisma.messageRead.upsert({
+      where: {
+        messageId_userId: {
+          messageId,
+          userId,
+        },
+      },
+      update: {
+        readAt: new Date(),
+      },
+      create: {
+        messageId,
+        userId,
+        readAt: new Date(),
+      },
+    });
 
     if (io) {
       io.to(messageId).emit("messageRead", { messageId, userId });
@@ -59,7 +93,20 @@ export class ChatService {
   }
 
   static async getUserChats(userId: number) {
-    return await ChatRepository.getUserChats(userId);
+    const chats = await prisma.chat.findMany({
+      where: {
+        participants: {
+          some: {
+            userId,
+          },
+        },
+      },
+      include: {
+        participants: true,
+        messages: true,
+      },
+    });
+    return chats;
   }
 
   static async searchMessages(
@@ -73,7 +120,26 @@ export class ChatService {
       limit: number;
     }
   ) {
-    return await ChatRepository.searchMessages(userId, params);
+    const messages = await prisma.chatMessage.findMany({
+      where: {
+        AND: [
+          { content: { contains: params.searchTerm } },
+          { chatId: params.chatId ? params.chatId : undefined },
+          {
+            createdAt: {
+              gte: params.startDate ? params.startDate : undefined,
+              lte: params.endDate ? params.endDate : undefined,
+            },
+          },
+        ],
+      },
+      skip: (params.page - 1) * params.limit,
+      take: params.limit,
+      orderBy: {
+        createdAt: "desc",
+      },
+    });
+    return messages;
   }
 
   static async sendEncryptedMessage(

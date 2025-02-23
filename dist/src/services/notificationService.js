@@ -19,23 +19,31 @@ var __rest = (this && this.__rest) || function (s, e) {
         }
     return t;
 };
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.NotificationService = void 0;
-const notificationRepository_1 = require("../repositories/notificationRepository");
 const email_1 = require("../helpers/email");
 const pushNotification_1 = require("../helpers/pushNotification");
+const client_1 = __importDefault(require("prisma/client"));
 class NotificationService {
     static createNotification(data) {
         return __awaiter(this, void 0, void 0, function* () {
             var _a, _b;
-            const { sendPush, sendEmail: shouldSendEmail } = data, notificationData = __rest(data, ["sendPush", "sendEmail"]);
-            const notification = yield notificationRepository_1.NotificationRepository.createNotification(notificationData);
+            const { userId, sendPush, sendEmail: shouldSendEmail } = data, notificationData = __rest(data, ["userId", "sendPush", "sendEmail"]);
+            const notification = yield client_1.default.notification.create({
+                data: Object.assign(Object.assign({}, notificationData), { user: { connect: { id: userId } } }),
+            });
             try {
                 if (sendPush) {
-                    const user = yield notificationRepository_1.NotificationRepository.getUserWithPreferences(data.userId);
+                    const user = yield client_1.default.user.findUnique({
+                        where: { id: userId },
+                        include: { preferences: true },
+                    });
                     if ((_a = user === null || user === void 0 ? void 0 : user.preferences) === null || _a === void 0 ? void 0 : _a.pushNotifications) {
                         yield (0, pushNotification_1.sendPushNotification)({
-                            userId: data.userId,
+                            userId: userId,
                             title: data.title,
                             body: data.message,
                             data: data.data,
@@ -43,7 +51,10 @@ class NotificationService {
                     }
                 }
                 if (shouldSendEmail) {
-                    const user = yield notificationRepository_1.NotificationRepository.getUserWithPreferences(data.userId);
+                    const user = yield client_1.default.user.findUnique({
+                        where: { id: userId },
+                        include: { preferences: true },
+                    });
                     if ((_b = user === null || user === void 0 ? void 0 : user.preferences) === null || _b === void 0 ? void 0 : _b.emailNotifications) {
                         yield (0, email_1.sendEmail)({
                             to: user.email,
@@ -63,65 +74,40 @@ class NotificationService {
     }
     static getUserNotifications(userId_1, page_1, limit_1) {
         return __awaiter(this, arguments, void 0, function* (userId, page, limit, onlyUnread = false) {
-            return yield notificationRepository_1.NotificationRepository.getUserNotifications(userId, page, limit, onlyUnread);
+            return yield client_1.default.notification.findMany({
+                where: { userId, isRead: onlyUnread ? false : undefined },
+                skip: ((page !== null && page !== void 0 ? page : 1) - 1) * (limit !== null && limit !== void 0 ? limit : 10),
+                take: limit !== null && limit !== void 0 ? limit : 10,
+            });
         });
     }
     static markAsRead(id, userId) {
         return __awaiter(this, void 0, void 0, function* () {
-            return yield notificationRepository_1.NotificationRepository.markAsRead(id, userId);
+            return yield client_1.default.notification.updateMany({
+                where: { id, userId },
+                data: { isRead: true, readAt: new Date() },
+            });
         });
     }
     static markAllAsRead(userId) {
         return __awaiter(this, void 0, void 0, function* () {
-            return yield notificationRepository_1.NotificationRepository.markAllAsRead(userId);
+            return yield client_1.default.notification.updateMany({
+                where: { userId, isRead: false },
+                data: { isRead: true, readAt: new Date() },
+            });
         });
     }
     static getUnreadCount(userId) {
         return __awaiter(this, void 0, void 0, function* () {
-            return yield notificationRepository_1.NotificationRepository.getUnreadCount(userId);
+            return yield client_1.default.notification.count({
+                where: { userId, isRead: false },
+            });
         });
     }
     static deleteNotification(id, userId) {
         return __awaiter(this, void 0, void 0, function* () {
-            return yield notificationRepository_1.NotificationRepository.deleteNotification(id, userId);
-        });
-    }
-    // Helper methods
-    static sendAppointmentNotification(userId, appointmentData) {
-        return __awaiter(this, void 0, void 0, function* () {
-            return yield this.createNotification({
-                userId,
-                title: "Yeni Randevu",
-                message: `${appointmentData.date} tarihinde randevunuz var.`,
-                type: "APPOINTMENT",
-                data: appointmentData,
-                sendPush: true,
-                sendEmail: true,
-            });
-        });
-    }
-    static sendMessageNotification(userId, messageData) {
-        return __awaiter(this, void 0, void 0, function* () {
-            return yield this.createNotification({
-                userId,
-                title: "Yeni Mesaj",
-                message: `${messageData.senderName}: ${messageData.preview}`,
-                type: "MESSAGE",
-                data: messageData,
-                sendPush: true,
-            });
-        });
-    }
-    static sendSystemNotification(userId, title, message, data) {
-        return __awaiter(this, void 0, void 0, function* () {
-            return yield this.createNotification({
-                userId,
-                title,
-                message,
-                type: "SYSTEM",
-                data,
-                sendPush: true,
-                sendEmail: true,
+            return yield client_1.default.notification.deleteMany({
+                where: { id, userId },
             });
         });
     }

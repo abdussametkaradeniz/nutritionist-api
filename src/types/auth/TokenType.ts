@@ -1,7 +1,7 @@
 export interface TokenType {
   accessToken: string;
   refreshToken: string;
-  expiresIn: number;
+  expiresIn: Date;
 }
 
 export interface RefreshTokenPayload {

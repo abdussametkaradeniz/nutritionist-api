@@ -4,8 +4,12 @@ import { InvalidParameter } from "../domain/exception/invalid-parameter";
 import { UserRole } from "../constants/userRoles";
 
 export async function jwt(req: Request, res: Response, next: NextFunction) {
-  const token = req.header("Authorization");
+  const authHeader = req.header("Authorization");
+  if (!authHeader) {
+    return next(new InvalidParameter("Token is missing"));
+  }
 
+  const token = authHeader.split(" ")[1];
   if (!token) {
     return next(new InvalidParameter("Token is missing"));
   }
@@ -14,9 +18,6 @@ export async function jwt(req: Request, res: Response, next: NextFunction) {
     return next(new InvalidParameter("Invalid token format"));
   }
 
-  if (token && typeof token !== "string") {
-    return next(new InvalidParameter("Invalid token format"));
-  }
   try {
     const verifiedUser = await verifyToken(token);
     if (!verifiedUser) {

@@ -8,24 +8,33 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.ActivityLogService = void 0;
-const activityLogRepository_1 = require("../repositories/activityLogRepository");
 const exception_1 = require("../domain/exception");
+const client_1 = __importDefault(require("prisma/client"));
 class ActivityLogService {
     static logActivity(data) {
         return __awaiter(this, void 0, void 0, function* () {
-            return yield activityLogRepository_1.ActivityLogRepository.create(data);
+            return yield client_1.default.activityLog.create({ data });
         });
     }
     static getActivityById(id, userId) {
         return __awaiter(this, void 0, void 0, function* () {
-            return yield activityLogRepository_1.ActivityLogRepository.findById(id, userId);
+            return yield client_1.default.activityLog.findUnique({
+                where: { id, userId },
+            });
         });
     }
     static getUserActivities(userId_1) {
         return __awaiter(this, arguments, void 0, function* (userId, page = 1, limit = 10) {
-            return yield activityLogRepository_1.ActivityLogRepository.findByUserId(userId, page, limit);
+            return yield client_1.default.activityLog.findMany({
+                where: { userId },
+                skip: (page - 1) * limit,
+                take: limit,
+            });
         });
     }
     static filterActivities(userId, filters) {
@@ -50,7 +59,9 @@ class ActivityLogService {
                 parsedFilters.startDate > parsedFilters.endDate) {
                 throw new exception_1.BusinessException("Başlangıç tarihi bitiş tarihinden büyük olamaz", 400);
             }
-            return yield activityLogRepository_1.ActivityLogRepository.findWithFilters(userId, parsedFilters);
+            return yield client_1.default.activityLog.findMany({
+                where: Object.assign({ userId }, parsedFilters),
+            });
         });
     }
     // Yardımcı metodlar

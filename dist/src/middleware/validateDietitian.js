@@ -16,17 +16,21 @@ exports.validateDietitian = void 0;
 const client_1 = __importDefault(require("../../prisma/client"));
 const appError_1 = require("../utils/appError");
 const validateDietitian = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
-    var _a;
+    var _a, _b;
     try {
         const userId = (_a = req.user) === null || _a === void 0 ? void 0 : _a.userId;
         if (!userId) {
             throw new appError_1.AppError("Unauthorized", 401);
         }
-        // Kullanıcının diyetisyen rolüne sahip olup olmadığını kontrol et
+        // Include the role relation in the query
         const user = yield client_1.default.user.findUnique({
             where: { id: userId },
+            include: {
+                role: true, // Assuming 'role' is a relation
+            },
         });
-        if (!(user === null || user === void 0 ? void 0 : user.roles.includes("DIETITIAN"))) {
+        // Access the role property correctly
+        if (((_b = user === null || user === void 0 ? void 0 : user.role) === null || _b === void 0 ? void 0 : _b.name) !== "DIETITIAN") {
             throw new appError_1.AppError("Only dietitians can access this resource", 403);
         }
         next();

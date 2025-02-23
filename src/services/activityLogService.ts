@@ -1,6 +1,6 @@
-import { ActivityFilters } from "src/types/activityFilters";
+import { ActivityFilters } from "../types/activityFilters";
 import { BusinessException } from "../domain/exception";
-import prisma from "prisma/client";
+import prisma from "../../prisma/client";
 export class ActivityLogService {
   static async logActivity(data: {
     userId: number;

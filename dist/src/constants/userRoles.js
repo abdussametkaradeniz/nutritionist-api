@@ -5,7 +5,5 @@ var UserRole;
 (function (UserRole) {
     UserRole["ADMIN"] = "ADMIN";
     UserRole["DIETITIAN"] = "DIETITIAN";
-    UserRole["BASICUSER"] = "BASICUSER";
-    UserRole["PREMIUMUSER"] = "PREMIUMUSER";
     UserRole["USER"] = "USER";
 })(UserRole || (exports.UserRole = UserRole = {}));

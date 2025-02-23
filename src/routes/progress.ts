@@ -4,7 +4,7 @@ import { authenticateToken } from "../middleware/auth";
 import { requestValidator } from "../middleware/requestValidator";
 import { z } from "zod";
 import multer from "multer";
-import { createProgressSchema } from "src/validations/progressValidation";
+import { createProgressSchema } from "../validations/progressValidation";
 
 const router = express.Router();
 const upload = multer();

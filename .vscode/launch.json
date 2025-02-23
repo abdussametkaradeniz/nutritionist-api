@@ -7,8 +7,10 @@
       "name": "Launch Program",
       "skipFiles": ["<node_internals>/**"],
       "program": "${workspaceFolder}/index.ts",
-      "preLaunchTask": "tsc: build - tsconfig.json",
-      "outFiles": ["${workspaceFolder}/dist/**/*.js"]
+      "runtimeArgs": ["-r", "ts-node/register"], // Bu satırı ekleyin
+      "args": [], // Komut satırı argümanları buraya eklenebilir
+      "cwd": "${workspaceFolder}", // Çalışma dizini
+      "console": "integratedTerminal" // Konsol çıktıları için
     }
   ]
 }

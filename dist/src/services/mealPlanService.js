@@ -32,10 +32,8 @@ class MealPlanService {
                 const dietitian = yield client_1.default.user.findFirst({
                     where: {
                         id: data.dietitianId,
-                        userRoles: {
-                            some: {
-                                name: "DIETITIAN",
-                            },
+                        role: {
+                            name: "DIETITIAN",
                         },
                     },
                 });

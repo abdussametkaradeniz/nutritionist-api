@@ -6,7 +6,7 @@ import { z } from "zod";
 import {
   createCategorySchema,
   createFoodSchema,
-} from "src/validations/foodValidation";
+} from "../validations/foodValidation";
 
 const router = express.Router();
 

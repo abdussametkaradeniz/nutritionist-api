@@ -17,28 +17,10 @@ const foodService_1 = require("../services/foodService");
 const auth_1 = require("../middleware/auth");
 const requestValidator_1 = require("../middleware/requestValidator");
 const zod_1 = require("zod");
+const foodValidation_1 = require("src/validations/foodValidation");
 const router = express_1.default.Router();
-// Validasyon şemaları
-const createCategorySchema = zod_1.z.object({
-    name: zod_1.z.string().min(1, "Kategori adı gerekli"),
-    description: zod_1.z.string().optional(),
-});
-const createFoodSchema = zod_1.z.object({
-    name: zod_1.z.string().min(1, "Besin adı gerekli"),
-    categoryId: zod_1.z.number().int().positive(),
-    calories: zod_1.z.number().min(0),
-    protein: zod_1.z.number().min(0),
-    carbs: zod_1.z.number().min(0),
-    fat: zod_1.z.number().min(0),
-    fiber: zod_1.z.number().min(0),
-    sugar: zod_1.z.number().min(0).optional(),
-    sodium: zod_1.z.number().min(0).optional(),
-    cholesterol: zod_1.z.number().min(0).optional(),
-    servingSize: zod_1.z.number().positive(),
-    servingUnit: zod_1.z.string().min(1),
-});
 // Kategori route'ları
-router.post("/categories", auth_1.authenticateToken, (0, requestValidator_1.requestValidator)(createCategorySchema), (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
+router.post("/categories", auth_1.authenticateToken, (0, requestValidator_1.requestValidator)(foodValidation_1.createCategorySchema), (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const category = yield foodService_1.FoodService.createCategory(req.body);
         res.status(201).json({ success: true, data: category });
@@ -56,7 +38,7 @@ router.get("/categories", auth_1.authenticateToken, (req, res, next) => __awaite
         next(error);
     }
 }));
-router.patch("/categories/:id", auth_1.authenticateToken, (0, requestValidator_1.requestValidator)(createCategorySchema.partial()), (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
+router.patch("/categories/:id", auth_1.authenticateToken, (0, requestValidator_1.requestValidator)(foodValidation_1.createCategorySchema.partial()), (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const category = yield foodService_1.FoodService.updateCategory(Number(req.params.id), req.body);
         res.json({ success: true, data: category });
@@ -66,7 +48,7 @@ router.patch("/categories/:id", auth_1.authenticateToken, (0, requestValidator_1
     }
 }));
 // Besin route'ları
-router.post("/", auth_1.authenticateToken, (0, requestValidator_1.requestValidator)(createFoodSchema), (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
+router.post("/", auth_1.authenticateToken, (0, requestValidator_1.requestValidator)(foodValidation_1.createFoodSchema), (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const food = yield foodService_1.FoodService.createFood(req.body);
         res.status(201).json({ success: true, data: food });
@@ -91,7 +73,7 @@ router.get("/", auth_1.authenticateToken, (req, res, next) => __awaiter(void 0, 
         next(error);
     }
 }));
-router.patch("/:id", auth_1.authenticateToken, (0, requestValidator_1.requestValidator)(createFoodSchema.partial()), (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
+router.patch("/:id", auth_1.authenticateToken, (0, requestValidator_1.requestValidator)(foodValidation_1.createFoodSchema.partial()), (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const food = yield foodService_1.FoodService.updateFood(Number(req.params.id), req.body);
         res.json({ success: true, data: food });

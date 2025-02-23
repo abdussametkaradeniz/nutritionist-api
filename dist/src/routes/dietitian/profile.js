@@ -18,7 +18,7 @@ const auth_1 = require("../../middleware/auth");
 const validateDietitian_1 = require("../../middleware/validateDietitian");
 const validateProfileCompletion_1 = require("../../middleware/validateProfileCompletion");
 const requestValidator_1 = require("../../middleware/requestValidator");
-const dietitian_1 = require("../../schemas/dietitian");
+const dietitian_1 = require("../../validations/dietitian");
 const rateLimiter_1 = require("../../middleware/rateLimiter");
 const zod_1 = require("zod");
 const appError_1 = require("../../utils/appError");
@@ -32,7 +32,7 @@ const isValidSpecialization = (value) => {
     return Object.values(client_1.Specialization).includes(value);
 };
 // Profil işlemleri
-router.post("/", auth_1.authenticateToken, (0, rbac_1.hasRole)([role_model_1.Role.DIETITIAN]), (0, rbac_1.hasPermission)([role_model_1.Permission.UPDATE_PROFILE]), rateLimiter_1.dietitianProfileLimiter, (0, requestValidator_1.requestValidator)(dietitian_1.dietitianProfileSchema), (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
+router.post("/", auth_1.authenticateToken, (0, rbac_1.hasRole)([role_model_1.Role.DIETITIAN]), (0, rbac_1.hasPermission)(["update:profile"]), rateLimiter_1.dietitianProfileLimiter, (0, requestValidator_1.requestValidator)(dietitian_1.dietitianProfileSchema), (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     var _a;
     try {
         const profile = yield dietitianService_1.DietitianService.createProfile(req.user.userId, req.body);
@@ -47,7 +47,7 @@ router.post("/", auth_1.authenticateToken, (0, rbac_1.hasRole)([role_model_1.Rol
         next(error);
     }
 }));
-router.get("/", auth_1.authenticateToken, (0, rbac_1.hasRole)([role_model_1.Role.DIETITIAN]), (0, rbac_1.hasPermission)([role_model_1.Permission.READ_PROFILE]), (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
+router.get("/", auth_1.authenticateToken, (0, rbac_1.hasRole)([role_model_1.Role.DIETITIAN]), (0, rbac_1.hasPermission)(["read:profile"]), (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const profile = yield dietitianService_1.DietitianService.getProfile(req.user.userId);
         res.json({ success: true, data: profile });
@@ -56,7 +56,7 @@ router.get("/", auth_1.authenticateToken, (0, rbac_1.hasRole)([role_model_1.Role
         next(error);
     }
 }));
-router.put("/", auth_1.authenticateToken, (0, rbac_1.hasRole)([role_model_1.Role.DIETITIAN]), (0, rbac_1.hasPermission)([role_model_1.Permission.UPDATE_PROFILE]), (0, requestValidator_1.requestValidator)(dietitian_1.dietitianProfileSchema), (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
+router.put("/", auth_1.authenticateToken, (0, rbac_1.hasRole)([role_model_1.Role.DIETITIAN]), (0, rbac_1.hasPermission)(["update:profile"]), (0, requestValidator_1.requestValidator)(dietitian_1.dietitianProfileSchema), (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const profile = yield dietitianService_1.DietitianService.updateProfile(req.user.userId, req.body);
         res.json({ success: true, data: profile });
@@ -66,7 +66,7 @@ router.put("/", auth_1.authenticateToken, (0, rbac_1.hasRole)([role_model_1.Role
     }
 }));
 // Uzmanlık alanları
-router.post("/specialties/:specialtyId", auth_1.authenticateToken, (0, rbac_1.hasRole)([role_model_1.Role.DIETITIAN]), (0, rbac_1.hasPermission)([role_model_1.Permission.UPDATE_PROFILE]), (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
+router.post("/specialties/:specialtyId", auth_1.authenticateToken, (0, rbac_1.hasRole)([role_model_1.Role.DIETITIAN]), (0, rbac_1.hasPermission)(["update:profile"]), (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const specialtyId = req.params.specialtyId;
         if (!isValidSpecialization(specialtyId)) {
@@ -79,7 +79,7 @@ router.post("/specialties/:specialtyId", auth_1.authenticateToken, (0, rbac_1.ha
         next(error);
     }
 }));
-router.delete("/specialties/:specialtyId", auth_1.authenticateToken, (0, rbac_1.hasRole)([role_model_1.Role.DIETITIAN]), (0, rbac_1.hasPermission)([role_model_1.Permission.UPDATE_PROFILE]), (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
+router.delete("/specialties/:specialtyId", auth_1.authenticateToken, (0, rbac_1.hasRole)([role_model_1.Role.DIETITIAN]), (0, rbac_1.hasPermission)(["update:profile"]), (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const specialtyId = req.params.specialtyId;
         if (!isValidSpecialization(specialtyId)) {

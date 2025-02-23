@@ -8,7 +8,7 @@ import { comparePassword } from "../../helpers/password";
 import bcrypt from "bcrypt";
 import speakeasy from "speakeasy";
 import { authLimiter } from "../../middleware/rateLimiter";
-import { generateAccessToken, generateRefreshToken } from "src/helpers/jwt";
+import { generateAccessToken, generateRefreshToken } from "../../helpers/jwt";
 
 /**
  * @swagger

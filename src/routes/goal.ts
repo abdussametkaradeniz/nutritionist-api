@@ -4,7 +4,7 @@ import { authenticateToken } from "../middleware/auth";
 import { requestValidator } from "../middleware/requestValidator";
 import { z } from "zod";
 import { GoalStatus } from "@prisma/client";
-import { createGoalSchema } from "src/validations/goalValidation";
+import { createGoalSchema } from "../validations/goalValidation";
 
 const router = express.Router();
 
