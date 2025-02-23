@@ -4,24 +4,10 @@ import { authenticateToken } from "../middleware/auth";
 import { requestValidator } from "../middleware/requestValidator";
 import { z } from "zod";
 import multer from "multer";
+import { createProgressSchema } from "src/validations/progressValidation";
 
 const router = express.Router();
 const upload = multer();
-
-// Validasyon şemaları
-const createProgressSchema = z.object({
-  date: z.string().datetime(),
-  weight: z.number().positive().optional(),
-  bodyFat: z.number().min(0).max(100).optional(),
-  muscle: z.number().positive().optional(),
-  water: z.number().min(0).max(100).optional(),
-  chest: z.number().positive().optional(),
-  waist: z.number().positive().optional(),
-  hip: z.number().positive().optional(),
-  arm: z.number().positive().optional(),
-  thigh: z.number().positive().optional(),
-  notes: z.string().optional(),
-});
 
 // İlerleme kaydı oluştur
 router.post(

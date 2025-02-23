@@ -24,8 +24,8 @@ export const apiLimiter = rateLimit({
 
 // Auth endpoint'leri için özel limiter
 export const authLimiter = rateLimit({
-  windowMs: 60 * 60 * 1000, // 1 saat
-  max: 5,
+  windowMs: 10, // 1 saat
+  max: 300,
   store: getStore(),
   message:
     "Çok fazla giriş denemesi yapıldı, lütfen daha sonra tekrar deneyin.",

@@ -3,7 +3,7 @@ import { BusinessException } from "../domain/exception";
 import { CreateSessionRequest, UpdateSessionRequest } from "../types/session";
 
 export class SessionService {
-  async createSession(data: CreateSessionRequest) {
+  static async createSession(data: CreateSessionRequest) {
     return await prisma.session.create({
       data: {
         userId: data.userId,
@@ -45,9 +45,15 @@ export class SessionService {
     });
   }
 
-  async updateSession(sessionId: string, data: UpdateSessionRequest) {
+  static async updateSession(sessionId: string, data: UpdateSessionRequest) {
     // Session'ın varlığını kontrol et
-    await this.getSession(sessionId);
+    const session = await prisma.session.findUnique({
+      where: { id: sessionId },
+    });
+
+    if (!session) {
+      throw new BusinessException("Session not found", 404);
+    }
 
     return await prisma.session.update({
       where: { id: sessionId },

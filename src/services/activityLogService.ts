@@ -1,9 +1,6 @@
-import {
-  ActivityLogRepository,
-  ActivityFilters,
-} from "../repositories/activityLogRepository";
+import { ActivityFilters } from "src/types/activityFilters";
 import { BusinessException } from "../domain/exception";
-
+import prisma from "prisma/client";
 export class ActivityLogService {
   static async logActivity(data: {
     userId: number;
@@ -12,15 +9,21 @@ export class ActivityLogService {
     ipAddress?: string;
     userAgent?: string;
   }) {
-    return await ActivityLogRepository.create(data);
+    return await prisma.activityLog.create({ data });
   }
 
   static async getActivityById(id: number, userId: number) {
-    return await ActivityLogRepository.findById(id, userId);
+    return await prisma.activityLog.findUnique({
+      where: { id, userId },
+    });
   }
 
   static async getUserActivities(userId: number, page = 1, limit = 10) {
-    return await ActivityLogRepository.findByUserId(userId, page, limit);
+    return await prisma.activityLog.findMany({
+      where: { userId },
+      skip: (page - 1) * limit,
+      take: limit,
+    });
   }
 
   static async filterActivities(userId: number, filters: ActivityFilters) {
@@ -53,7 +56,9 @@ export class ActivityLogService {
       );
     }
 
-    return await ActivityLogRepository.findWithFilters(userId, parsedFilters);
+    return await prisma.activityLog.findMany({
+      where: { userId, ...parsedFilters },
+    });
   }
 
   // Yardımcı metodlar

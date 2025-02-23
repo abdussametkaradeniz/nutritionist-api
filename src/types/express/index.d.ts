@@ -2,7 +2,6 @@ import { Session } from "../session";
 import { UserRole } from "@prisma/client";
 import { Multer } from "multer";
 import { JwtPayload } from "jsonwebtoken";
-import { Role, Permission } from "../../models/role.model";
 
 declare global {
   namespace Express {
@@ -11,8 +10,8 @@ declare global {
       user?: JwtPayload & {
         userId: number;
         email: string;
-        role: Role;
-        permissions: Permission[];
+        role: string;
+        permissions: string[];
       };
       file?: Multer.File;
       io?: any;
@@ -23,8 +22,8 @@ declare global {
       email: string;
       username: string;
       dietitianId?: number;
-      role: Role;
-      permissions: Permission[];
+      role: string;
+      permissions: string[];
     }
   }
 }

@@ -25,7 +25,9 @@ export async function jwt(req: Request, res: Response, next: NextFunction) {
     }
 
     req.user = {
-      roles: verifiedUser.roles,
+      userId: verifiedUser.userId,
+      email: verifiedUser.email,
+      role: verifiedUser.role,
       permissions: verifiedUser.permissions ? verifiedUser.permissions : [],
     };
     console.log("req.user", req.user);

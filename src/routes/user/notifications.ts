@@ -4,7 +4,7 @@ import { authenticateToken } from "../../middleware/auth";
 import { NotificationService } from "../../services/notificationService";
 import { requestValidator } from "../../middleware/requestValidator";
 import { z } from "zod";
-import { updatePreferencesSchema } from "../../validations/user/notificationValidator";
+import { updatePreferencesSchema } from "../../validations/notificationValidator";
 
 /**
  * @swagger
@@ -111,13 +111,6 @@ import { updatePreferencesSchema } from "../../validations/user/notificationVali
  */
 const router = express.Router();
 const prisma = new PrismaClient();
-
-// Validasyon şemaları
-const getNotificationsSchema = z.object({
-  page: z.number().min(1).optional(),
-  limit: z.number().min(1).max(100).optional(),
-  onlyUnread: z.boolean().optional(),
-});
 
 // Bildirim listesini getir
 router.get("/", authenticateToken, async (req, res, next) => {

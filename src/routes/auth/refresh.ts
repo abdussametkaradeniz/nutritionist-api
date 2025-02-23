@@ -1,6 +1,6 @@
 import express from "express";
-import { TokenService } from "../../services/tokenService";
 import { BusinessException } from "../../domain/exception";
+import { refreshAccessToken } from "src/helpers/jwt";
 
 /**
  * @swagger
@@ -51,7 +51,7 @@ router.post("/", async (req, res, next) => {
       throw new BusinessException("Refresh token is required", 400);
     }
 
-    const newAccessToken = await TokenService.refreshAccessToken(refreshToken);
+    const newAccessToken = await refreshAccessToken(refreshToken);
 
     res.json({
       accessToken: newAccessToken,

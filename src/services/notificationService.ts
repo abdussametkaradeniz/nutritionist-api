@@ -1,7 +1,6 @@
-import { NotificationRepository } from "../repositories/notificationRepository";
 import { sendEmail } from "../helpers/email";
 import { sendPushNotification } from "../helpers/pushNotification";
-
+import prisma from "prisma/client";
 export class NotificationService {
   static async createNotification(data: {
     userId: number;
@@ -12,19 +11,30 @@ export class NotificationService {
     sendPush?: boolean;
     sendEmail?: boolean;
   }) {
-    const { sendPush, sendEmail: shouldSendEmail, ...notificationData } = data;
-    const notification =
-      await NotificationRepository.createNotification(notificationData);
+    const {
+      userId,
+      sendPush,
+      sendEmail: shouldSendEmail,
+      ...notificationData
+    } = data;
+
+    const notification = await prisma.notification.create({
+      data: {
+        ...notificationData,
+        user: { connect: { id: userId } },
+      },
+    });
 
     try {
       if (sendPush) {
-        const user = await NotificationRepository.getUserWithPreferences(
-          data.userId
-        );
+        const user = await prisma.user.findUnique({
+          where: { id: userId },
+          include: { preferences: true },
+        });
 
         if (user?.preferences?.pushNotifications) {
           await sendPushNotification({
-            userId: data.userId,
+            userId: userId,
             title: data.title,
             body: data.message,
             data: data.data,
@@ -33,9 +43,10 @@ export class NotificationService {
       }
 
       if (shouldSendEmail) {
-        const user = await NotificationRepository.getUserWithPreferences(
-          data.userId
-        );
+        const user = await prisma.user.findUnique({
+          where: { id: userId },
+          include: { preferences: true },
+        });
 
         if (user?.preferences?.emailNotifications) {
           await sendEmail({
@@ -64,71 +75,36 @@ export class NotificationService {
     limit?: number,
     onlyUnread = false
   ) {
-    return await NotificationRepository.getUserNotifications(
-      userId,
-      page,
-      limit,
-      onlyUnread
-    );
+    return await prisma.notification.findMany({
+      where: { userId, isRead: onlyUnread ? false : undefined },
+      skip: ((page ?? 1) - 1) * (limit ?? 10),
+      take: limit ?? 10,
+    });
   }
 
   static async markAsRead(id: number, userId: number) {
-    return await NotificationRepository.markAsRead(id, userId);
+    return await prisma.notification.updateMany({
+      where: { id, userId },
+      data: { isRead: true, readAt: new Date() },
+    });
   }
 
   static async markAllAsRead(userId: number) {
-    return await NotificationRepository.markAllAsRead(userId);
+    return await prisma.notification.updateMany({
+      where: { userId, isRead: false },
+      data: { isRead: true, readAt: new Date() },
+    });
   }
 
   static async getUnreadCount(userId: number) {
-    return await NotificationRepository.getUnreadCount(userId);
+    return await prisma.notification.count({
+      where: { userId, isRead: false },
+    });
   }
 
   static async deleteNotification(id: number, userId: number) {
-    return await NotificationRepository.deleteNotification(id, userId);
-  }
-
-  // Helper methods
-  static async sendAppointmentNotification(
-    userId: number,
-    appointmentData: any
-  ) {
-    return await this.createNotification({
-      userId,
-      title: "Yeni Randevu",
-      message: `${appointmentData.date} tarihinde randevunuz var.`,
-      type: "APPOINTMENT",
-      data: appointmentData,
-      sendPush: true,
-      sendEmail: true,
-    });
-  }
-
-  static async sendMessageNotification(userId: number, messageData: any) {
-    return await this.createNotification({
-      userId,
-      title: "Yeni Mesaj",
-      message: `${messageData.senderName}: ${messageData.preview}`,
-      type: "MESSAGE",
-      data: messageData,
-      sendPush: true,
-    });
-  }
-
-  static async sendSystemNotification(
-    userId: number,
-    title: string,
-    message: string,
-    data?: any
-  ) {
-    return await this.createNotification({
-      userId,
-      title,
-      message,
-      type: "SYSTEM",
-      data,
-      sendPush: true,
-      sendEmail: true,
+    return await prisma.notification.deleteMany({
+      where: { id, userId },
     });
   }
 }

@@ -22,7 +22,7 @@ export function initializeWebSocket(httpServer: HTTPServer) {
     try {
       const decoded = verifyToken(token);
       const user = await prisma.user.findUnique({
-        where: { id: decoded.id },
+        where: { id: decoded.userId },
       });
 
       if (!user) {

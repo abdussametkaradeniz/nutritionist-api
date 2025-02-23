@@ -7,7 +7,7 @@ import {
   createChatSchema,
   getMessagesSchema,
   sendMessageSchema,
-} from "../schemas/chat";
+} from "../validations/chat";
 import { MediaService } from "../services/mediaService";
 import { z } from "zod";
 /**

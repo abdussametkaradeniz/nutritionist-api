@@ -1,14 +1,14 @@
 import express, { NextFunction, Request, Response } from "express";
-import { loginSchema } from "../../validations/auth/loginValidator";
+import { loginSchema } from "../../validations/loginValidator";
 import { requestValidator } from "../../middleware/requestValidator";
 import { PrismaClient } from "@prisma/client";
-import { TokenService } from "../../services/tokenService";
 import { SessionService } from "../../services/sessionService";
 import { BusinessException } from "../../domain/exception";
 import { comparePassword } from "../../helpers/password";
 import bcrypt from "bcrypt";
 import speakeasy from "speakeasy";
 import { authLimiter } from "../../middleware/rateLimiter";
+import { generateAccessToken, generateRefreshToken } from "src/helpers/jwt";
 
 /**
  * @swagger
@@ -121,12 +121,12 @@ router.post(
       }
 
       // Access ve Refresh token oluştur
-      const accessToken = TokenService.generateAccessToken(user);
-      const refreshToken = await TokenService.generateRefreshToken(user);
+      const accessToken = generateAccessToken(user);
+      const refreshToken = await generateRefreshToken(user.id!);
 
       // Session oluştur
-      const sessionId = await sessionService.createSession({
-        userId: user.id,
+      const sessionId = await SessionService.createSession({
+        userId: user.id!,
         deviceId: req.headers["x-device-id"] as string,
         deviceType: req.headers["x-device-type"] as string,
         ipAddress: req.ip,

@@ -4,8 +4,7 @@ import { BusinessException } from "../domain/exception";
 import { UserRole } from "../constants/userRoles";
 import { RegisterType } from "../types/user/Register";
 import jwt from "jsonwebtoken";
-import { Role, Permission } from "../models/role.model";
-import { rolePermissions } from "../config/permissions";
+import { Role } from "../models/role.model";
 
 export class AuthService {
   async register(registerData: RegisterType) {
@@ -48,7 +47,9 @@ export class AuthService {
         address: registerData.address ?? null,
         avatarUrl: registerData.avatarUrl ?? null,
         emailVerified: false,
-        roles: [UserRole.BASICUSER],
+        role: {
+          connect: { name: "USER" },
+        },
         permissions: [],
         twoFactorEnabled: false,
         backupCodes: [],
@@ -86,13 +87,12 @@ export class AuthService {
   private static generateTokens(user: {
     userId: number;
     email: string;
-    role: Role;
+    role: string;
   }) {
     const payload = {
       userId: user.userId,
       email: user.email,
       role: user.role,
-      permissions: rolePermissions[user.role],
     };
 
     const accessToken = jwt.sign(payload, process.env.JWT_SECRET!, {
@@ -111,6 +111,9 @@ export class AuthService {
   public static async login(email: string, password: string) {
     const user = await prisma.user.findUnique({
       where: { email },
+      include: {
+        role: true,
+      },
     });
 
     if (!user) {
@@ -120,7 +123,7 @@ export class AuthService {
     const tokens = this.generateTokens({
       userId: user.id,
       email: user.email,
-      role: user.roles[0] as Role,
+      role: user.role.name,
     });
 
     return {
@@ -128,8 +131,7 @@ export class AuthService {
       user: {
         id: user.id,
         email: user.email,
-        role: user.roles[0] as Role,
-        permissions: rolePermissions[user.roles[0] as Role],
+        role: user.role.name,
       },
     };
   }

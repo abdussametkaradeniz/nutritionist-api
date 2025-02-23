@@ -4,34 +4,13 @@ import { authenticateToken } from "../middleware/auth";
 import { requestValidator } from "../middleware/requestValidator";
 import { z } from "zod";
 import { HealthAppProvider } from "@prisma/client";
+import {
+  connectSchema,
+  syncDataSchema,
+  getDataSchema,
+} from "src/validations/healthValidation";
 
 const router = express.Router();
-
-// Validasyon şemaları
-const connectSchema = z.object({
-  provider: z.nativeEnum(HealthAppProvider),
-  accessToken: z.string(),
-  refreshToken: z.string().optional(),
-  expiresAt: z.string().datetime().optional(),
-});
-
-const syncDataSchema = z.object({
-  provider: z.nativeEnum(HealthAppProvider),
-  data: z.array(
-    z.object({
-      dataType: z.string(),
-      value: z.number(),
-      unit: z.string(),
-      timestamp: z.string().datetime(),
-    })
-  ),
-});
-
-const getDataSchema = z.object({
-  dataType: z.string().optional(),
-  startDate: z.string().datetime().optional(),
-  endDate: z.string().datetime().optional(),
-});
 
 // Sağlık uygulaması bağlantısı
 router.post(

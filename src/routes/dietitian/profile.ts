@@ -8,7 +8,7 @@ import {
   dietitianProfileSchema,
   workingHoursSchema,
   pricingSchema,
-} from "../../schemas/dietitian";
+} from "../../validations/dietitian";
 import {
   dietitianProfileLimiter,
   workingHoursLimiter,
@@ -17,7 +17,7 @@ import {
 import { z } from "zod";
 import { AppError } from "../../utils/appError";
 import { Specialization } from "@prisma/client";
-import { Role, Permission } from "../../models/role.model";
+import { Role } from "../../models/role.model";
 import { hasRole, hasPermission } from "../../middleware/rbac";
 import { captureException } from "../../config/sentry";
 
@@ -33,7 +33,7 @@ router.post(
   "/",
   authenticateToken,
   hasRole([Role.DIETITIAN]),
-  hasPermission([Permission.UPDATE_PROFILE]),
+  hasPermission(["update:profile"]),
   dietitianProfileLimiter,
   requestValidator(dietitianProfileSchema),
   async (req, res, next) => {
@@ -58,7 +58,7 @@ router.get(
   "/",
   authenticateToken,
   hasRole([Role.DIETITIAN]),
-  hasPermission([Permission.READ_PROFILE]),
+  hasPermission(["read:profile"]),
   async (req, res, next) => {
     try {
       const profile = await DietitianService.getProfile(req.user!.userId);
@@ -73,7 +73,7 @@ router.put(
   "/",
   authenticateToken,
   hasRole([Role.DIETITIAN]),
-  hasPermission([Permission.UPDATE_PROFILE]),
+  hasPermission(["update:profile"]),
   requestValidator(dietitianProfileSchema),
   async (req, res, next) => {
     try {
@@ -93,7 +93,7 @@ router.post(
   "/specialties/:specialtyId",
   authenticateToken,
   hasRole([Role.DIETITIAN]),
-  hasPermission([Permission.UPDATE_PROFILE]),
+  hasPermission(["update:profile"]),
   async (req, res, next) => {
     try {
       const specialtyId = req.params.specialtyId;
@@ -117,7 +117,7 @@ router.delete(
   "/specialties/:specialtyId",
   authenticateToken,
   hasRole([Role.DIETITIAN]),
-  hasPermission([Permission.UPDATE_PROFILE]),
+  hasPermission(["update:profile"]),
   async (req, res, next) => {
     try {
       const specialtyId = req.params.specialtyId;

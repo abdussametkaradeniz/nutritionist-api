@@ -6,10 +6,9 @@ import {
   createAppointmentSchema,
   updateAppointmentSchema,
   appointmentFilterSchema,
-} from "../schemas/appointment";
+} from "../validations/appointment";
 import { appointmentLimiter } from "../middleware/rateLimiter";
-import { Role, Permission } from "../models/role.model";
-import { hasRole, hasPermission } from "../middleware/rbac";
+import { hasPermission } from "../middleware/rbac";
 
 const router = express.Router();
 
@@ -159,7 +158,7 @@ const router = express.Router();
 router.post(
   "/",
   authenticateToken,
-  hasPermission([Permission.CREATE_APPOINTMENT]),
+  hasPermission(["create:appointment"]),
   appointmentLimiter,
   requestValidator(createAppointmentSchema),
   async (req, res, next) => {
@@ -179,7 +178,7 @@ router.post(
 router.patch(
   "/:id/status",
   authenticateToken,
-  hasPermission([Permission.UPDATE_APPOINTMENT]),
+  hasPermission(["update:appointment"]),
   requestValidator(updateAppointmentSchema),
   async (req, res, next) => {
     try {

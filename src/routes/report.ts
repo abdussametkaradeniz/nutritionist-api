@@ -3,14 +3,11 @@ import { ReportService } from "../services/reportService";
 import { authenticateToken } from "../middleware/auth";
 import { requestValidator } from "../middleware/requestValidator";
 import { z } from "zod";
+import { dateRangeSchema } from "src/validations/reportValidation";
 
 const router = express.Router();
 
 // Validasyon şemaları
-const dateRangeSchema = z.object({
-  startDate: z.string().datetime(),
-  endDate: z.string().datetime(),
-});
 
 // Özet raporu
 router.get(

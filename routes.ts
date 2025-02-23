@@ -1,5 +1,4 @@
 import express, { Request, Response, NextFunction } from "express";
-import log from "./src/logger/loggerdeneme";
 import {
   apiLimiter,
   authLimiter,
@@ -35,7 +34,6 @@ import analyticsRouter from "./src/routes/analytics";
 export const setRoutes = async (app: express.Application) => {
   app.use(express.json());
   app.use(express.urlencoded({ extended: true }));
-  app.use(log);
   if (app.get("env") === "development") {
     app.use(morgan("combined"));
   }

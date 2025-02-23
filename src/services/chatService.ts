@@ -3,7 +3,6 @@ import prisma from "../../prisma/client";
 import { AppError } from "../utils/appError";
 import { Server } from "socket.io";
 import { E2EEncryption } from "../utils/encryption";
-import { ChatRepository } from "../repositories/chatRepository";
 import { BusinessException } from "../domain/exception";
 
 export class ChatService {

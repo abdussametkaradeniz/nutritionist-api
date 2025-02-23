@@ -3,22 +3,13 @@ import { AnalyticsService } from "../services/analyticsService";
 import { authenticateToken } from "../middleware/auth";
 import { requestValidator } from "../middleware/requestValidator";
 import { z } from "zod";
+import {
+  predictionSchema,
+  recommendationSchema,
+  trendAnalysisSchema,
+} from "src/validations/analyticValidation";
 
 const router = express.Router();
-
-// Validasyon şemaları
-const trendAnalysisSchema = z.object({
-  startDate: z.string().datetime(),
-  endDate: z.string().datetime(),
-});
-
-const predictionSchema = z.object({
-  goalId: z.number(),
-});
-
-const recommendationSchema = z.object({
-  period: z.number().min(1).max(365).optional(),
-});
 
 // Trend analizi
 router.get(

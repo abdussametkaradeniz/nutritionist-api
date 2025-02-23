@@ -3,29 +3,12 @@ import { FoodService } from "../services/foodService";
 import { authenticateToken } from "../middleware/auth";
 import { requestValidator } from "../middleware/requestValidator";
 import { z } from "zod";
+import {
+  createCategorySchema,
+  createFoodSchema,
+} from "src/validations/foodValidation";
 
 const router = express.Router();
-
-// Validasyon şemaları
-const createCategorySchema = z.object({
-  name: z.string().min(1, "Kategori adı gerekli"),
-  description: z.string().optional(),
-});
-
-const createFoodSchema = z.object({
-  name: z.string().min(1, "Besin adı gerekli"),
-  categoryId: z.number().int().positive(),
-  calories: z.number().min(0),
-  protein: z.number().min(0),
-  carbs: z.number().min(0),
-  fat: z.number().min(0),
-  fiber: z.number().min(0),
-  sugar: z.number().min(0).optional(),
-  sodium: z.number().min(0).optional(),
-  cholesterol: z.number().min(0).optional(),
-  servingSize: z.number().positive(),
-  servingUnit: z.string().min(1),
-});
 
 // Kategori route'ları
 router.post(

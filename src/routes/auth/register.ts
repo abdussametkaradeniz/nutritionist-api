@@ -1,5 +1,5 @@
 import express, { Request, Response, NextFunction } from "express";
-import { registerSchema } from "../../validations/auth/registerValidator";
+import { registerSchema } from "../../validations/registerValidator";
 import { requestValidator } from "../../middleware/requestValidator";
 import { RegisterType } from "../../types/user/Register";
 import { sendSuccess } from "../../helpers/responseHandler";

@@ -3,11 +3,9 @@ import { Unauthorized } from "../domain/exception/unauthorized";
 import { Request, Response, NextFunction, RequestHandler } from "express";
 import { UserRole } from "../types/user/UserRole";
 import jwt, { JwtPayload } from "jsonwebtoken";
-import { BusinessException } from "../domain/exception";
 import { AppError } from "../utils/appError";
-import { Role } from "../models/role.model";
-import { rolePermissions } from "../config/permissions";
-
+import prisma from "../../prisma/client";
+import { verifyToken } from "src/helpers/jwt";
 // Kaldır veya yorum satırına al
 // declare global {
 //   namespace Express {
@@ -81,21 +79,16 @@ export const authenticateToken = async (
     const token = authHeader && authHeader.split(" ")[1];
 
     if (!token) {
-      throw new AppError("No token provided", 401);
+      throw new Unauthorized("No token provided");
     }
 
-    const decoded = jwt.verify(
-      token,
-      process.env.JWT_SECRET!
-    ) as jwt.JwtPayload & {
-      userId: number;
-      email: string;
-      role: Role;
-    };
+    const decoded = verifyToken(token);
 
     req.user = {
-      ...decoded,
-      permissions: rolePermissions[decoded.role],
+      userId: decoded.userId,
+      email: decoded.email,
+      role: decoded.role,
+      permissions: decoded.permissions,
     };
 
     next();

@@ -2,7 +2,7 @@ import { EmailService } from "./emailService";
 import { BusinessException } from "../domain/exception";
 import { User } from "@prisma/client";
 import crypto from "crypto";
-import { EmailVerificationRepository } from "../repositories/emailVerificationRepository";
+import prisma from "prisma/client";
 
 export class EmailVerificationService {
   static async sendVerificationEmail(user: User): Promise<void> {
@@ -15,10 +15,13 @@ export class EmailVerificationService {
     const token = crypto.randomBytes(32).toString("hex");
 
     // Token'ı veritabanına kaydet
-    await EmailVerificationRepository.createVerificationToken({
-      userId: user.id,
-      token,
-      expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000), // 24 saat
+    await prisma.emailVerification.create({
+      data: {
+        userId: user.id,
+        token,
+        expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000), // 24 saat
+        lastUpdatingUser: "SYSTEM",
+      },
     });
 
     // Doğrulama emaili gönder
@@ -26,9 +29,10 @@ export class EmailVerificationService {
   }
 
   static async verifyEmail(token: string): Promise<void> {
-    // Token'ı kontrol et
-    const verification =
-      await EmailVerificationRepository.getVerificationToken(token);
+    const verification = await prisma.emailVerification.findUnique({
+      where: { token },
+      include: { user: true },
+    });
 
     if (!verification || !verification.user) {
       throw new BusinessException(
@@ -38,13 +42,17 @@ export class EmailVerificationService {
     }
 
     // Email'i doğrulanmış olarak işaretle
-    await EmailVerificationRepository.markEmailAsVerified(verification.user.id);
+    await prisma.user.update({
+      where: { id: verification.user.id },
+      data: { emailVerified: true },
+    });
   }
 
   static async resendVerificationEmail(user: User): Promise<void> {
-    // Son 5 dakika içinde gönderilmiş bir email var mı kontrol et
-    const lastVerification =
-      await EmailVerificationRepository.getLastVerificationRequest(user.id);
+    const lastVerification = await prisma.emailVerification.findFirst({
+      where: { userId: user.id },
+      orderBy: { createdAt: "desc" },
+    });
 
     if (
       lastVerification &&
@@ -57,7 +65,6 @@ export class EmailVerificationService {
       );
     }
 
-    // Yeni doğrulama emaili gönder
     await this.sendVerificationEmail(user);
   }
 }

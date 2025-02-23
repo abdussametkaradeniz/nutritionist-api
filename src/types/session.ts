@@ -36,4 +36,5 @@ export type UpdateSessionRequest = {
   ipAddress?: string;
   userAgent?: string;
   isActive?: boolean;
+  lastActivity: Date;
 };

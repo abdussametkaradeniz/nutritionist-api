@@ -1,7 +1,7 @@
 import { Router, Request, Response, NextFunction } from "express";
-import { SessionRepository } from "../../repositories/sessionRepository";
 import { authenticateToken } from "../../middleware/auth";
 import { BusinessException } from "../../domain/exception";
+import { SessionService } from "src/services/sessionService";
 
 const router = Router();
 
@@ -43,7 +43,7 @@ router.post(
       if (!sessionId) {
         throw new BusinessException("Session ID gerekli", 400);
       }
-      await SessionRepository.deactivateSession(sessionId);
+      await SessionService.deactivateSession(sessionId);
       res.json({ success: true, message: "Başarıyla çıkış yapıldı" });
     } catch (error) {
       next(error);
@@ -60,7 +60,7 @@ router.post(
       if (!req.user?.userId) {
         throw new BusinessException("Kullanıcı bulunamadı", 401);
       }
-      await SessionRepository.deactivateAllSessions(req.user.userId);
+      await SessionService.deactivateAllSessions(req.user.userId);
       res.json({ success: true, message: "Tüm oturumlardan çıkış yapıldı" });
     } catch (error) {
       next(error);

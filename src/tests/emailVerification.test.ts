@@ -3,9 +3,8 @@ import express from "express";
 import { PrismaClient } from "@prisma/client";
 import { EmailService } from "../services/emailService";
 import { hashPassword } from "../helpers/password";
-import { TokenService } from "../services/tokenService";
 import emailVerification from "../routes/auth/emailVerification";
-
+import { generateAccessToken } from "src/helpers/jwt";
 // Test için minimal bir Express uygulaması oluştur
 const app = express();
 app.use(express.json());
@@ -40,7 +39,7 @@ describe("Email Verification Tests", () => {
     });
 
     // Access token oluştur
-    authToken = TokenService.generateAccessToken(testUser);
+    authToken = generateAccessToken(testUser);
   });
 
   afterEach(async () => {

@@ -6,88 +6,63 @@ import {
 } from "../types/request/profile";
 import { comparePassword, hashPassword } from "../helpers/password";
 import { uploadToS3, deleteFromS3 } from "../helpers/s3";
-import { ProfileRepository } from "../repositories/profileRepository";
-
+import prisma from "prisma/client";
 export class ProfileService {
   static async getProfile(userId: number) {
-    return await ProfileRepository.getProfile(userId);
-  }
-
-  static async updateProfile(userId: number, data: UpdateProfileRequest) {
-    return await ProfileRepository.updateProfile(userId, data);
-  }
-
-  static async updatePreferences(
-    userId: number,
-    data: UpdatePreferencesRequest
-  ) {
-    return await ProfileRepository.updatePreferences(userId, data);
-  }
-
-  static async changePassword(userId: number, data: ChangePasswordRequest) {
-    const user = await ProfileRepository.getProfile(userId);
-
-    const isValidPassword = await comparePassword(
-      data.currentPassword,
-      user.passwordHash
-    );
-    if (!isValidPassword) {
-      throw new BusinessException("Mevcut şifre yanlış", 400);
-    }
-
-    if (data.newPassword !== data.confirmPassword) {
-      throw new BusinessException("Yeni şifreler eşleşmiyor", 400);
-    }
-
-    if (data.currentPassword === data.newPassword) {
-      throw new BusinessException(
-        "Yeni şifre mevcut şifre ile aynı olamaz",
-        400
-      );
-    }
-
-    const newPasswordHash = await hashPassword(data.newPassword);
-    return await ProfileRepository.updateProfile(userId, {
-      passwordHash: newPasswordHash,
+    return await prisma.user.findUnique({
+      where: { id: userId },
+      include: {
+        profile: true, // Profil bilgilerini de getir
+        preferences: true, // Kullanıcı tercihlerini de getir
+      },
     });
   }
 
-  static async updateAvatar(userId: number, file: Express.Multer.File) {
-    // Avatar boyut kontrolü
-    if (file.size > 5 * 1024 * 1024) {
-      // 5MB
-      throw new BusinessException("Avatar boyutu 5MB'dan büyük olamaz", 400);
-    }
+  static async updateProfile(userId: number, data: any) {
+    return await prisma.profile.update({
+      where: { userId: userId },
+      data: data,
+    });
+  }
 
-    // Dosya tipi kontrolü
-    if (!file.mimetype.startsWith("image/")) {
-      throw new BusinessException("Geçersiz dosya tipi", 400);
-    }
+  static async updatePreferences(userId: number, preferencesData: any) {
+    return await prisma.userPreferences.update({
+      where: { userId: userId },
+      data: preferencesData,
+    });
+  }
 
-    const avatarUrl = await uploadToS3(file, `avatars/${userId}`);
-    return await ProfileRepository.updateAvatar(userId, avatarUrl);
+  static async changePassword(userId: number, newPassword: string) {
+    const newPasswordHash = await hashPassword(newPassword); // Yeni şifreyi hashle
+    return await prisma.user.update({
+      where: { id: userId },
+      data: { passwordHash: newPasswordHash },
+    });
+  }
+
+  static async updateAvatar(userId: number, avatarUrl: string) {
+    return await prisma.profile.update({
+      where: { userId: userId },
+      data: { photoUrl: avatarUrl },
+    });
   }
 
   static async deleteAvatar(userId: number) {
-    const user = await ProfileRepository.getProfile(userId);
-    if (user.avatarUrl) {
-      await deleteFromS3(user.avatarUrl);
-    }
-    return await ProfileRepository.deleteAvatar(userId);
+    return await prisma.profile.update({
+      where: { userId: userId },
+      data: { photoUrl: null },
+    });
   }
 
   static async deleteAccount(userId: number) {
-    // Avatar varsa sil
-    const user = await ProfileRepository.getProfile(userId);
-    if (user.avatarUrl) {
-      await deleteFromS3(user.avatarUrl);
-    }
-
-    return await ProfileRepository.deleteAccount(userId);
+    return await prisma.user.delete({
+      where: { id: userId },
+    });
   }
 
   static async getPreferences(userId: number) {
-    const preferences = await ProfileRepository.getPreferences(userId);
-    return preferences ?? {};
+    return await prisma.userPreferences.findUnique({
+      where: { userId: userId },
+    });
   }
 }

@@ -6,7 +6,7 @@ import {
   updateProfileSchema,
   changePasswordSchema,
   updatePreferencesSchema,
-} from "../../validations/user/profileValidator";
+} from "../../validations/profileValidator";
 import multer from "multer";
 import { BusinessException } from "../../domain/exception";
 

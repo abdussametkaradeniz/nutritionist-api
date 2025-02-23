@@ -22,16 +22,16 @@ model User {
   avatarUrl        String?
   emailVerified    Boolean   @default(false)
   dietitianId      Int?
-  roles            String[]  @default([])
   permissions      String[]  @default([])
   twoFactorSecret  String?
   twoFactorEnabled Boolean   @default(false)
   backupCodes      String[]  @default([])
+  premiumUser      Boolean   @default(false)
 
   // İlişkiler
   preferences        UserPreferences?
   profile            Profile?
-  userRoles          Role[]              @relation("UserRoles")
+  role               Role                @relation(fields: [id], references: [id])
   refreshTokens      RefreshToken[]
   emailVerifications EmailVerification[]
   passwordResets     PasswordReset[]
@@ -81,12 +81,12 @@ model User {
   progress Progress[]
 
   // Hedef belirleme
-  goals             Goal[]
-  dietitianGoals    Goal[]    @relation("DietitianGoals")
+  goals          Goal[]
+  dietitianGoals Goal[] @relation("DietitianGoals")
 
   // Sağlık uygulaması bağlantıları
   healthConnections HealthAppConnection[]
-  healthData       HealthData[]
+  healthData        HealthData[]
 
   @@index([email])
   @@index([username])
@@ -127,32 +127,32 @@ model Profile {
 }
 
 model Role {
-  id               Int               @id @default(autoincrement())
-  name             String            @unique
-  users            User[]            @relation("UserRoles")
-  permissions      Permission[]      @relation("RolePermissions")
-  rolePermissions  RolePermissions[] @relation("RolePermissionsRole")
-  lastUpdatingUser String?           @default("ADMIN")
-  lastUpdateDate   DateTime          @updatedAt
-  recordStatus     String?           @default("A")
+  id               Int              @id @default(autoincrement())
+  name             String           @unique
+  users            User[]
+  permissions      Permission[]     @relation("RolePermissions")
+  lastUpdatingUser String?          @default("ADMIN")
+  lastUpdateDate   DateTime         @updatedAt
+  recordStatus     String?          @default("A")
+  RolePermission   RolePermission[]
 }
 
 model Permission {
-  id               Int               @id @default(autoincrement())
-  name             String            @unique
+  id               Int              @id @default(autoincrement())
+  name             String           @unique
   description      String
-  roles            Role[]            @relation("RolePermissions")
-  rolePermissions  RolePermissions[] @relation("RolePermissionsPermission")
-  lastUpdatingUser String?           @default("ADMIN")
-  lastUpdateDate   DateTime          @updatedAt
-  recordStatus     String?           @default("A")
+  roles            Role[]           @relation("RolePermissions")
+  lastUpdatingUser String?          @default("ADMIN")
+  lastUpdateDate   DateTime         @updatedAt
+  recordStatus     String?          @default("A")
+  RolePermission   RolePermission[]
 }
 
-model RolePermissions {
+model RolePermission {
   roleId       Int
   permissionId Int
-  role         Role       @relation(fields: [roleId], references: [id], name: "RolePermissionsRole")
-  permission   Permission @relation(fields: [permissionId], references: [id], name: "RolePermissionsPermission")
+  role         Role       @relation(fields: [roleId], references: [id])
+  permission   Permission @relation(fields: [permissionId], references: [id])
 
   @@id([roleId, permissionId])
 }
@@ -640,31 +640,31 @@ model ProgressPhoto {
 
 // Hedef belirleme
 model Goal {
-  id          Int       @id @default(autoincrement())
+  id          Int   @id @default(autoincrement())
   userId      Int
-  user        User      @relation(fields: [userId], references: [id])
+  user        User  @relation(fields: [userId], references: [id])
   dietitianId Int?
-  dietitian   User?     @relation("DietitianGoals", fields: [dietitianId], references: [id])
-  
-  startDate   DateTime
-  targetDate  DateTime
-  
+  dietitian   User? @relation("DietitianGoals", fields: [dietitianId], references: [id])
+
+  startDate  DateTime
+  targetDate DateTime
+
   // Kilo hedefi
-  startWeight Float?
+  startWeight  Float?
   targetWeight Float?
-  
+
   // Kalori hedefi
   calorieTarget Int?
-  
+
   // Makro besin hedefleri (%)
   proteinTarget Float?
   carbTarget    Float?
   fatTarget     Float?
-  
-  status      GoalStatus @default(ACTIVE)
-  notes       String?    @db.Text
-  createdAt   DateTime   @default(now())
-  updatedAt   DateTime   @updatedAt
+
+  status    GoalStatus @default(ACTIVE)
+  notes     String?    @db.Text
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
 
   @@index([userId])
   @@index([dietitianId])
@@ -672,32 +672,32 @@ model Goal {
 
 // Sağlık uygulaması bağlantıları
 model HealthAppConnection {
-  id          Int       @id @default(autoincrement())
-  userId      Int
-  user        User      @relation(fields: [userId], references: [id])
-  provider    HealthAppProvider
-  accessToken String    @db.Text
-  refreshToken String?  @db.Text
-  expiresAt   DateTime?
-  lastSync    DateTime?
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
+  id           Int               @id @default(autoincrement())
+  userId       Int
+  user         User              @relation(fields: [userId], references: [id])
+  provider     HealthAppProvider
+  accessToken  String            @db.Text
+  refreshToken String?           @db.Text
+  expiresAt    DateTime?
+  lastSync     DateTime?
+  createdAt    DateTime          @default(now())
+  updatedAt    DateTime          @updatedAt
 
-  @@index([userId])
   @@unique([userId, provider])
+  @@index([userId])
 }
 
 // Sağlık uygulaması veri senkronizasyonu
 model HealthData {
-  id          Int       @id @default(autoincrement())
-  userId      Int
-  user        User      @relation(fields: [userId], references: [id])
-  provider    HealthAppProvider
-  dataType    String    // steps, weight, calories, etc.
-  value       Float
-  unit        String
-  timestamp   DateTime
-  createdAt   DateTime  @default(now())
+  id        Int               @id @default(autoincrement())
+  userId    Int
+  user      User              @relation(fields: [userId], references: [id])
+  provider  HealthAppProvider
+  dataType  String // steps, weight, calories, etc.
+  value     Float
+  unit      String
+  timestamp DateTime
+  createdAt DateTime          @default(now())
 
   @@index([userId])
   @@index([dataType])

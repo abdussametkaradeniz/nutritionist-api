@@ -6,7 +6,7 @@ import {
   disable2FA,
   generateBackupCodes,
   verifyBackupCode,
-} from "../../controllers/auth/twoFactorController";
+} from "../../services/twoFactorService";
 
 const router = express.Router();
 

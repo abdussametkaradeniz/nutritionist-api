@@ -18,21 +18,19 @@ export async function generateTokens(user: UserType): Promise<TokenType> {
   };
 }
 
-function generateAccessToken(user: UserType): string {
+export function generateAccessToken(user: UserType): string {
   const payload = {
     id: user.id,
     username: user.username,
     email: user.email,
-    roles: user.userRoles?.map((role) => role.name) || [],
-    permissions: user.permissions || [],
   };
 
   return jwt.sign(payload, process.env.JWT_SECRET_KEY as Secret, {
-    expiresIn: ACCESS_TOKEN_EXPIRES_IN,
+    expiresIn: ACCESS_TOKEN_EXPIRES_IN, // Örneğin 1 saat geçerlilik süresi
   });
 }
 
-async function generateRefreshToken(userId: number): Promise<string> {
+export async function generateRefreshToken(userId: number): Promise<string> {
   const tokenFamily = uuid();
   const expiresAt = new Date();
   expiresAt.setDate(expiresAt.getDate() + 7); // 7 days from now
@@ -78,7 +76,7 @@ export async function refreshAccessToken(
         id: tokenData.userId,
       },
       include: {
-        userRoles: true,
+        role: true,
       },
     });
 
@@ -106,10 +104,10 @@ export async function refreshAccessToken(
 export function verifyToken(token: string) {
   try {
     return jwt.verify(token, process.env.JWT_SECRET_KEY as Secret) as {
-      id: number;
+      userId: number;
       username: string;
       email: string;
-      roles: string[];
+      role: string;
       permissions: string[];
     };
   } catch (error) {

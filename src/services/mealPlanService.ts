@@ -36,10 +36,8 @@ export class MealPlanService {
       const dietitian = await prisma.user.findFirst({
         where: {
           id: data.dietitianId,
-          userRoles: {
-            some: {
-              name: "DIETITIAN",
-            },
+          role: {
+            name: "DIETITIAN",
           },
         },
       });

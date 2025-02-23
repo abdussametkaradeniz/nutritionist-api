@@ -13,12 +13,16 @@ export const validateDietitian = async (
       throw new AppError("Unauthorized", 401);
     }
 
-    // Kullanıcının diyetisyen rolüne sahip olup olmadığını kontrol et
+    // Include the role relation in the query
     const user = await prisma.user.findUnique({
       where: { id: userId },
+      include: {
+        role: true, // Assuming 'role' is a relation
+      },
     });
 
-    if (!user?.roles.includes("DIETITIAN")) {
+    // Access the role property correctly
+    if (user?.role?.name !== "DIETITIAN") {
       throw new AppError("Only dietitians can access this resource", 403);
     }
 

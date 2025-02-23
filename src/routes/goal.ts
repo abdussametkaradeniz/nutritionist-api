@@ -4,22 +4,9 @@ import { authenticateToken } from "../middleware/auth";
 import { requestValidator } from "../middleware/requestValidator";
 import { z } from "zod";
 import { GoalStatus } from "@prisma/client";
+import { createGoalSchema } from "src/validations/goalValidation";
 
 const router = express.Router();
-
-// Validasyon şemaları
-const createGoalSchema = z.object({
-  dietitianId: z.number().optional(),
-  startDate: z.string().datetime(),
-  targetDate: z.string().datetime(),
-  startWeight: z.number().positive().optional(),
-  targetWeight: z.number().positive().optional(),
-  calorieTarget: z.number().positive().optional(),
-  proteinTarget: z.number().min(0).max(100).optional(),
-  carbTarget: z.number().min(0).max(100).optional(),
-  fatTarget: z.number().min(0).max(100).optional(),
-  notes: z.string().optional(),
-});
 
 // Hedef oluştur
 router.post(
