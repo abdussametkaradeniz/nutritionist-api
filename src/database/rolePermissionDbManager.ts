@@ -182,7 +182,7 @@ export class RolePermissionDbManager {
       where: { id: userId },
       data: {
         roles: {
-          set: [{ id: newRoleId }],
+          connect: { id: newRoleId },
         },
       },
     });

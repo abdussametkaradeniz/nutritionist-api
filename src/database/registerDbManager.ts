@@ -14,7 +14,7 @@ export class RegisterDbManager {
   };
 
   findPhonenumber = async (phoneNumber: string) => {
-    const user = prisma.user.findUnique({
+    const user = prisma.user.findFirst({
       where: { phoneNumber: phoneNumber },
     });
     return user;
@@ -28,7 +28,7 @@ export class RegisterDbManager {
         email: registerData.email,
         passwordHash: registerData.password,
         roles: {
-          connect: [{ name: registerData.role ?? "BASICUSER" }],
+          connect: { name: registerData.role ?? "BASICUSER" },
         },
         phoneNumber: registerData.phoneNumber ?? "",
         profile: {
@@ -38,9 +38,9 @@ export class RegisterDbManager {
             secondName: registerData.secondName ?? "",
             age: registerData.age ?? 0,
             weight: registerData.weight ?? 0,
-            goals: registerData.goals ?? "GAINMUSCLES",
             photoUrl: registerData.photoUrl ?? "",
             isProfileCompleted: false,
+            goals: registerData.goals ?? "GAINMUSCLES",
           },
         },
       },

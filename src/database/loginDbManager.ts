@@ -10,8 +10,6 @@ export class LoginDbManager {
         include: {
           profile: true,
           mealPlans: true,
-          appointmentsAsUser: true,
-          appointmentsAsDietitian: true,
           performances: true,
           roles: {
             select: {
@@ -21,13 +19,11 @@ export class LoginDbManager {
         },
       });
     } else if (/^\d+$/.test(identifier)) {
-      user = await prisma.user.findUnique({
+      user = await prisma.user.findFirst({
         where: { phoneNumber: loginData.identifier },
         include: {
           profile: true,
           mealPlans: true,
-          appointmentsAsUser: true,
-          appointmentsAsDietitian: true,
           performances: true,
           roles: {
             select: {
@@ -37,13 +33,11 @@ export class LoginDbManager {
         },
       });
     } else {
-      user = await prisma.user.findUnique({
+      user = await prisma.user.findFirst({
         where: { username: loginData.identifier },
         include: {
           profile: true,
           mealPlans: true,
-          appointmentsAsUser: true,
-          appointmentsAsDietitian: true,
           performances: true,
           roles: {
             select: {

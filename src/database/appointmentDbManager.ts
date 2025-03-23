@@ -146,7 +146,6 @@ export class AppointmentDbManager {
     return await prisma.appointment.findMany({
       where: {
         dietitianId: dietitianId,
-        recordStatus: "A",
       },
       select: {
         user: {
