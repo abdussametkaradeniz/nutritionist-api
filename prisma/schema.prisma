@@ -22,7 +22,6 @@ model User {
   avatarUrl        String?
   emailVerified    Boolean   @default(false)
   dietitianId      Int?
-  permissions      String[]  @default([])
   twoFactorSecret  String?
   twoFactorEnabled Boolean   @default(false)
   backupCodes      String[]  @default([])

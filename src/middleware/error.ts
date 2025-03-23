@@ -89,7 +89,7 @@ const errorMiddleware = (
   }
 
   // Default error response
-  const statusCode = (err as any).statusCode || 500;
+  const statusCode = (err as any).status || 500;
   return res.status(statusCode).json({
     success: false,
     message:

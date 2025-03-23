@@ -9,6 +9,8 @@ import bcrypt from "bcrypt";
 import speakeasy from "speakeasy";
 import { authLimiter } from "../../middleware/rateLimiter";
 import { generateAccessToken, generateRefreshToken } from "../../helpers/jwt";
+import errorMiddleware from "../../middleware/error";
+import { UserType } from "src/types/user/User";
 
 /**
  * @swagger
@@ -78,6 +80,7 @@ const sessionService = new SessionService();
 router.post(
   "/",
   requestValidator(loginSchema),
+  errorMiddleware,
   async (req: Request, res: Response, next: NextFunction) => {
     try {
       const { email, password, totpToken } = req.body;
@@ -85,6 +88,13 @@ router.post(
       // Kullanıcıyı bul
       const user = await prisma.user.findUnique({
         where: { email },
+        include: {
+          role: {
+            include: {
+              permissions: true,
+            },
+          },
+        },
       });
 
       if (!user) {
@@ -121,7 +131,7 @@ router.post(
       }
 
       // Access ve Refresh token oluştur
-      const accessToken = generateAccessToken(user);
+      const accessToken = generateAccessToken(user as unknown as UserType);
       const refreshToken = await generateRefreshToken(user.id!);
 
       // Session oluştur
@@ -132,7 +142,28 @@ router.post(
         ipAddress: req.ip,
         userAgent: req.headers["user-agent"],
       });
-
+      var x = {
+        accessToken,
+        refreshToken,
+        sessionId,
+        user: {
+          id: user.id,
+          email: user.email,
+          username: user.username,
+          dietitianId: user.dietitianId,
+          twoFactorEnabled: user.twoFactorEnabled,
+          role: user.role,
+          gender: user.gender,
+          birthDate: user.birthDate,
+          height: user.height,
+          weight: user.weight,
+          phoneNumber: user.phoneNumber,
+          fullName: user.fullName,
+          isVerified: user.emailVerified,
+          createdAt: user.createdAt,
+        },
+      };
+      console.log(x);
       res.json({
         accessToken,
         refreshToken,
@@ -143,6 +174,16 @@ router.post(
           username: user.username,
           dietitianId: user.dietitianId,
           twoFactorEnabled: user.twoFactorEnabled,
+          role: user.role,
+          gender: user.gender,
+          birthDate: user.birthDate,
+          height: user.height,
+          weight: user.weight,
+          phoneNumber: user.phoneNumber,
+          fullName: user.fullName,
+          isVerified: user.emailVerified,
+          createdAt: user.createdAt,
+          permissions: user.role.permissions,
         },
       });
     } catch (error) {

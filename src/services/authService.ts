@@ -51,7 +51,6 @@ export class AuthService {
         role: {
           connect: { name: "USER" },
         },
-        permissions: [],
         twoFactorEnabled: false,
         backupCodes: [],
 
