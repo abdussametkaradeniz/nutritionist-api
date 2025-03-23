@@ -5,3 +5,10 @@
 
 # Ignore node_modules directory
 node_modules
+.env.local
+.vscode
+API_EKSIKLIKLERI.md
+BACKEND_USAGE_GUIDE.md
+dump.rdb
+error.log
+out.log
