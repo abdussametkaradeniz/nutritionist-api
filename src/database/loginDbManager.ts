@@ -8,7 +8,13 @@ export class LoginDbManager {
       user = await prisma.user.findUnique({
         where: { email: loginData.identifier },
         include: {
-          profile: true,
+          profile: {
+            select: {
+              firstName: true,
+              lastName: true,
+              goals: true,
+            },
+          },
           mealPlans: true,
           performances: true,
           roles: {
@@ -22,7 +28,13 @@ export class LoginDbManager {
       user = await prisma.user.findFirst({
         where: { phoneNumber: loginData.identifier },
         include: {
-          profile: true,
+          profile: {
+            select: {
+              firstName: true,
+              lastName: true,
+              goals: true,
+            },
+          },
           mealPlans: true,
           performances: true,
           roles: {
@@ -36,7 +48,13 @@ export class LoginDbManager {
       user = await prisma.user.findFirst({
         where: { username: loginData.identifier },
         include: {
-          profile: true,
+          profile: {
+            select: {
+              firstName: true,
+              lastName: true,
+              goals: true,
+            },
+          },
           mealPlans: true,
           performances: true,
           roles: {

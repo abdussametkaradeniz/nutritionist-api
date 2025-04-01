@@ -5,3 +5,12 @@
 
 # Ignore node_modules directory
 node_modules
+err.log
+out.log
+error.log
+
+# Ignore logs directory
+logs
+
+# Ignore uploads directory
+uploads

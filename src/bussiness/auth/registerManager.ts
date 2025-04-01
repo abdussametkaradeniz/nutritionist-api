@@ -13,7 +13,10 @@ export class RegisterManager {
   }
 
   async create() {
-    const findEmail = await this.registerDbManager.findEmail(this.request.email);
+    console.log(this.request, "request");
+    const findEmail = await this.registerDbManager.findEmail(
+      this.request.email
+    );
 
     if (findEmail) {
       throw new BusinessException("Email already using", 400);
@@ -30,7 +33,7 @@ export class RegisterManager {
     }
 
     const findUsername = await this.registerDbManager.findUsername(
-      this.request.userName
+      this.request.username
     );
 
     if (findUsername) {
@@ -40,5 +43,5 @@ export class RegisterManager {
     this.request.password = await hashPassword(this.request.password);
     const result = await this.registerDbManager.create(this.request);
     return result;
-  };
+  }
 }

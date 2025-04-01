@@ -1,18 +1,31 @@
 import joi from "joi";
-import { RegisterType } from "../../types/user/Register";
+import { ProfileType, RegisterType } from "../../types/user/Register";
 
 export const registerSchema = joi.object<RegisterType>({
-  userName: joi.string().optional(),
-  email: joi.string().optional(),
-  phoneNumber: joi.string().optional(),
-  password: joi.string().required(),
-  age: joi.number().optional().default(0),
-  firstName: joi.string().required(),
-  lastName: joi.string().required(),
-  secondName: joi.string().optional().default(""),
-  role: joi.string().optional(),
-  weight: joi.number().optional(),
-  height: joi.number().optional(),
-  goals: joi.string().optional(),
-  photoUrl: joi.string().optional().default(" ")
+  username: joi.string().required().min(3).max(50),
+  email: joi.string().email().required(),
+  phoneNumber: joi.string().allow(null, ""),
+  password: joi.string().required().min(6),
+  role: joi
+    .string()
+    .valid("USER", "DIETITIAN", "ADMIN", "BASICUSER", "VIPUSER")
+    .optional()
+    .default("USER"),
+  weight: joi.number().allow(null),
+  height: joi.number().allow(null),
+  goals: joi
+    .string()
+    .optional()
+    .valid("GAINMUSCLES", "GAINWEIGHT", "WEIGHTLOSS")
+    .default("GAINWEIGHT"),
+  profile: joi
+    .object<ProfileType>({
+      firstName: joi.string().required().min(2).max(50),
+      lastName: joi.string().required().min(2).max(50),
+      secondName: joi.string().allow(null, ""),
+      age: joi.number().integer().min(0).max(150).allow(null),
+      weight: joi.number().min(0).allow(null),
+      photoUrl: joi.string().allow(null, ""),
+    })
+    .required(),
 });

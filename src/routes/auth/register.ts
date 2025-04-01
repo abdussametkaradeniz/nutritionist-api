@@ -4,7 +4,11 @@ import { requestValidator } from "../../middleware/requestValidator";
 import { RegisterManager } from "../../bussiness/auth/registerManager";
 import { RegisterType } from "../../types/user/Register";
 import { sendSuccess } from "../../helpers/responseHandler";
-import { NotFound, InvalidParameter, BusinessException } from "../../domain/exception";
+import {
+  NotFound,
+  InvalidParameter,
+  BusinessException,
+} from "../../domain/exception";
 
 const router: express.Router = express.Router();
 
@@ -15,12 +19,16 @@ router.post(
     const request = req.body as RegisterType;
     try {
       const registerManager = new RegisterManager(request);
+      console.log(request, "request in register route");
       const result = await registerManager.create();
-      sendSuccess(res, {user: result}, "Register Successful");
+      console.log(result, "result in register route");
+      sendSuccess(res, { user: result }, "Register Successful");
     } catch (error: unknown) {
-      if (error instanceof NotFound 
-        || error instanceof InvalidParameter 
-        || error instanceof BusinessException
+      console.log(error, "error in register route");
+      if (
+        error instanceof NotFound ||
+        error instanceof InvalidParameter ||
+        error instanceof BusinessException
       ) {
         next(error);
       } else {

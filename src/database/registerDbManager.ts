@@ -1,7 +1,6 @@
 import prisma from "../../prisma/client";
 import { RegisterType } from "../types/user/Register";
-import { UserGoals } from "../types/user/UserGoals";
-import { UserRole } from "../types/user/UserRole";
+
 export class RegisterDbManager {
   findEmail = async (email: string) => {
     const user = prisma.user.findUnique({ where: { email: email } });
@@ -21,28 +20,32 @@ export class RegisterDbManager {
   };
 
   create = async (registerData: RegisterType): Promise<any> => {
-    console.log(registerData, "register data");
     const user = await prisma.user.create({
       data: {
-        username: registerData.userName,
+        username: registerData.username,
         email: registerData.email,
         passwordHash: registerData.password,
         roles: {
-          connect: { name: registerData.role ?? "BASICUSER" },
+          connect: { name: registerData.role },
         },
-        phoneNumber: registerData.phoneNumber ?? "",
+        phoneNumber: registerData.phoneNumber || null,
         profile: {
           create: {
-            firstName: registerData.firstName,
-            lastName: registerData.lastName ?? "",
-            secondName: registerData.secondName ?? "",
-            age: registerData.age ?? 0,
-            weight: registerData.weight ?? 0,
-            photoUrl: registerData.photoUrl ?? "",
+            firstName: registerData.profile.firstName,
+            lastName: registerData.profile.lastName,
+            secondName: registerData.profile.secondName || null,
+            age: registerData.profile.age || null,
+            weight: registerData.profile.weight || null,
+            photoUrl: registerData.profile.photoUrl || null,
             isProfileCompleted: false,
-            goals: registerData.goals ?? "GAINMUSCLES",
+            goals: registerData.profile.goals || "GAINWEIGHT",
           },
         },
+      },
+      include: {
+        profile: true,
+        roles: true,
+        sessionsAsUser: true,
       },
     });
     return user;
